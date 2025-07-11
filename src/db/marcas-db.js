@@ -46,14 +46,15 @@ async function crearMarca(req) {
 
 
 async function esMarcaExistente(id_marca, nombre) {
+	let respuesta;
+	
 	if(nombre === undefined) {
 		if(id_marca === undefined) {
 			return undefined;
 		}
-		const respuesta = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [id_marca]);
-	}
-	else {
-		const respuesta = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [nombre]);
+		respuesta = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [id_marca]);
+	} else {
+		respuesta = await dbClient.query("SELECT * FROM marcas WHERE nombre = $1", [nombre]);
 	}
 	
 	if(respuesta.rows.length === 0) {
@@ -83,7 +84,7 @@ async function actualizarMarca(req) {
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE relojes SET nombre = $2, imagen = $3 WHERE id_marca = $1",
+			"UPDATE marcas SET nombre = $2, imagen = $3 WHERE id_marca = $1",
 			[id_marca, nombre, imagen]
 		);
 		
@@ -140,6 +141,7 @@ async function patchearMarca(req) {
 module.exports = {
     getAllMarcas,
     getMarca,
+    crearMarca,
     esMarcaExistente,
     eliminarMarca,
     actualizarMarca,

@@ -111,13 +111,14 @@ async function patchearUsuario(req) {
 	
 	if(nombre !== undefined) usuario.nombre = nombre;
 	if(contrasenia !== undefined) usuario.contrasenia = contrasenia;
+	if(edad !== undefined) usuario.edad = edad;
 	if(sexo !== undefined) usuario.sexo = sexo;
 	if(precio_buscado !== undefined) usuario.precio_buscado = precio_buscado;
 	
 	try {
 		const resultado = await dbClient.query(
 			"UPDATE usuarios SET nombre = $2, contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
-			[id_usuario, nombre, contrasenia, sexo, edad, precio_buscado]
+			[req.params.id_usuario, usuario.nombre, usuario.contrasenia, usuario.sexo, usuario.edad, usuario.precio_buscado]
 		);
 		
 		if(resultado.rowCount === 0) {
@@ -143,6 +144,7 @@ async function patchearUsuario(req) {
 module.exports = {
     getAllUsuarios,
     getUsuario,
+    crearUsuario,
     esUsuarioExistente,
     eliminarUsuario,
     actualizarUsuario,
