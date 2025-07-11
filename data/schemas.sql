@@ -1,3 +1,9 @@
+create table marcas (
+	id_marca serial primary key,
+	nombre varchar(20),
+	imagen varchar(200)
+);
+
 create table relojes (
 	id_reloj serial primary key,
 	id_marca int REFERENCES marcas (id_marca) ON DELETE CASCADE,
@@ -9,12 +15,6 @@ create table relojes (
 	diametro int not null,
 	precio int not null,
 	sexo char
-);
-
-create table marcas (
-	id_marca serial primary key,
-	nombre varchar(20),
-	imagen varchar(200)
 );
 
 create table usuarios (
@@ -60,14 +60,14 @@ INSERT INTO relojes (id_marca, nombre, mecanismo, material, resistencia_agua, di
 
 INSERT INTO extras_reloj (id_reloj, atributo) VALUES 
 	(1, 'Aventurero'), (1, 'Resistente'), (2, 'Deportivo'), (2, 'Elegante');
-
-INSERT INTO relojes_usuarios (id_usuario, id_reloj) VALUES 
-	(1, 2), (2, 1);
-
+	
 INSERT INTO usuarios (nombre, contrasenia, sexo, edad, precio_buscado) VALUES
 	('Marco12', 'Boquitael+grande', 'M', 19, 120000),
 	('Juanfran', 'Calamardexvida', 'M', 19, 300000);
 
+INSERT INTO relojes_usuarios (id_usuario, id_reloj) VALUES 
+	(1, 2), (2, 1);
+
 INSERT INTO resenias (id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso) VALUES 
 	(1, 2, 'Un tanque en miniatura, impresionante', 'Su diseño simple pero atractivo, sumado a su estilo lo hacen un reloj resistente y muy recomendable', 5, '2025-05-12', 8),
-	(2, 1, 'El mejor para el día a día', 'Elegante, resistente, simple y no es caro. Qué más querés pedir?' 5, '2024-11-09', 7);
+	(2, 1, 'El mejor para el día a día', 'Elegante, resistente, simple y no es caro. Qué más querés pedir?', 5, '2024-11-09', 7);
