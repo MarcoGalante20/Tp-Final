@@ -1,4 +1,7 @@
 function insertarCaracteristicasReloj(datos) {
+    const nombreReloj = document.getElementById("nombreReloj");
+    nombreReloj.textContent = datos.nombre;
+
     const precioReloj = document.createElement("li");
     precioReloj.textContent = `Precio: ${datos.precio}`;
 
