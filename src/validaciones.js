@@ -1,3 +1,9 @@
+const {
+	esRelojExistente,
+	esMarcaInexistente,
+} = require("../db/ChronoVault-db.js");
+
+
 function validarReloj (req, res, next, verSiExiste) {
 	if(req.body === undefined) {
 		return res.status(400).send("No se brindó un cuerpo para la request.\n");
@@ -16,7 +22,7 @@ function validarReloj (req, res, next, verSiExiste) {
 		return res.status(400).send("No se brindó la marca del reloj.\n");
 	}
 	
-	if(await esMarcaInexistente(id_marca)) {
+	if(await esMarcaInexistente(id_marca, undefined)) {
 		return res.status(400).send("La marca brindada no existe.\n");
 	}
 	
@@ -26,7 +32,7 @@ function validarReloj (req, res, next, verSiExiste) {
 	
 	if(verSiExiste) {
 		if(await esRelojExistente(nombre)) {
-			return res.status(409).send("El reloj ya existe.\n");
+			return res.status(409).send("El reloj ya existe en la base de datos.\n");
 		}
 	}
 	
@@ -50,6 +56,33 @@ function validarReloj (req, res, next, verSiExiste) {
 }
 
 
+function validarMarca (req, res, next, verSiExiste) {
+	if(req.body === undefined) {
+		return res.status(400).send("No se brindó un cuerpo para la request.\n");
+	}
+	
+	const nombre = req.body.nombre;
+	const imagen = req.body.imagen;
+	
+	if(nombre === undefined) {
+		return res.status(400).send("No se brindó el nombre de la marca.\n");
+	}
+	
+	if(verSiExiste) {
+		if(!esMarcaInexistente(undefined, nombre)) {
+			return res.status(409).send("La marca ya existe en la base de datos.\n");
+		}
+	}
+	
+	if(imagen === undefined) {
+		return res.status(400).send("No se brindó la imágen de la marca.\n");
+	}
+	
+	next();
+}
+
+
 module.exports = {
 	validarReloj,
+	validarMarca,
 };

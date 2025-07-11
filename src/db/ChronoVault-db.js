@@ -5,45 +5,49 @@ const dbClient = new Pool({
     password: "password",
     host: "localhost",
     port: 5432,
-    database: "ChronoVault-db"
+    database: "ChronoVault"
 });
 
 
+// ---------------------------- Funciones de los relojes ------------------------------
+
+
 async function getAllRelojes() {
-	const respuesta = await dbClient.query("SELECT * FROM relojes ORDER BY id ASC");
-	return respuesta.rows;
-}
-
-
-async function getReloj(id) {
-	const respuesta = await dbClient.query("SELECT * FROM relojes WHERE id = $1", [id]);
+	const relojes = await dbClient.query("SELECT * FROM relojes ORDER BY id ASC");
 	
-	if(respuesta.rows.length === 0) {
+	if(relojes.rows.length === 0) {
 		return undefined;
 	}
 	
-	return respuesta.rows[0];
+	return relojes.rows;
 }
 
 
-async function crearReloj(nombre, marca, mecanismo, material, resistencia_agua, diametro, precio, sexo) {
+async function getReloj(id_reloj) {
+	const reloj = await dbClient.query("SELECT * FROM relojes WHERE id = $1", [id_reloj]);
+	
+	if(reloj.rows.length === 0) {
+		return undefined;
+	}
+	
+	return reloj.rows[0];
+}
+
+
+async function crearReloj(id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) {
 	try { 
 		const resultado = await dbClient.query(
-			"INSERT INTO relojes (nombre, marca, mecanismo, material, resistencia_agua, diametro, precio, sexo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-			[nombre, marca, mecanismo, material, resistencia_agua, diametro, precio, sexo]
+			"INSERT INTO relojes (id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+			[id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo]
 		);
 		
-		console.log("Resultado de INSERT:", resultado);
-		
 		if(resultado.rowCount === 0) {
-			console.log("No se devolvio nada\n");
 			return undefined;
 		}
 		
-		console.log("Registro insertado:", resultado.rows[0]);
 		return {
+			id_marca, 
 			nombre,
-			marca,
 			mecanismo,
 			material,
 			resistencia_agua,
@@ -52,35 +56,41 @@ async function crearReloj(nombre, marca, mecanismo, material, resistencia_agua, 
 			sexo,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en crearReloj:", error_devuelto);
+		console.error("Error en crearReloj: ", error_devuelto);
 		return undefined;
 	}
 }
 
 
-function esRelojExistente(nombre) {
-	return false;  // todavía queda armarla 
+async function esRelojExistente(nombre) {
+	const respuesta = await dbClient.query("SELECT * FROM relojes WHERE nombre = $1", [nombre]);
+	
+	if(respuesta.rows.length !== 0) {
+		return true;
+	}
+	return false;
 }
 
 
 // Devuelve true si se pudo eliminar el reloj y false en caso contrario
-async function eliminarReloj(id) {
+async function eliminarReloj(id_reloj) {
 	try {
-		const resultado = await dbClient.query("DELETE FROM relojes WHERE id = $1", [id]);
+		const resultado = await dbClient.query("DELETE FROM relojes WHERE id = $1", [id_reloj]);
 		
 		return (resultado.rowCount === 1);
-	} catch {
+	} catch (error_devuelto) {
+		console.error("Error en eliminarReloj: ", error_devuelto);
 		return false;
 	}
 }
 
 
-// Devuelve el reloj actualizado si se pudo actualizar y undefined en caso contrario
-async function actualizarReloj(id, nombre, marca, mecanismo, material, resistencia_agua, diametro, precio, sexo) {
+// Devuelve el nuevo reloj si se pudo actualizar y undefined en caso contrario
+async function actualizarReloj(id_reloj, id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) {
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE relojes SET nombre = $2, marca = $3, mecanismo = $4, material = $5, resistencia_agua = $6, diametro = $7, precio = $8, sexo = $9 WHERE id=$1",
-			[id, nombre, marca, mecanismo, material, resistencia_agua, diametro, precio, sexo]
+			"UPDATE relojes SET id_marca = $2, nombre = $3, mecanismo = $4, material = $5, resistencia_agua = $6, diametro = $7, precio = $8, sexo = $9 WHERE id = $1",
+			[id_reloj, id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo]
 		);
 		
 		if(resultado.rowCount === 0) {
@@ -88,15 +98,117 @@ async function actualizarReloj(id, nombre, marca, mecanismo, material, resistenc
 		}
 		
 		return {
-			id,
+			id_reloj,
+			id_marca,
 			nombre,
-			marca,
 			mecanismo,
 			diametro,
 			precio,
 			sexo,
 		};
-	} catch {
+	} catch (error_devuelto) {
+		console.error("Error en actualizarReloj: ", error_devuelto);
+		return undefined;
+	}
+}
+
+
+// ---------------------------- Funciones de las marcas ------------------------------
+
+
+async function getAllMarcas() {
+	const marcas = await dbClient.query("SELECT * FROM marcas ORDER BY id ASC");
+	
+	if(marcas.rows.length === 0) {
+		return undefined;
+	}
+	
+	return marcas.rows;
+}
+
+async function getMarca(id_marca) {
+	const marca = await dbClient.query("SELECT * FROM marcas WHERE id = $1", [id_marca]);
+	
+	if(marca.rows.length === 0) {
+		return undefined;
+	}
+	
+	return marca.rows[0];
+}
+
+
+async function crearMarca(nombre, imagen) {
+	try { 
+		const resultado = await dbClient.query(
+			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2)",
+			[nombre, imagen]
+		);
+		
+		if(resultado.rowCount === 0) {
+			return undefined;
+		}
+		
+		return {
+			nombre,
+			imagen,
+		};
+	} catch(error_devuelto) {
+		console.error("Error en crearReloj: ", error_devuelto);
+		return undefined;
+	}
+}
+
+
+async function esMarcaInexistente(id_marca, nombre) {
+	if(nombre === undefined) {
+		if(id_marca === undefined) {
+			return undefined;
+		}
+		const respuesta = await dbClient.query("SELECT * FROM marcas WHERE id = $1", [id_marca]);
+	}
+	else {
+		const respuesta = await dbClient.query("SELECT * FROM marcas WHERE id = $1", [nombre]);
+	}
+	
+	if(respuesta.rows.length === 0) {
+		return true;
+	}
+	return false;
+}
+
+
+// Devuelve true si se pudo eliminar la marca y false en caso contrario
+async function eliminarMarca(id_marca) {
+	try {
+		const resultado = await dbClient.query("DELETE FROM marcas WHERE id = $1", [id_marca]);
+		
+		return (resultado.rowCount === 1);
+	} catch (error_devuelto) {
+		console.error("Error en eliminarMarca: ", error_devuelto);
+		return false;
+	}
+}
+
+
+// Devuelve la nueva marca si se pudo actualizar y undefined en caso contrario
+async function actualizarMarca(id_marca, nombre, imagen) {
+	try {
+		const resultado = await dbClient.query(
+			"UPDATE relojes SET nombre = $2, imagen = $3 WHERE id = $1",
+			[id_marca, nombre, imagen]
+		);
+		
+		if(resultado.rowCount === 0) {
+			return undefined;
+		}
+		
+		return {
+			id_marca,
+			nombre,
+			imagen,
+		};
+	} catch (error_devuelto) {
+		console.error("Error en actualizarMarca: ", error_devuelto);
 		return undefined;
 	}
 }
@@ -109,4 +221,9 @@ module.exports = {
     esRelojExistente,
     eliminarReloj,
     actualizarReloj,
+    getAllMarcas,
+    getMarca,
+    esMarcaInexistente,
+    eliminarMarca,
+    actualizarMarca,
 };
