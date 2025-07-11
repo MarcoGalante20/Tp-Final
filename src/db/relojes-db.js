@@ -105,7 +105,7 @@ async function actualizarReloj(req) {
 	}
 }
 
-async function patchReloj(req) {
+async function patchearReloj(req) {
 	const reloj = await getReloj(req.params.id_reloj);
 	if(reloj === undefined) {
 		return 404;
@@ -157,5 +157,5 @@ module.exports = {
 	esRelojExistente,
 	eliminarReloj,
 	actualizarReloj,
-	patchReloj,
+	patchearReloj,
 }

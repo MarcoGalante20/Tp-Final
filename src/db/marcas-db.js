@@ -103,7 +103,7 @@ async function actualizarMarca(req) {
 }
 
 
-async function patchMarca(req) {
+async function patchearMarca(req) {
 	const marca = await getMarca(req.params.id_marca);
 	if(marca === undefined) {
 		return 404;
@@ -143,5 +143,5 @@ module.exports = {
     esMarcaExistente,
     eliminarMarca,
     actualizarMarca,
-    patchMarca,
+    patchearMarca,
 };

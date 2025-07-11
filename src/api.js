@@ -6,24 +6,33 @@ const {
 	getAllRelojes, 
 	getReloj, 
 	crearReloj, 
-	esRelojExistente, 
 	eliminarReloj,
 	actualizarReloj,
-	patchReloj,
+	patchearReloj,
 } = require("./db/relojes-db.js");
 
 const { 
 	getAllMarcas,
 	getMarca,
+	crearMarca,
 	eliminarMarca,
 	actualizarMarca,
-	patchMarca,
+	patchearMarca,
 } = require("./db/marcas-db.js");
+
+const {
+	getAllUsuarios,
+	getUsuario,
+	crearUsuario,
+	eliminarUsuario,
+	actualizarUsuario,
+	patchearUsuario,
+} = require("./db/usuarios-db.js");
 
 const {
 	validarReloj,
 	validarMarca,
-} = require("./validaciones/validaciones.js");
+} = require("./validaciones.js");
 
 const app = express();
 const port = 3000;
@@ -94,7 +103,7 @@ app.patch("/api/v1/relojes/:id_reloj", async (req, res) => {
 		return res.status(400).send("El cuerpo de la request se encuentra vacío.\n");
 	}
 	
-	const reloj_patcheado = await patchReloj(req);
+	const reloj_patcheado = await patchearReloj(req);
 	if(reloj_patcheado === undefined) {
 		return res.status(500).send("Ocurrió un error patcheando el reloj en la base de datos.\n");
 	}
@@ -171,7 +180,7 @@ app.patch("/api/v1/marcas/:id_marca", async (req, res) => {
 		return res.status(400).send("El cuerpo de la request se encuentra vacío.\n");
 	}
 	
-	const marca_patcheada = await patchMarca(req);
+	const marca_patcheada = await patchearMarca(req);
 	if(marca_patcheada === undefined) {
 		return res.status(500).send("Ocurrió un error patcheando la marca en la base de datos.\n");
 	}
@@ -248,7 +257,7 @@ app.patch("/api/v1/usuarios/:id_usuario", async (req, res) => {
 		return res.status(400).send("El cuerpo de la request se encuentra vacío.\n");
 	}
 	
-	const usuario_patcheado = await patchUsuario(req);
+	const usuario_patcheado = await patchearUsuario(req);
 	if(usuario_patcheado === undefined) {
 		return res.status(500).send("Ocurrió un error patcheando el usuario en la base de datos.\n");
 	}
@@ -258,6 +267,7 @@ app.patch("/api/v1/usuarios/:id_usuario", async (req, res) => {
 	
 	res.json(usuario_patcheado);
 });
+
 
 // --------------------------------- fin :( -------------------------------------------
 

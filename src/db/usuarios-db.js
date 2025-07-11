@@ -101,7 +101,7 @@ async function actualizarUsuario(req) {
 }
 
 
-async function patchUsuario(req) {
+async function patchearUsuario(req) {
 	const usuario = await getUsuario(req.params.id_usuario);
 	if(usuario === undefined) {
 		return 404;
@@ -146,5 +146,5 @@ module.exports = {
     esUsuarioExistente,
     eliminarUsuario,
     actualizarUsuario,
-    patchUsuario,
+    patchearUsuario,
 };
