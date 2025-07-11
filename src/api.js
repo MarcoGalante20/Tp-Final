@@ -1,5 +1,7 @@
 const express = require("express");
+
 var cors = require('cors');
+
 const { 
 	getAllRelojes, 
 	getReloj, 
@@ -8,6 +10,10 @@ const {
 	eliminarReloj,
 	actualizarReloj,
 } = require("./db/ChronoVault-db.js")
+
+const {
+	validarReloj,
+} = require("./validaciones/validaciones.js");
 
 const app = express();
 const port = 3000;
@@ -24,59 +30,21 @@ app.get("/api/v1/relojes", async (req, res) => {
 
 app.get("/api/v1/relojes/:id", async (req, res) => {
 	const reloj = await getReloj(req.params.id);
-	
 	if(reloj === undefined) {
-		res.sendStatus(404);
+		return res.status(404).send("El reloj buscado no existe en la base de datos.\n");
 	}
 	
 	res.json(reloj);
 });
 
 
-app.post("/api/v1/relojes", async (req, res) => {
-	if(req.body === undefined) {
-		return res.status(400).send("No se brindó un cuerpo para la request.\n");
-	}
-	
-	const nombre = req.body.nombre;
-	const marca = req.body.marca;
-	const mecanismo = req.body.mecanismo;
-	const material = req.body.material;
-	const resistencia_agua = req.body.resistencia_agua;
-	const diametro = req.body.diametro;
-	const precio = req.body.precio;
-	const sexo = req.body.sexo;
-	
-	if(nombre === undefined) {
-		return res.status(400).send("No se brindó el nombre del reloj.\n");
-	}
-	
-	if((esRelojExistente(nombre)) === true) {
-		return res.status(409).send("El reloj ya existe.\n");
-	}
-	
-	if(marca === undefined) {
-		return res.status(400).send("No se brindó la marca del reloj.\n");
-	}
-	
-	if(mecanismo !== "Cuarzo" && mecanismo !== "Automático" && mecanismo !== "Mecánico") {
-		return res.status(400).send("El mecánismo brindado no es válido.\n");
-	}
-	
-	if(diametro === undefined) {
-		return res.status(400).send("No se brindó el diámetro del reloj.\n");
-	}
-	
-	if(precio === undefined) {
-		return res.status(400).send("No se brindó el precio del reloj.\n");
-	}
-	
-	if(sexo === undefined) {
-		return res.status(400).send("No se brindó el sexo del reloj.\n");
-	}
-	
+app.get("/api/v1/usuarios", async (req, res) => {
+	const usuarios = await getAllUsuarios();
+	res.json(usuarios);
+});
+
+app.post("/api/v1/relojes", validarReloj(true), async (req, res) => {
 	const reloj = await crearReloj(nombre, marca, mecanismo, material, resistencia_agua, diametro, precio, sexo);
-	
 	if(reloj === undefined) {
 		return res.status(500).send("Ocurrió un error agregando el reloj a la base de datos.\n");;
 	}
@@ -87,7 +55,6 @@ app.post("/api/v1/relojes", async (req, res) => {
 
 app.delete("/api/v1/relojes/:id", async (req, res) => {
 	const reloj = await getReloj(req.params.id);
-	
 	if(reloj === undefined) {
 		return res.status(404).send("No existe un reloj con el id brindado.\n");
 	}
@@ -100,56 +67,13 @@ app.delete("/api/v1/relojes/:id", async (req, res) => {
 });
 
 
-app.put("/api/v1/relojes/:id", async (req, res) => {
+app.put("/api/v1/relojes/:id", validarReloj(false), async (req, res) => {
 	const reloj = await getReloj(req.params.id);
-	
 	if(reloj === undefined) {
 		return res.status(404).send("No existe un reloj con el id brindado.\n");
 	}
 	
-	if(req.body === undefined) {
-		return res.status(400).send("No se brindó un cuerpo para la request.\n");
-	}
-	
-	const nombre = req.body.nombre;
-	const marca = req.body.marca;
-	const mecanismo = req.body.mecanismo;
-	const material = req.body.material;
-	const resistencia_agua = req.body.resistencia_agua;
-	const diametro = req.body.diametro;
-	const precio = req.body.precio;
-	const sexo = req.body.sexo;
-	
-	if(nombre === undefined) {
-		return res.status(400).send("No se brindó el nombre del reloj.\n");
-	}
-	
-	if(marca === undefined) {
-		return res.status(400).send("No se brindó la marca del reloj.\n");
-	}
-	
-	if(mecanismo === undefined) {
-		return res.status(400).send("No se brindó el mecanismo del reloj.\n");
-	}
-	
-	if(mecanismo !== "Cuarzo" && mecanismo !== "Automático" && mecanismo !== "Mecánico") {
-		return res.status(400).send("El mecánismo brindado no es válido.\n");
-	}
-	
-	if(diametro === undefined) {
-		return res.status(400).send("No se brindó el diámetro del reloj.\n");
-	}
-	
-	if(precio === undefined) {
-		return res.status(400).send("No se brindó el precio del reloj.\n");
-	}
-	
-	if(sexo === undefined) {
-		return res.status(400).send("No se brindó el sexo del reloj.\n");
-	}
-	
 	const reloj_actualizado = await actualizarReloj(req.params.id, nombre, marca, mecanismo, material, resistencia_agua, diametro, precio, sexo);
-	
 	if(reloj_actualizado === undefined) {
 		return res.status(500).send("Ocurrió un error actualizando el reloj en la base de datos.\n");
 	}
