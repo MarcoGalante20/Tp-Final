@@ -1,28 +1,35 @@
 const {
 	esRelojExistente,
-	esMarcaInexistente,
-} = require("../db/ChronoVault-db.js");
+} = require("../db/relojes-db.js");
+
+const {
+	esMarcaExistente,
+} = require("../db/marcas-db.js");
+
+// ---------------------------- Validaciones de los relojes ------------------------------
 
 
-function validarReloj (req, res, next, verSiExiste) {
+async function validarReloj(req, res, next, tieneQueExistir) {
 	if(req.body === undefined) {
 		return res.status(400).send("No se brindó un cuerpo para la request.\n");
 	}
 	
-	const id_marca = req.body.id_marca;
-	const nombre = req.body.nombre;
-	const mecanismo = req.body.mecanismo;
-	const material = req.body.material;
-	const resistencia_agua = req.body.resistencia_agua;
-	const diametro = req.body.diametro;
-	const precio = req.body.precio;
-	const sexo = req.body.sexo;
+	const {
+		id_marca,
+		nombre,
+		mecanismo,
+		material,
+		resistencia_agua,
+		diametro,
+		precio,
+		sexo
+	} = req.body;
 	
 	if(id_marca === undefined) {
 		return res.status(400).send("No se brindó la marca del reloj.\n");
 	}
 	
-	if(await esMarcaInexistente(id_marca, undefined)) {
+	if(!(await esMarcaExistente(id_marca, undefined))) {
 		return res.status(400).send("La marca brindada no existe.\n");
 	}
 	
@@ -30,10 +37,13 @@ function validarReloj (req, res, next, verSiExiste) {
 		return res.status(400).send("No se brindó el nombre del reloj.\n");
 	}
 	
-	if(verSiExiste) {
-		if(await esRelojExistente(nombre)) {
+	if(await esRelojExistente(nombre)) {
+		if(!tieneQueExistir) {
 			return res.status(409).send("El reloj ya existe en la base de datos.\n");
 		}
+	}
+	else if(tieneQueExistir) {
+		return res.status(404).send("No existe un reloj con el id brindado.\n");
 	}
 	
 	if(mecanismo !== "Cuarzo" && mecanismo !== "Automático" && mecanismo !== "Mecánico") {
@@ -56,7 +66,10 @@ function validarReloj (req, res, next, verSiExiste) {
 }
 
 
-function validarMarca (req, res, next, verSiExiste) {
+// ---------------------------- Validaciones de las marcas ------------------------------
+
+
+async function validarMarca(req, res, next, tieneQueExistir) {
 	if(req.body === undefined) {
 		return res.status(400).send("No se brindó un cuerpo para la request.\n");
 	}
@@ -68,11 +81,15 @@ function validarMarca (req, res, next, verSiExiste) {
 		return res.status(400).send("No se brindó el nombre de la marca.\n");
 	}
 	
-	if(verSiExiste) {
-		if(!esMarcaInexistente(undefined, nombre)) {
+	if(await esMarcaExistente(undefined, nombre)) {
+		if(!tieneQueExistir) {
 			return res.status(409).send("La marca ya existe en la base de datos.\n");
 		}
 	}
+	else if(tieneQueExistir) {
+		return res.status(404).send("No existe una marca con el id brindado.\n");
+	}
+	
 	
 	if(imagen === undefined) {
 		return res.status(400).send("No se brindó la imágen de la marca.\n");

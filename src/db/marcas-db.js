@@ -21,7 +21,9 @@ async function getMarca(id_marca) {
 }
 
 
-async function crearMarca(nombre, imagen) {
+async function crearMarca(req) {
+	const { nombre, imagen } = req.body;
+	
 	try { 
 		const resultado = await dbClient.query(
 			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2)",
@@ -43,7 +45,7 @@ async function crearMarca(nombre, imagen) {
 }
 
 
-async function esMarcaInexistente(id_marca, nombre) {
+async function esMarcaExistente(id_marca, nombre) {
 	if(nombre === undefined) {
 		if(id_marca === undefined) {
 			return undefined;
@@ -55,9 +57,9 @@ async function esMarcaInexistente(id_marca, nombre) {
 	}
 	
 	if(respuesta.rows.length === 0) {
-		return true;
+		return false;
 	}
-	return false;
+	return true;
 }
 
 
@@ -75,7 +77,10 @@ async function eliminarMarca(id_marca) {
 
 
 // Devuelve la nueva marca si se pudo actualizar y undefined en caso contrario
-async function actualizarMarca(id_marca, nombre, imagen) {
+async function actualizarMarca(req) {
+	const id_marca = req.params.id_marca;
+	const { nombre, imagen } = req.body;
+	
 	try {
 		const resultado = await dbClient.query(
 			"UPDATE relojes SET nombre = $2, imagen = $3 WHERE id = $1",
@@ -104,10 +109,7 @@ async function patchMarca(req) {
 		return 404;
 	}
 	
-	const {
-		nombre,
-		imagen,
-	} = req.body;
+	const { nombre, imagen } = req.body;
 	
 	if(nombre !== undefined) marca.nombre = nombre;
 	if(imagen !== undefined) marca.imagen = imagen;
@@ -138,7 +140,7 @@ async function patchMarca(req) {
 module.exports = {
     getAllMarcas,
     getMarca,
-    esMarcaInexistente,
+    esMarcaExistente,
     eliminarMarca,
     actualizarMarca,
     patchMarca,

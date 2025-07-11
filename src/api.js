@@ -55,8 +55,8 @@ app.get("/api/v1/relojes/:id_reloj", async (req, res) => {
 });
 
 
-app.post("/api/v1/relojes", validarReloj(true), async (req, res) => {
-	const reloj = await crearReloj(id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo);
+app.post("/api/v1/relojes", validarReloj(false), async (req, res) => {
+	const reloj = await crearReloj(req);
 	if(reloj === undefined) {
 		return res.status(500).send("Ocurrió un error agregando el reloj a la base de datos.\n");;
 	}
@@ -79,13 +79,8 @@ app.delete("/api/v1/relojes/:id_reloj", async (req, res) => {
 });
 
 
-app.put("/api/v1/relojes/:id_reloj", validarReloj(false), async (req, res) => {
-	const reloj = await getReloj(req.params.id_reloj);
-	if(reloj === undefined) {
-		return res.status(404).send("No existe un reloj con el id brindado.\n");
-	}
-	
-	const reloj_actualizado = await actualizarReloj(req.params.id_reloj, id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo);
+app.put("/api/v1/relojes/:id_reloj", validarReloj(true), async (req, res) => {
+	const reloj_actualizado = await actualizarReloj(req);
 	if(reloj_actualizado === undefined) {
 		return res.status(500).send("Ocurrió un error actualizando el reloj en la base de datos.\n");
 	}
@@ -110,6 +105,7 @@ app.patch("/api/v1/relojes/:id_reloj", async (req, res) => {
 	res.json(reloj_patcheado);
 });
 
+
 // ---------------------------- Métodos de las marcas ------------------------------
 
 
@@ -123,16 +119,16 @@ app.get("/api/v1/marcas", async (req,res) => {
 
 
 app.get("/api/v1/marcas/:id_marca", async (req, res) => {
-	const imagen = await getMarca(req.params.id_marca);
-	if(imagen === undefined) {
+	const marca = await getMarca(req.params.id_marca);
+	if(marca === undefined) {
 		res.status(404).send("La marca buscada no existe en la base de datos.\n");
 	}
 	
-	res.json(imagen);
+	res.json(marca);
 }
 
-app.post("/api/v1/marcas", validarMarca(true), async (req, res) => {
-	const marca = await crearMarca(imagen);
+app.post("/api/v1/marcas", validarMarca(false), async (req, res) => {
+	const marca = await crearMarca(req);
 	if(marca === undefined) {
 		return res.status(500).send("Ocurrió un error agregando la marca a la base de datos.\n");;
 	}
@@ -155,13 +151,13 @@ app.delete("/api/v1/marcas/:id_marca", async (req, res) => {
 });
 
 
-app.put("/api/v1/marcas/:id_marca", validarMarca(false), async (req, res) => {
+app.put("/api/v1/marcas/:id_marca", validarMarca(true), async (req, res) => {
 	const marca = await getMarca(req.params.id_marca);
 	if(marca === undefined) {
 		return res.status(404).send("No existe una marca con el id brindado.\n");
 	}
 	
-	const marca_actualizada = await actualizarMarca(req.params.id_marca, nombre, imagen);
+	const marca_actualizada = await actualizarMarca(req);
 	if(marca_actualizada === undefined) {
 		return res.status(500).send("Ocurrió un error actualizando la marca en la base de datos.\n");
 	}
@@ -187,7 +183,8 @@ app.patch("/api/v1/marcas/:id_marca", async (req, res) => {
 });
 
 
-// --------------------------------- fin -------------------------------------------
+// --------------------------------- fin :( -------------------------------------------
+
 
 app.get('/api/health', (req, res) => {
 	res.json({ status: 'OK' });

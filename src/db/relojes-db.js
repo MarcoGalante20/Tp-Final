@@ -22,7 +22,9 @@ async function getReloj(id_reloj) {
 }
 
 
-async function crearReloj(id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) {
+async function crearReloj(req) {
+	const { id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo } = req.body;
+	
 	try { 
 		const resultado = await dbClient.query(
 			"INSERT INTO relojes (id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
@@ -74,7 +76,10 @@ async function eliminarReloj(id_reloj) {
 
 
 // Devuelve el nuevo reloj si se pudo actualizar y undefined en caso contrario
-async function actualizarReloj(id_reloj, id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) {
+async function actualizarReloj(req) {
+	const id_reloj = req.params.id_reloj;
+	const { id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo } = req.body;
+	
 	try {
 		const resultado = await dbClient.query(
 			"UPDATE relojes SET id_marca = $2, nombre = $3, mecanismo = $4, material = $5, resistencia_agua = $6, diametro = $7, precio = $8, sexo = $9 WHERE id = $1",
@@ -106,16 +111,7 @@ async function patchReloj(req) {
 		return 404;
 	}
 	
-	const {
-		id_marca,
-		nombre,
-		mecanismo,
-		material,
-		resistencia_agua,
-		diametro,
-		precio,
-		sexo
-	} = req.body;
+	const { id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo } = req.body;
 	
 	if(id_marca !== undefined) reloj.id_marca = id_marca;
 	if(nombre !== undefined) reloj.nombre = nombre;
