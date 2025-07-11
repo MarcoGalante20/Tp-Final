@@ -10,12 +10,15 @@ const {
 	eliminarReloj,
 	actualizarReloj,
 	patchReloj,
+} = require("./db/relojes-db.js");
+
+const { 
 	getAllMarcas,
 	getMarca,
 	eliminarMarca,
 	actualizarMarca,
 	patchMarca,
-} = require("./db/ChronoVault-db.js")
+} = require("./db/marcas-db.js");
 
 const {
 	validarReloj,
@@ -184,7 +187,7 @@ app.patch("/api/v1/marcas/:id_marca", async (req, res) => {
 });
 
 
-// ----------------------------------------------------------------------------
+// --------------------------------- fin -------------------------------------------
 
 app.get('/api/health', (req, res) => {
 	res.json({ status: 'OK' });
