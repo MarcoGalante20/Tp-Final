@@ -9,6 +9,8 @@ const {
 	esRelojExistente, 
 	eliminarReloj,
 	actualizarReloj,
+	getImagenMarca,
+	esMarcaInexistente,
 } = require("./db/ChronoVault-db.js")
 
 const {
@@ -18,12 +20,17 @@ const {
 const app = express();
 const port = 3000;
 
-app.use(express.json()); //linea magica para que ande post, interpreta los bodies de los requests como jsons
-app.use(cors()); //importante para que el http-server me deje hacer requests a la api
+app.use(express.json());
+app.use(cors());
 
+// ------ Métodos de los relojes -------
 
 app.get("/api/v1/relojes", async (req, res) => {
 	const relojes = await getAllRelojes();
+	if(relojes === undefined) {
+		return res.status(500).send("Hubo un error obteniendo todos los relojes\n");
+	}
+	
 	res.json(relojes);
 });
 
@@ -37,11 +44,6 @@ app.get("/api/v1/relojes/:id", async (req, res) => {
 	res.json(reloj);
 });
 
-
-app.get("/api/v1/usuarios", async (req, res) => {
-	const usuarios = await getAllUsuarios();
-	res.json(usuarios);
-});
 
 app.post("/api/v1/relojes", validarReloj(true), async (req, res) => {
 	const reloj = await crearReloj(nombre, marca, mecanismo, material, resistencia_agua, diametro, precio, sexo);
@@ -79,6 +81,51 @@ app.put("/api/v1/relojes/:id", validarReloj(false), async (req, res) => {
 	}
 	
 	res.json(reloj_actualizado);
+});
+
+
+// ------- Métodos de las marcas --------
+
+
+app.get("/api/v1/marcas", async (req,res) => {
+	const marcas = await getAllMarcas();
+	if(marcas === undefined) {
+		return res.status(500).send("Hubo un error obteniendo todas las marcas\n");
+	}
+	res.json(marcas);
+});
+
+
+app.get("/api/v1/marcas/:id", async (req, res) => {
+	const imagen = await getImagenMarca(req.params.id);
+	if(imagen === undefined) {
+		res.status(404).send("La marca buscada no existe en la base de datos.\n");
+	}
+	
+	res.json(imagen);
+}
+
+app.post("/api/v1/marcas", validarMarca, async (req, res) => {
+	const marca = await crearMarca(imagen);
+	if(marca === undefined) {
+		return res.status(500).send("Ocurrió un error agregando la marca a la base de datos.\n");;
+	}
+	
+	res.status(201).json(marca);
+});
+
+
+app.delete("/api/v1/marcas/:id", async (req, res) => {
+	const marca = await getMarca(req.params.id);
+	if(marca === undefined) {
+		return res.status(404).send("No existe una marca con el id brindado.\n");
+	}
+	
+	if(!(await eliminarMarca(req.params.id))) {
+		return res.status(500).send("Ocurrió un error eliminando la marca de la base de datos.\n");
+	}
+	
+	return res.json(marca);
 });
 
 
