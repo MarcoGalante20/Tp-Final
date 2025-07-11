@@ -1,7 +1,7 @@
 const dbClient = require("./conexion.js");
 
 async function getAllMarcas() {
-	const marcas = await dbClient.query("SELECT * FROM marcas ORDER BY id ASC");
+	const marcas = await dbClient.query("SELECT * FROM marcas ORDER BY id_marca ASC");
 	
 	if(marcas.rows.length === 0) {
 		return undefined;
@@ -11,7 +11,7 @@ async function getAllMarcas() {
 }
 
 async function getMarca(id_marca) {
-	const marca = await dbClient.query("SELECT * FROM marcas WHERE id = $1", [id_marca]);
+	const marca = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [id_marca]);
 	
 	if(marca.rows.length === 0) {
 		return undefined;
@@ -50,10 +50,10 @@ async function esMarcaExistente(id_marca, nombre) {
 		if(id_marca === undefined) {
 			return undefined;
 		}
-		const respuesta = await dbClient.query("SELECT * FROM marcas WHERE id = $1", [id_marca]);
+		const respuesta = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [id_marca]);
 	}
 	else {
-		const respuesta = await dbClient.query("SELECT * FROM marcas WHERE id = $1", [nombre]);
+		const respuesta = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [nombre]);
 	}
 	
 	if(respuesta.rows.length === 0) {
@@ -66,7 +66,7 @@ async function esMarcaExistente(id_marca, nombre) {
 // Devuelve true si se pudo eliminar la marca y false en caso contrario
 async function eliminarMarca(id_marca) {
 	try {
-		const resultado = await dbClient.query("DELETE FROM marcas WHERE id = $1", [id_marca]);
+		const resultado = await dbClient.query("DELETE FROM marcas WHERE id_marca = $1", [id_marca]);
 		
 		return (resultado.rowCount === 1);
 	} catch (error_devuelto) {
@@ -83,7 +83,7 @@ async function actualizarMarca(req) {
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE relojes SET nombre = $2, imagen = $3 WHERE id = $1",
+			"UPDATE relojes SET nombre = $2, imagen = $3 WHERE id_marca = $1",
 			[id_marca, nombre, imagen]
 		);
 		
@@ -116,7 +116,7 @@ async function patchearMarca(req) {
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE marcas SET nombre = $2, imagen = $3 WHERE id = $1",
+			"UPDATE marcas SET nombre = $2, imagen = $3 WHERE id_marca = $1",
 			[req.params.id_marca, marca.nombre, marca.imagen]
 		);
 		

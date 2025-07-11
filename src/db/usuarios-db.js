@@ -1,7 +1,7 @@
 const dbClient = require("./conexion.js");
 
 async function getAllUsuarios() {
-	const usuarios = await dbClient.query("SELECT * FROM usuarios ORDER BY id ASC");
+	const usuarios = await dbClient.query("SELECT * FROM usuarios ORDER BY id_usuario ASC");
 	
 	if(usuarios.rows.length === 0) {
 		return undefined;
@@ -11,7 +11,7 @@ async function getAllUsuarios() {
 }
 
 async function getUsuario(id_usuario) {
-	const usuario = await dbClient.query("SELECT * FROM usuarios WHERE id = $1", [id_usuario]);
+	const usuario = await dbClient.query("SELECT * FROM usuarios WHERE id_usuario = $1", [id_usuario]);
 	
 	if(usuario.rows.length === 0) {
 		return undefined;
@@ -61,7 +61,7 @@ async function esUsuarioExistente(nombre) {
 // Devuelve true si se pudo eliminar el usuario y false en caso contrario
 async function eliminarUsuario(id_usuario) {
 	try {
-		const resultado = await dbClient.query("DELETE FROM usuarios WHERE id = $1", [id_usuario]);
+		const resultado = await dbClient.query("DELETE FROM usuarios WHERE id_usuario = $1", [id_usuario]);
 		
 		return (resultado.rowCount === 1);
 	} catch (error_devuelto) {
@@ -78,7 +78,7 @@ async function actualizarUsuario(req) {
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE usuarios SET nombre = $2, contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id = $1",
+			"UPDATE usuarios SET nombre = $2, contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
 			[id_usuario, nombre, contrasenia, sexo, edad, precio_buscado]
 		);
 		
@@ -116,7 +116,7 @@ async function patchearUsuario(req) {
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE usuarios SET nombre = $2, contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id = $1",
+			"UPDATE usuarios SET nombre = $2, contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
 			[id_usuario, nombre, contrasenia, sexo, edad, precio_buscado]
 		);
 		

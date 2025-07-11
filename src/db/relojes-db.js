@@ -1,7 +1,7 @@
 const dbClient = require("./conexion.js");
 
 async function getAllRelojes() {
-	const relojes = await dbClient.query("SELECT * FROM relojes ORDER BY id ASC");
+	const relojes = await dbClient.query("SELECT * FROM relojes ORDER BY id_reloj ASC");
 	
 	if(relojes.rows.length === 0) {
 		return undefined;
@@ -12,7 +12,7 @@ async function getAllRelojes() {
 
 
 async function getReloj(id_reloj) {
-	const reloj = await dbClient.query("SELECT * FROM relojes WHERE id = $1", [id_reloj]);
+	const reloj = await dbClient.query("SELECT * FROM relojes WHERE id_reloj = $1", [id_reloj]);
 	
 	if(reloj.rows.length === 0) {
 		return undefined;
@@ -65,7 +65,7 @@ async function esRelojExistente(nombre) {
 // Devuelve true si se pudo eliminar el reloj y false en caso contrario
 async function eliminarReloj(id_reloj) {
 	try {
-		const resultado = await dbClient.query("DELETE FROM relojes WHERE id = $1", [id_reloj]);
+		const resultado = await dbClient.query("DELETE FROM relojes WHERE id_reloj = $1", [id_reloj]);
 		
 		return (resultado.rowCount === 1);
 	} catch (error_devuelto) {
@@ -82,7 +82,7 @@ async function actualizarReloj(req) {
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE relojes SET id_marca = $2, nombre = $3, mecanismo = $4, material = $5, resistencia_agua = $6, diametro = $7, precio = $8, sexo = $9 WHERE id = $1",
+			"UPDATE relojes SET id_marca = $2, nombre = $3, mecanismo = $4, material = $5, resistencia_agua = $6, diametro = $7, precio = $8, sexo = $9 WHERE id_reloj = $1",
 			[id_reloj, id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo]
 		);
 		
@@ -124,7 +124,7 @@ async function patchearReloj(req) {
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE relojes SET id_marca = $2, nombre = $3, mecanismo = $4, material = $5, resistencia_agua = $6, diametro = $7, precio = $8, sexo = $9 WHERE id = $1",
+			"UPDATE relojes SET id_marca = $2, nombre = $3, mecanismo = $4, material = $5, resistencia_agua = $6, diametro = $7, precio = $8, sexo = $9 WHERE id_reloj = $1",
 			[req.params.id_reloj, reloj.id_marca, reloj.nombre, reloj.mecanismo, reloj.material, reloj.resistencia_agua, reloj.diametro, reloj.precio, reloj.sexo]
 		);
 		
