@@ -183,6 +183,82 @@ app.patch("/api/v1/marcas/:id_marca", async (req, res) => {
 });
 
 
+// --------------------------------- Métodos de los usuarios -------------------------------------------
+
+
+app.get("/api/v1/usuarios", async (req,res) => {
+	const usuarios = await getAllUsuarios();
+	if(usuarios === undefined) {
+		return res.status(500).send("Hubo un error obteniendo todos los usuarios\n");
+	}
+	res.json(usuarios);
+});
+
+
+app.get("/api/v1/usuarios/:id_usuario", async (req, res) => {
+	const usuario = await getUsuario(req.params.id_usuario);
+	if(usuario === undefined) {
+		res.status(404).send("El usuario buscado no existe en la base de datos.\n");
+	}
+	
+	res.json(usuario);
+}
+
+app.post("/api/v1/usuarios", validarUsuario(false), async (req, res) => {
+	const usuario = await crearUsuario(usuario);
+	if(usuario === undefined) {
+		return res.status(500).send("Ocurrió un error agregando el usuario a la base de datos.\n");;
+	}
+	
+	res.status(201).json(usuario);
+});
+
+
+app.delete("/api/v1/usuarios/:id_usuario", async (req, res) => {
+	const usuario = await getUsuario(req.params.id_usuario);
+	if(usuario === undefined) {
+		return res.status(404).send("No existe un usuario con el id brindado.\n");
+	}
+	
+	if(!(await eliminarUsuario(req.params.id_usuario))) {
+		return res.status(500).send("Ocurrió un error eliminando el usuario de la base de datos.\n");
+	}
+	
+	return res.json(usuario);
+});
+
+
+app.put("/api/v1/usuarios/:id_usuario", validarUsuario(true), async (req, res) => {
+	const usuario = await getUsuario(req.params.id_usuario);
+	if(usuario === undefined) {
+		return res.status(404).send("No existe un usuario con el id brindado.\n");
+	}
+	
+	const usuario_actualizado = await actualizarUsuario(req);
+	if(usuario_actualizado === undefined) {
+		return res.status(500).send("Ocurrió un error actualizando el usuario en la base de datos.\n");
+	}
+	
+	res.json(usuario_actualizado);
+});
+
+
+app.patch("/api/v1/usuarios/:id_usuario", async (req, res) => {
+	if(req.body === undefined || Object.keys(req.body).length === 0) {
+		return res.status(400).send("El cuerpo de la request se encuentra vacío.\n");
+	}
+	
+	const usuario_patcheado = await patchUsuario(req);
+	if(usuario_patcheado === undefined) {
+		return res.status(500).send("Ocurrió un error patcheando el usuario en la base de datos.\n");
+	}
+	else if(usuario_patcheado === 404) {
+		return res.status(404).send("No existe un usuario con el id brindado.\n");
+	}
+	
+	res.json(usuario_patcheado);
+});
+
 // --------------------------------- fin :( -------------------------------------------
 
 
