@@ -112,6 +112,61 @@ async function actualizarReloj(id_reloj, id_marca, nombre, mecanismo, material, 
 	}
 }
 
+async function patchReloj(req) {
+	const reloj = await getReloj(req.params.id_reloj);
+	if(reloj === undefined) {
+		return 404;
+	}
+	
+	const {
+		id_marca,
+		nombre,
+		mecanismo,
+		material,
+		resistencia_agua,
+		diametro,
+		precio,
+		sexo
+	} = req.body;
+	
+	if(id_marca !== undefined) reloj.id_marca = id_marca;
+	if(nombre !== undefined) reloj.nombre = nombre;
+	if(mecanismo !== undefined) reloj.mecanismo = mecanismo;
+	if(material !== undefined) reloj.material = material;
+	if(resistencia_agua !== undefined) reloj.resistencia_agua = resistencia_agua;
+	if(diametro !== undefined) reloj.diametro = diametro;
+	if(precio !== undefined) reloj.precio = precio;
+	if(sexo !== undefined) reloj.sexo = sexo;
+	
+	try {
+		const resultado = await dbClient.query(
+			"UPDATE relojes SET id_marca = $2, nombre = $3, mecanismo = $4, material = $5, resistencia_agua = $6, diametro = $7, precio = $8, sexo = $9 WHERE id = $1",
+			[req.params.id_reloj, reloj.id_marca, reloj.nombre, reloj.mecanismo, reloj.material, reloj.resistencia_agua, reloj.diametro, reloj.precio, reloj.sexo]
+		);
+		
+		if(resultado.rowCount === 0) {
+			return undefined;
+		}
+		
+		return {
+			id_reloj: req.params.id_reloj,
+			id_marca: reloj.id_marca,
+			nombre: reloj.nombre,
+			mecanismo: reloj.mecanismo,
+			material: reloj.material,
+			resistencia_agua: reloj.resistencia_agua,
+			diametro: reloj.diametro,
+			precio: reloj.precio,
+			sexo: reloj.sexo,
+		};
+	} catch(error_devuelto) {
+		console.error("Error en patchReloj: ", error_devuelto);
+		return undefined;
+		
+	}
+}
+
+
 
 // ---------------------------- Funciones de las marcas ------------------------------
 
@@ -214,6 +269,42 @@ async function actualizarMarca(id_marca, nombre, imagen) {
 }
 
 
+async function patchMarca(req) {
+	const marca = await getMarca(req.params.id_marca);
+	if(marca === undefined) {
+		return 404;
+	}
+	
+	const {
+		nombre,
+		imagen,
+	} = req.body;
+	
+	if(nombre !== undefined) marca.nombre = nombre;
+	if(imagen !== undefined) marca.imagen = imagen;
+	
+	try {
+		const resultado = await dbClient.query(
+			"UPDATE marcas SET nombre = $2, imagen = $3 WHERE id = $1",
+			[req.params.id_marca, marca.nombre, marca.imagen]
+		);
+		
+		if(resultado.rowCount === 0) {
+			return undefined;
+		}
+		
+		return {
+			id_marca: req.params.id_marca,
+			nombre: marca.nombre,
+			imagen: marca.imagen,
+		};
+	} catch(error_devuelto) {
+		console.error("Error en patchMarca: ", error_devuelto);
+		return undefined;
+		
+	}
+}
+
 module.exports = {
     getAllRelojes,
     getReloj,
@@ -221,9 +312,11 @@ module.exports = {
     esRelojExistente,
     eliminarReloj,
     actualizarReloj,
+    patchReloj,
     getAllMarcas,
     getMarca,
     esMarcaInexistente,
     eliminarMarca,
     actualizarMarca,
+    patchMarca,
 };

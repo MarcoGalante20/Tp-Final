@@ -9,10 +9,12 @@ const {
 	esRelojExistente, 
 	eliminarReloj,
 	actualizarReloj,
-    getAllMarcas,
-    getMarca,
-    eliminarMarca,
-    actualizarMarca,
+	patchReloj,
+	getAllMarcas,
+	getMarca,
+	eliminarMarca,
+	actualizarMarca,
+	patchMarca,
 } = require("./db/ChronoVault-db.js")
 
 const {
@@ -89,6 +91,22 @@ app.put("/api/v1/relojes/:id_reloj", validarReloj(false), async (req, res) => {
 });
 
 
+app.patch("/api/v1/relojes/:id_reloj", async (req, res) => {
+	if(req.body === undefined || Object.keys(req.body).length === 0) {
+		return res.status(400).send("El cuerpo de la request se encuentra vacío.\n");
+	}
+	
+	const reloj_patcheado = await patchReloj(req);
+	if(reloj_patcheado === undefined) {
+		return res.status(500).send("Ocurrió un error patcheando el reloj en la base de datos.\n");
+	}
+	else if(reloj_patcheado === 404) {
+		return res.status(404).send("No existe un reloj con el id brindado.\n");
+	}
+	
+	res.json(reloj_patcheado);
+});
+
 // ---------------------------- Métodos de las marcas ------------------------------
 
 
@@ -148,6 +166,25 @@ app.put("/api/v1/marcas/:id_marca", validarMarca(false), async (req, res) => {
 	res.json(marca_actualizada);
 });
 
+
+app.patch("/api/v1/marcas/:id_marca", async (req, res) => {
+	if(req.body === undefined || Object.keys(req.body).length === 0) {
+		return res.status(400).send("El cuerpo de la request se encuentra vacío.\n");
+	}
+	
+	const marca_patcheada = await patchMarca(req);
+	if(marca_patcheada === undefined) {
+		return res.status(500).send("Ocurrió un error patcheando la marca en la base de datos.\n");
+	}
+	else if(marca_patcheada === 404) {
+		return res.status(404).send("No existe una marca con el id brindado.\n");
+	}
+	
+	res.json(marca_patcheada);
+});
+
+
+// ----------------------------------------------------------------------------
 
 app.get('/api/health', (req, res) => {
 	res.json({ status: 'OK' });
