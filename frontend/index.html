@@ -21,32 +21,27 @@
 
                         <h1 class = "title is-6">Marca: </h1>
                         <div class="select is-multiple block">
-                            <select multiple size = 5>
-                                <option value="Argentina">Argentina</option>
-                                <option value="Bolivia">Bolivia</option>
-                                <option value="Brazil">Brazil</option>
-                                <option value="Chile">Chile</option>
-                                <option value="Colombia">Colombia</option>
-                                <option value="Ecuador">Ecuador</option>
-                                <option value="Guyana">Guyana</option>
-                                <option value="Paraguay">Paraguay</option>
-                                <option value="Peru">Peru</option>
-                                <option value="Suriname">Suriname</option>
-                                <option value="Uruguay">Uruguay</option>
-                                <option value="Venezuela">Venezuela</option>
+                            <select id="selectMarcas" multiple size = 5>
+                                <option value="casio">Casio</option>
+                                <option value="citizen">Citizen</option>
+                                <option value="swatch">Swatch</option>
+                                <option value="seiko">Seiko</option>
+                                <option value="rolex">Rolex</option>
+                                <option value="ap">AP</option>
+                                <option value="rm">RM</option>
                             </select>
                         </div>
 
                         <h1 class="title is-6">Precio: </h1>
                         <div class="container is-flex block">
-                            <input class="input" type="number" placeholder="min">
-                            <input class="input" type="number" placeholder="max">
+                            <input id="minPrecio" class="input" type="number" placeholder="min">
+                            <input id="maxPrecio" class="input" type="number" placeholder="max">
                         </div>
 
                         <h1 class = "title is-6">Sexo: </h1>
                         <div class="select block">
-                            <select>
-                                <option value="">-</option>
+                            <select id="selectSexo">
+                                <option value="null">-</option>
                                 <option value="H">Hombre</option>
                                 <option value="M">Mujer</option>
                             </select>
@@ -54,13 +49,13 @@
 
                         <h1 class = "title is-6">Diametro: </h1>
                         <div class="container is-flex block">
-                            <input class="input" type="number" placeholder="min">
-                            <input class="input" type="number" placeholder="max">
+                            <input id="minDiametro" class="input" type="number" placeholder="min">
+                            <input id="maxDiametro" class="input" type="number" placeholder="max">
                         </div>
 
                         <h1 class = "title is-6">Material: </h1>
                         <div class="select is-multiple block">
-                            <select multiple size="4">
+                            <select id="selectMateriales" multiple size="4">
                                 <option value="plastico">Plastico</option>
                                 <option value="acero">Acero</option>
                                 <option value="oro">Oro</option>
@@ -70,7 +65,7 @@
 
                         <h1 class = "title is-6">Mecanismo: </h1>
                         <div class="select is-multiple block">
-                            <select multiple size="4">
+                            <select id="selectMecanismos" multiple size="4">
                                 <option value="manual">Manual</option>
                                 <option value="automatico">Automatico</option>
                                 <option value="cuarzo">Cuarzo</option>
@@ -79,8 +74,9 @@
                         </div>
 
                         <h1 class = "title is-6">Resistencia al agua: </h1>
-                        <div class="container block">
-                            <input class="input" type="number" placeholder="min">
+                        <div class="container is-flex block">
+                            <input id="minResistencia" class="input" type="number" placeholder="min">
+                            <input id="maxResistencia" class="input" type="number" placeholder="max">
                         </div>
                     </div>
                 </div>
