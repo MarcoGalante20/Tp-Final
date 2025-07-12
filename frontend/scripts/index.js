@@ -50,10 +50,18 @@ function estandarizarData(data) {
         if ((elemento.min === "") || (elemento.min < 0)) {
             elemento.min = 0;
         }
-        if (elemento.max === "") {
-            elemento.max = null;
-        }
     })
+
+    if (data.precio.max === "") {
+        data.precio.max = 50000000;
+    }
+    if (data.diametro.max === "") {
+        data.diametro.max = 55;
+    }
+    if (data.resistencia_agua.max === "") {
+        data.resistencia_agua.max = 330;
+    }
+    
     return data;
 }
 
@@ -139,7 +147,6 @@ function atribuirEscucharFiltrado() {
         })
     })
 }
-
 
 cargarRelojes();
 atribuirEscucharFiltrado();

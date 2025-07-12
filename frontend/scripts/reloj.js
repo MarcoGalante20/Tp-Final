@@ -35,6 +35,22 @@ function insertarImagenes(datos) {
     imagenMarca.style.height="100px"; 
 }
 
+function eliminarReview(id_resenia) {
+    fetch(`http://localhost:3000/api/v1/resenias/${id_resenia}`, {
+    method: 'DELETE'
+    })
+    .then(async respuesta => {
+        if (!respuesta.ok) {
+            const mensaje = await respuesta.text();
+            throw new Error(`Error ${respuesta.status}: ${mensaje}`);
+        }
+        document.getElementById(`resenia${id_resenia}`).remove();
+    })
+    .catch(error => {
+        alert(error);
+    });
+}
+
 function formatearReview(review) {
     const textoReview = document.createElement("p");
     textoReview.innerHTML = `<strong>${review.nombre_usuario}</strong> <small>${review.fecha}, ${review.meses_de_uso} meses de uso</small>
@@ -43,16 +59,24 @@ function formatearReview(review) {
                             ${review.resenia} <br />
                             <strong>${review.calificacion}/5</strong>`;
     
+    const buttonEliminar = document.createElement("button");
+    buttonEliminar.classList.add("button", "is-danger");
+    buttonEliminar.textContent = "Eliminar";
+    buttonEliminar.addEventListener("click", () => (
+        eliminarReview(review.id_resenia)
+    ));
 
     const divMediaContent = document.createElement("div");
     divMediaContent.classList.add("media-content", "content");
     divMediaContent.appendChild(textoReview);
+    divMediaContent.appendChild(buttonEliminar);
 
     const articleMedia = document.createElement("article");
     articleMedia.classList.add("media");
     articleMedia.appendChild(divMediaContent);
 
     const boxReview = document.createElement("div");
+    boxReview.id=`resenia${review.id_resenia}`
     boxReview.classList.add("box");
     boxReview.appendChild(articleMedia);
 
@@ -77,7 +101,6 @@ async function insertarReviews (idReloj) {
     .catch((error) => {
         console.error("Hubo un error al obtener las resenias: ", error);
     });
-    // hay que hacer un nuevo fetch para las reviews pero la api no esta preparada :(
 }
 
 async function publicarReview(idReloj) {
@@ -114,6 +137,13 @@ async function publicarReview(idReloj) {
     });
 }
 
+function atribuirFunciones() {
+    const botonPublicar = document.getElementById("botonPublicar");
+    botonPublicar.addEventListener("click", () => {
+        publicarReview(idReloj);
+    })
+}
+
 async function crearPagina(idReloj) {
     return fetch(`http://localhost:3000/api/v1/relojes/${idReloj}`)
     .then((respuesta) => {
@@ -124,6 +154,7 @@ async function crearPagina(idReloj) {
         insertarCaracteristicasReloj(datos);
         insertarImagenes(datos);
         insertarReviews(idReloj);
+        atribuirFunciones();
     })
 
     .catch((error) => {
@@ -133,10 +164,8 @@ async function crearPagina(idReloj) {
 
 const params = new URLSearchParams(window.location.search);
 const idReloj = params.get("id");
+
 crearPagina(idReloj);
 
-const botonPublicar = document.getElementById("botonPublicar");
-botonPublicar.addEventListener("click", () => {
-    publicarReview(idReloj);
-})
+
 
