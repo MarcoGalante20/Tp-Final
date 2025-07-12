@@ -7,26 +7,26 @@ const {
 	ERROR_INTERNO,
 } = require("../codigosStatusHttp.js");
 
-async function getAllResenias() {
-	try {
-		const resenias = await dbClient.query("SELECT * FROM resenias ORDER BY id_resenia ASC");
-		
-		return resenias.rows;
-	} catch(error_recibido) {
-		console.error("Error en getAllResenias: ", error_recibido);
-		return undefined;
-	}
-}
 
 async function getResenias(id_reloj) {
 	try {
-		const resenias = await dbClient.query("SELECT * FROM resenias WHERE id_resenia = $1", [id_resenia]);
+		const resenias = await dbClient.query(`
+			SELECT 
+				r.id_resenia,
+				r.id_usuario,
+				u.nombre AS nombre_usuario,
+				r.titulo,
+				r.resenia,
+				r.calificacion,
+				r.fecha,
+				r.meses_de_uso
+			FROM resenias r 
+			JOIN usuarios u ON r.id_usuario = u.id_usuario
+			WHERE r.id_reloj = $1`,
+			[id_reloj]
+		);
 		
-		if(resenia.rows.length === 0) {
-			return NO_ENCONTRADO;
-		}
-		
-		return resenia.rows[0];
+		return resenias.rows[0];
 	} catch(error_recibido) {
 		console.error("Error en getResenia: ", error_recibido);
 		return undefined;
@@ -175,8 +175,7 @@ async function patchearResenia(req) {
 
 
 module.exports = {
-    getAllResenias,
-    getResenia,
+    getResenias,
     crearResenia,
     esReseniaExistente,
     eliminarResenia,

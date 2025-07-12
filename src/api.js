@@ -30,8 +30,7 @@ const {
 } = require("./db/usuarios-db.js");
 
 const {
-	getAllResenias,
-	getResenia,
+	getResenias,
 	crearResenia,
 	eliminarResenia,
 	actualizarResenia,
@@ -312,26 +311,18 @@ app.patch("/api/v1/usuarios/:id_usuario", async (req, res) => {
 // --------------------------------- Métodos de las resenias -------------------------------------------
 
 
-app.get("/api/v1/resenias", async (req,res) => {
-	const resenias = await getAllResenias();
+app.get("/api/v1/resenias/:id_reloj", async (req, res) => {
+	const reloj = await getReloj(req.params.id_reloj);
+	if(reloj === undefined) {
+		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
+	}
+	
+	const resenias = await getResenias(req.params.id_reloj);
 	if(resenias === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo todas las resenias\n");
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las resenias de la base de datos.\n");
 	}
 	
 	return res.status(EXITO).json(resenias);
-});
-
-
-app.get("/api/v1/resenias/:id_resenia", async (req, res) => {
-	const resenia = await getResenia(req.params.id_resenia);
-	if(resenia === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo la resenia de la base de datos.\n");
-	}
-	else if(resenia === NO_ENCONTRADO) {
-		return res.status(NO_ENCONTRADO).send("No existe una resenia con el id brindado en la base de datos.\n");
-	}
-	
-	return res.status(EXITO).json(resenia);
 });
 
 
