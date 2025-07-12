@@ -13,22 +13,28 @@ async function cargarRelojes() {
             imagenReloj.style.height = "150px";
 
             const nombreReloj = document.createElement("h1");
-            nombreReloj.classList.add("title", "is-6")
-            nombreReloj.textContent = `${infoReloj.marca} ${infoReloj.nombre}`;
+            nombreReloj.classList.add("title", "is-6");
+            nombreReloj.textContent = infoReloj.nombre;
+            nombreReloj.style.margin = "0px";
+
+            const marcaReloj = document.createElement("h1");
+            marcaReloj.classList.add("title", "is-6");
+            marcaReloj.textContent = infoReloj.marca;
 
             const nuevoReloj = document.createElement("div");
             nuevoReloj.classList.add("nuevoReloj");
             nuevoReloj.addEventListener("click", () => {
-                window.location.href = ("http://localhost:8080/reloj.html?id=" + infoReloj.id);
+                window.location.href = ("http://localhost:8080/reloj.html?id=" + infoReloj.id_reloj);
             });
             nuevoReloj.addEventListener("mousedown", function(event) {
                 if (event.button === 1) {
-                    window.open("http://localhost:8080/reloj.html?id=" + infoReloj.id, "_blank");
+                    window.open("http://localhost:8080/reloj.html?id=" + infoReloj.id_reloj, "_blank");
                 }
             });
 
             nuevoReloj.appendChild(imagenReloj);
             nuevoReloj.appendChild(nombreReloj);
+            nuevoReloj.appendChild(marcaReloj);
 
             document.getElementById("contenedor_relojes").appendChild(nuevoReloj);
         });
