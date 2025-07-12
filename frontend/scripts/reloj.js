@@ -35,10 +35,9 @@ function insertarImagenes(datos) {
     imagenMarca.style.height="100px"; 
 }
 
-
 function formatearReview(review) {
     const textoReview = document.createElement("p");
-    textoReview.innerHTML = `<strong>${review.nombre}</strong> <small>${review.fecha} ${review.meses_de_uso} meses de uso</small>
+    textoReview.innerHTML = `<strong>${review.nombre_usuario}</strong> <small>${review.fecha}, ${review.meses_de_uso} meses de uso</small>
                             <br />
                             <strong>${review.titulo}</strong> <br />
                             ${review.resenia} <br />
@@ -81,6 +80,40 @@ async function insertarReviews (idReloj) {
     // hay que hacer un nuevo fetch para las reviews pero la api no esta preparada :(
 }
 
+async function publicarReview(idReloj) {
+    const titulo = document.getElementById("inputTitulo").value;
+    const resenia = document.getElementById("inputReview").value;
+    const calificacion = document.getElementById("inputCalificacion").value;
+    const fecha = (new Date()).toISOString().slice(0, 10);
+    const meses_de_uso = document.getElementById("inputMesesUso").value;
+
+    fetch('http://localhost:3000/api/v1/resenias', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            id_reloj: idReloj,
+            id_usuario: 2,
+            titulo,
+            resenia,
+            calificacion,
+            fecha,
+            meses_de_uso
+        })
+    })
+    .then(async (respuesta) => {
+        if (!respuesta.ok) {
+            const mensajeError = await respuesta.text();
+            throw new Error(`${respuesta.status}\n${mensajeError}`);
+        }
+        insertarReviews(idReloj);
+    })
+    .catch(error => {
+        alert(`${error}`);
+    });
+}
+
 async function crearPagina(idReloj) {
     return fetch(`http://localhost:3000/api/v1/relojes/${idReloj}`)
     .then((respuesta) => {
@@ -101,4 +134,9 @@ async function crearPagina(idReloj) {
 const params = new URLSearchParams(window.location.search);
 const idReloj = params.get("id");
 crearPagina(idReloj);
+
+const botonPublicar = document.getElementById("botonPublicar");
+botonPublicar.addEventListener("click", () => {
+    publicarReview(idReloj);
+})
 

@@ -8,7 +8,9 @@
     <body>
 
         <div class = "container is-flex is-align-items-center is-justify-content-space-between mt-4">
-            <h1 class = "title is-1">ChronoVault</h1>
+            <a href="http://localhost:8080">
+                <h1 class = "title is-1">ChronoVault</h1>
+            </a>
             <button class="button is-primary is-outlined is-small">Iniciar sesion</button>
         </div>
 
@@ -21,7 +23,7 @@
                         <div class="container is-fluid is-flex">
                             <img id="imagenReloj" style="width:375px; height:450px;"/>
                             <div class="container is-flex is-flex-direction-column is-align-items-center">
-                                <img id="imagenMarca"/>
+                                <img id="imagenMarca" style="margin: 1rem;"/>
                                 <div class="container is-fluid is-flex is-flex-direction-column">
                                     <h1 class="title is-5">Caracteristicas: </h1>
                                     <div class="content">
@@ -42,14 +44,19 @@
                         <article class="media">
                             <div class="media-content">
                                 <div class="field">
+                                    <input id="inputTitulo" class="input block" placeholder="Titulo">
+                                    <div class="container is-flex block">
+                                        <input id="inputCalificacion" class="input" type="number" placeholder="Calificacion /5">
+                                        <input id="inputMesesUso" class="input" type="number" placeholder="Meses de uso">
+                                    </div>
                                     <p class="control">
-                                        <textarea class="textarea" placeholder="Add a comment..."></textarea>
+                                        <textarea id="inputReview" class="textarea" placeholder="Agregar una reseña..."></textarea>
                                     </p>
                                 </div>
                                 <nav class="level">
                                     <div class="level-left">
                                         <div class="level-item">
-                                            <a class="button is-info">Submit</a>
+                                            <a id="botonPublicar" class="button is-info">Publicar</a>
                                         </div>
                                     </div>
                                 </nav>
