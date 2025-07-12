@@ -1,29 +1,34 @@
 const dbClient = require("./conexion.js");
 
+const {
+	NO_ENCONTRADO,
+} = require("../codigosStatusHttp.js");
+
 async function getRelojesUsuario(id_usuario) {
-	const relojes = await dbClient.query(`
-		SELECT 
-		r.id_reloj,
-		m.nombre AS marca,
-		r.nombre,
-		r.mecanismo,
-		r.material,
-		r.imagen,
-		r.resistencia_agua,
-		r.diametro,
-		r.precio,
-		r.sexo
-		FROM relojes_usuarios ru
-		JOIN relojes r ON ru.id_reloj = r.id_reloj
-		JOIN marcas m ON r.id_marca = m.id_marca
-		WHERE ru.id_usuario = $1`,
-	[id_usuario]);
-	
-	if(relojes.rows.length === 0) {
-		return [];
+	try {
+		const relojes = await dbClient.query(`
+			SELECT 
+			r.id_reloj,
+			m.nombre AS marca,
+			r.nombre,
+			r.mecanismo,
+			r.material,
+			r.imagen,
+			r.resistencia_agua,
+			r.diametro,
+			r.precio,
+			r.sexo
+			FROM relojes_usuarios ru
+			JOIN relojes r ON ru.id_reloj = r.id_reloj
+			JOIN marcas m ON r.id_marca = m.id_marca
+			WHERE ru.id_usuario = $1`,
+		[id_usuario]);
+		
+		return relojes.rows;
+	} catch(error_recibido) {
+		console.error("Error en getRelojesUsuario: ", error_recibido);
+		return undefined;
 	}
-	
-	return relojes;
 }
 
 
@@ -36,6 +41,10 @@ async function agregarRelojUsuario(req) {
 			"INSERT INTO relojes_usuarios (id_usuario, id_reloj) VALUES ($1, $2)",
 			[id_usuario, id_reloj]
 		);
+		
+		if(resultado.rowCount === 0) {
+			return undefined;
+		}
 		
 		return resultado.rowCount;
 	} catch(error_devuelto) {
@@ -51,13 +60,13 @@ async function quitarRelojUsuario(req) {
 		[req.params.id_usuario, req.body.id_reloj]);
 		
 		if(resultado.rowCount === 0) {
-			return 404;
+			return NO_ENCONTRADO;
 		}
 		
-		return 204;
+		return ELIMINADO;
 	} catch (reloj_devuelto) {
 		console.error("Error en quitarRelojUsuario: ", error_devuelto);
-		return 500;
+		return undefined;
 	}
 	
 }

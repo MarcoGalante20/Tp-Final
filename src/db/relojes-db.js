@@ -1,24 +1,36 @@
 const dbClient = require("./conexion.js");
 
+const {
+	ELIMINADO,
+	NO_ENCONTRADO,
+	ERROR_INTERNO,
+} = require("../codigosStatusHttp.js");
+
 async function getAllRelojes() {
-	const relojes = await dbClient.query("SELECT * FROM relojes ORDER BY id_reloj ASC");
-	
-	if(relojes.rows.length === 0) {
+	try {
+		const relojes = await dbClient.query("SELECT * FROM relojes ORDER BY id_reloj ASC");
+		
+		return relojes.rows;
+	} catch(error_recibido) {
+		console.error("Error en getAllRelojes: ", error_recibido);
 		return undefined;
 	}
-	
-	return relojes.rows;
 }
 
 
 async function getReloj(id_reloj) {
-	const reloj = await dbClient.query("SELECT * FROM relojes WHERE id_reloj = $1", [id_reloj]);
-	
-	if(reloj.rows.length === 0) {
+	try {
+		const reloj = await dbClient.query("SELECT * FROM relojes WHERE id_reloj = $1", [id_reloj]);
+		
+		if(reloj.rows.length === 0) {
+			return NO_ENCONTRADO;
+		}
+		
+		return reloj.rows[0];
+	} catch(error_recibido) {
+		console.error("Error en getReloj: ", error_recibido);
 		return undefined;
 	}
-	
-	return reloj.rows[0];
 }
 
 
@@ -45,20 +57,25 @@ async function crearReloj(req) {
 			precio,
 			sexo,
 		};
-	} catch(error_devuelto) {
-		console.error("Error en crearReloj: ", error_devuelto);
+	} catch(error_recibido) {
+		console.error("Error en crearReloj: ", error_recibido);
 		return undefined;
 	}
 }
 
 
 async function esRelojExistente(nombre) {
-	const respuesta = await dbClient.query("SELECT * FROM relojes WHERE nombre = $1", [nombre]);
-	
-	if(respuesta.rows.length !== 0) {
-		return true;
+	try {
+		const respuesta = await dbClient.query("SELECT * FROM relojes WHERE nombre = $1", [nombre]);
+		
+		if(respuesta.rows.length !== 0) {
+			return true;
+		}
+		return false;
+	} catch(error_recibido) {
+		console.error("Error en esRelojExistente: ", error_recibido);
+		return undefined;
 	}
-	return false;
 }
 
 
@@ -67,10 +84,14 @@ async function eliminarReloj(id_reloj) {
 	try {
 		const resultado = await dbClient.query("DELETE FROM relojes WHERE id_reloj = $1", [id_reloj]);
 		
-		return (resultado.rowCount === 1);
-	} catch (error_devuelto) {
-		console.error("Error en eliminarReloj: ", error_devuelto);
-		return false;
+		if(resultado.rowCount === 0) {
+			return NO_ENCONTRADO;
+		}
+		
+		return ELIMINADO;
+	} catch (error_recibido) {
+		console.error("Error en eliminarReloj: ", error_recibido);
+		return ERROR_INTERNO;
 	}
 }
 
@@ -87,7 +108,7 @@ async function actualizarReloj(req) {
 		);
 		
 		if(resultado.rowCount === 0) {
-			return undefined;
+			return NO_ENCONTRADO;
 		}
 		
 		return {
@@ -99,28 +120,34 @@ async function actualizarReloj(req) {
 			precio,
 			sexo,
 		};
-	} catch (error_devuelto) {
-		console.error("Error en actualizarReloj: ", error_devuelto);
+	} catch (error_recibido) {
+		console.error("Error en actualizarReloj: ", error_recibido);
 		return undefined;
 	}
 }
 
+
 async function patchearReloj(req) {
 	const reloj = await getReloj(req.params.id_reloj);
 	if(reloj === undefined) {
-		return 404;
+		return 'r';
 	}
 	
 	const { id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo } = req.body;
 	
+	const marca = getMarca(id_marca);
+	if(marca === undefined) {
+		return 'm';
+	}
+	
 	if(id_marca !== undefined) reloj.id_marca = id_marca;
 	if(nombre !== undefined) reloj.nombre = nombre;
-	if(mecanismo !== undefined) reloj.mecanismo = mecanismo;
-	if(material !== undefined) reloj.material = material;
-	if(resistencia_agua !== undefined) reloj.resistencia_agua = resistencia_agua;
-	if(diametro !== undefined) reloj.diametro = diametro;
-	if(precio !== undefined) reloj.precio = precio;
-	if(sexo !== undefined) reloj.sexo = sexo;
+	if(mecanismo === 'Cuarzo' || mecanismo === 'Mecánico' || mecanismo === 'Automático') reloj.mecanismo = mecanismo;
+	if(material === "Plástico" || material === "Acero-inox" || material === "Aluminio" || material === "Titanio" || material === "Latón" || material === "Oro") reloj.material = material;
+	if(resistencia_agua !== undefined && resistencia_agua >= 0 && resistencia_agua <= 300) reloj.resistencia_agua = resistencia_agua;
+	if(diametro !== undefined && diametro >= 0 && diametro <= 55) reloj.diametro = diametro;
+	if(precio !== undefined && precio >= 0) reloj.precio = precio;
+	if(sexo === 'H' || sexo === 'M' || sexo === '-') reloj.sexo = sexo;
 	
 	try {
 		const resultado = await dbClient.query(
@@ -143,8 +170,8 @@ async function patchearReloj(req) {
 			precio: reloj.precio,
 			sexo: reloj.sexo,
 		};
-	} catch(error_devuelto) {
-		console.error("Error en patchReloj: ", error_devuelto);
+	} catch(error_recibido) {
+		console.error("Error en patchReloj: ", error_recibido);
 		return undefined;
 		
 	}
