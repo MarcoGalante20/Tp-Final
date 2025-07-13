@@ -1,65 +1,23 @@
-async function cargarRelojes() {
-
-  return fetch(`http://localhost:3000/api/v1/relojes`)
-    .then((respuesta) => {
-        return respuesta.json();
-    })
-
-    .then((datos) => {
-        datos.forEach(infoReloj => {
-            const imagenReloj = document.createElement("img");
-            imagenReloj.src = infoReloj.imagen
-            imagenReloj.style.width = "128px";
-            imagenReloj.style.height = "150px";
-
-            const nombreReloj = document.createElement("h1");
-            nombreReloj.classList.add("title", "is-6");
-            nombreReloj.textContent = infoReloj.nombre;
-            nombreReloj.style.margin = "0px";
-
-            const marcaReloj = document.createElement("h1");
-            marcaReloj.classList.add("title", "is-6");
-            marcaReloj.textContent = infoReloj.marca;
-
-            const nuevoReloj = document.createElement("div");
-            nuevoReloj.classList.add("nuevoReloj");
-            nuevoReloj.addEventListener("click", () => {
-                window.location.href = ("http://localhost:8080/reloj.html?id=" + infoReloj.id_reloj);
-            });
-            nuevoReloj.addEventListener("mousedown", function(event) {
-                if (event.button === 1) {
-                    window.open("http://localhost:8080/reloj.html?id=" + infoReloj.id_reloj, "_blank");
-                }
-            });
-
-            nuevoReloj.appendChild(imagenReloj);
-            nuevoReloj.appendChild(nombreReloj);
-            nuevoReloj.appendChild(marcaReloj);
-
-            document.getElementById("contenedor_relojes").appendChild(nuevoReloj);
-        });
-    })
-
-    .catch((error) => {
-        console.error("Hubo un error al obtener los relojes: ", error);
-    });
+function vaciarContenedorRelojes() {
+    const contenedorRelojes = document.getElementById("contenedorRelojes");
+    contenedorRelojes.innerHTML = "";
 }
 
-function estandarizarData(data) {
+function estandarizarDataFiltrado(data) {
     [data.precio, data.diametro, data.resistencia_agua].forEach((elemento) => {
-        if ((elemento.min === "") || (elemento.min < 0)) {
-            elemento.min = 0;
+        if ((elemento[0] === "") || (elemento[0] < 0)) {
+            elemento[0] = "0";
         }
     })
 
-    if (data.precio.max === "") {
-        data.precio.max = 50000000;
+    if (data.precio[1] === "") {
+        data.precio[1] = "50000000";
     }
-    if (data.diametro.max === "") {
-        data.diametro.max = 55;
+    if (data.diametro[1] === "") {
+        data.diametro[1] = "55";
     }
-    if (data.resistencia_agua.max === "") {
-        data.resistencia_agua.max = 330;
+    if (data.resistencia_agua[1] === "") {
+        data.resistencia_agua[1] = "330";
     }
     
     return data;
@@ -108,18 +66,20 @@ function escucharFiltrado() {
 
     let data = {
         marcas: seleccionadosMarcas,
-        precio: { min: minPrecio.value, max: maxPrecio.value },
+        precio: [minPrecio.value, maxPrecio.value],
         sexo: selectSexo.value,
-        diametro: { min: minDiametro.value, max: maxDiametro.value}, 
+        diametro: [minDiametro.value, maxDiametro.value], 
         materiales: seleccionadosMateriales,
         mecanismos: seleccionadosMecanismos,
-        resistencia_agua: { min: minResistencia.value, max: maxResistencia.value}
+        resistencia_agua: [minResistencia.value, maxResistencia.value],
+        relojes: [inicio, final]
     };
 
-    data = estandarizarData(data);
+    data = estandarizarDataFiltrado(data);
 
-    const jsonData = JSON.stringify(data);
-    console.log(jsonData);
+    console.log(JSON.stringify(data));
+
+    return data;
 }
 
 function atribuirEscucharFiltrado() {
@@ -143,10 +103,80 @@ function atribuirEscucharFiltrado() {
     const elementos = [selectMarcas, minPrecio, maxPrecio, selectSexo, minDiametro, maxDiametro, selectMateriales, selectMecanismos, minResistencia, maxResistencia];
     elementos.forEach((elemento) => {
         elemento.addEventListener("change", () => {
-            escucharFiltrado();
+            inicio = 0;
+            final = 20;
+            vaciarContenedorRelojes()
+            cargarRelojesNuevos();
         })
     })
 }
 
-cargarRelojes();
+function inicializarBotonCargarRelojes() {
+    const boton = document.getElementById("cargarRelojes");
+    boton.addEventListener("click", () => {
+        inicio += 20;
+        final += 20;
+        cargarRelojesNuevos();
+    })
+} 
+
+function insertarRelojes(data) {
+    if (!data) throw new Error("Datos inválidos");
+    data.forEach(infoReloj => {
+        const imagenReloj = document.createElement("img");
+        imagenReloj.src = infoReloj.imagen
+        imagenReloj.style.width = "128px";
+        imagenReloj.style.height = "150px";
+
+        const nombreReloj = document.createElement("h1");
+        nombreReloj.classList.add("title", "is-6");
+        nombreReloj.textContent = infoReloj.nombre;
+        nombreReloj.style.margin = "0px";
+
+        const marcaReloj = document.createElement("h1");
+        marcaReloj.classList.add("title", "is-6");
+        marcaReloj.textContent = infoReloj.marca;
+
+        const nuevoReloj = document.createElement("div");
+        nuevoReloj.classList.add("nuevoReloj");
+        nuevoReloj.addEventListener("click", () => {
+            window.location.href = ("http://localhost:8080/reloj.html?id=" + infoReloj.id_reloj);
+        });
+        nuevoReloj.addEventListener("mousedown", function(event) {
+            if (event.button === 1) {
+                window.open("http://localhost:8080/reloj.html?id=" + infoReloj.id_reloj, "_blank");
+            }
+        });
+
+        nuevoReloj.appendChild(imagenReloj);
+        nuevoReloj.appendChild(nombreReloj);
+        nuevoReloj.appendChild(marcaReloj);
+
+        document.getElementById("contenedorRelojes").appendChild(nuevoReloj);
+    });
+}
+
+async function cargarRelojesNuevos() {
+    const params = new URLSearchParams(escucharFiltrado())
+    return fetch(`http://localhost:3000/api/v1/relojes?${params}`)
+    .then((respuesta) => {
+        return respuesta.json();
+    })
+
+    .then((data) => {
+        insertarRelojes(data);
+    })
+
+    .catch((error) => {
+        console.error("Hubo un error al obtener los relojes: ", error);
+    });
+}
+
+
+
+let inicio = 0;
+let final = 20;
+
 atribuirEscucharFiltrado();
+inicializarBotonCargarRelojes();
+cargarRelojesNuevos();
