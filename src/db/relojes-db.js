@@ -2,17 +2,81 @@ const dbClient = require("./conexion.js");
 
 const {
 	ELIMINADO,
+	REQUEST_INVALIDA,
 	NO_ENCONTRADO,
 	ERROR_INTERNO,
 } = require("../codigosStatusHttp.js");
 
-async function getAllRelojes() {
+
+async function getAllRelojes(filtros) {
+	const [min_precio, max_precio] = filtros.precio.split(',').map(Number);
+	const [min_diam, max_diam] = filtros.diametro.split(',').map(Number);
+	const [min_res, max_res] = filtros.resistencia_agua.split(',').map(Number);
+	const [min_reloj, max_reloj] = filtros.relojes.split(',').map(Number);
+	const marcas = filtros.marcas ? filtros.marcas.split(',').map(Number) : [];
+	const mecanismos = filtros.mecanismos ? filtros.mecanismos.split(',') : ["Cuarzo", "Mecánico", "Automático"];
+	const materiales = filtros.materiales ? filtros.materiales.split(',') : ["Plástico", "Acero-inox", "Aluminio", "Titanio", "Latón", "Oro"];
+	const sexo = filtros.sexo ? filtros.sexo.split(',') : ["H", "M", "-"];
+	
+	if([min_precio, max_precio, min_diam, max_diam, min_res, max_res, min_reloj, max_reloj].some(isNaN)) {
+		return REQUEST_INVALIDA;
+	}
+	
 	try {
-		const relojes = await dbClient.query("SELECT * FROM relojes ORDER BY id_reloj ASC");
+		const relojes = await dbClient.query(`
+			SELECT 
+				r.id_reloj,
+				m.nombre AS marca,
+				r.nombre,
+				r.imagen,
+				r.precio
+			FROM relojes r JOIN marcas m ON r.id_marca = m.id_marca
+			WHERE
+				(array_length($1::int[], 1) IS NULL OR m.id_marca = ANY($1::int[])) AND
+				(r.sexo = ANY($2::text[])) AND
+				(r.material = ANY($3::text[])) AND
+				(r.mecanismo = ANY($4::text[])) AND
+				(r.precio BETWEEN $5 AND $6) AND
+				(r.diametro BETWEEN $7 AND $8) AND
+				(r.resistencia_agua BETWEEN $9 AND $10) 
+			ORDER BY id_reloj ASC
+			OFFSET $11
+			LIMIT $12`,
+			[marcas, sexo, materiales, mecanismos, min_precio, max_precio, min_diam, max_diam, min_res, max_res, 
+			min_reloj, (max_reloj - min_reloj + 1)]
+		); 
 		
 		return relojes.rows;
 	} catch(error_recibido) {
 		console.error("Error en getAllRelojes: ", error_recibido);
+		return undefined;
+	}
+}
+
+async function getReloj(id_reloj) {
+	try {
+		const reloj = await dbClient.query(`
+			SELECT relojes.nombre,
+				marcas.nombre as marca,
+				marcas.imagen AS imagen_marca,
+				mecanismo,
+				material,
+				relojes.imagen,
+				resistencia_agua,
+				diametro,
+				precio, sexo
+			FROM relojes JOIN marcas ON relojes.id_marca = marcas.id_marca
+			WHERE id_reloj = $1`, 
+			[id_reloj]
+		);
+		
+		if(reloj.rows.length === 0) {
+			return NO_ENCONTRADO;
+		}
+		
+		return reloj.rows[0];
+	} catch(error_recibido) {
+		console.error("Error en getReloj: ", error_recibido);
 		return undefined;
 	}
 }

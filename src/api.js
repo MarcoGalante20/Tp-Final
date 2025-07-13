@@ -44,6 +44,12 @@ const {
 	} = require("./db/relojesUsuarios-db.js");
 
 const {
+	getExtrasReloj,
+	agregarExtraReloj,
+	quitarExtraReloj,
+} = require("./db/extrasRelojes-db.js");
+
+const {
 	validarReloj,
 	validarMarca,
 	validarUsuario,
@@ -71,10 +77,13 @@ app.use(cors());
 // -------------------------- Métodos de los relojes ---------------------------------
 
 
-app.get("/api/v1/relojes", async (req, res) => {
-	const relojes = await getAllRelojes();
+app.get("/api/v1/relojes/", async (req, res) => {
+	const relojes = await getAllRelojes(req.query);
 	if(relojes === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo todos los relojes\n");
+	}
+	else if(relojes === REQUEST_INVALIDA) {
+		return res.status(REQUEST_INVALIDA).send("Se recibió uno o más parámetros incorrectos en la request.\nVerifique que todos existan y sean válidos.\n");
 	}
 	
 	return res.status(EXITO).json(relojes);
@@ -113,7 +122,7 @@ app.delete("/api/v1/relojes/:id_reloj", async (req, res) => {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
 	}
 	
-	return res.status(ELIMINADO).json(reloj);
+	return res.status(ELIMINADO).send("El reloj fue eliminado de la base de datos con éxito.\n");
 });
 
 
@@ -195,7 +204,7 @@ app.delete("/api/v1/marcas/:id_marca", async (req, res) => {
 		return res.status(NO_ENCONTRADO).send("No existe una marca con el id brindado en la base de datos.\n");
 	}
 	
-	return res.status(ELIMINADO).json(marca);
+	return res.status(ELIMINADO).send("La marca fue eliminada de la base de datos con éxito.\n");;
 });
 
 
@@ -274,7 +283,7 @@ app.delete("/api/v1/usuarios/:id_usuario", async (req, res) => {
 		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
 	}
 	
-	return res.status(ELIMINADO).json(usuario);
+	return res.status(ELIMINADO).send("El usuario fue eliminado de la base de datos con éxito.\n");;
 });
 
 
@@ -322,6 +331,10 @@ app.get("/api/v1/resenias/:id_reloj", async (req, res) => {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las resenias de la base de datos.\n");
 	}
 	
+	resenias.forEach((resenia) => {
+		resenia.fecha = resenia.fecha.toISOString().slice(0, 10);
+	});
+	
 	return res.status(EXITO).json(resenias);
 });
 
@@ -345,7 +358,7 @@ app.delete("/api/v1/resenias/:id_resenia", async (req, res) => {
 		return res.status(NO_ENCONTRADO).send("No existe una resenia con el id brindado en la base de datos.\n");
 	}
 	
-	return res.status(ELIMINADO).json(resenia);
+	return res.status(ELIMINADO).send("La resenia fue eliminada de la base de datos con éxito.\n");
 });
 
 
@@ -388,7 +401,7 @@ app.patch("/api/v1/resenias/:id_resenia", async (req, res) => {
 app.get("/api/v1/usuarios/:id_usuario/relojes", async (req, res) => {
 	const usuario = await getUsuario(req.params.id_usuario);
 	if(usuario === undefined) {
-		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado.\n");
+		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
 	}
 	
 	const relojes_usuario = await getRelojesUsuario(req.params.id_usuario);
@@ -421,6 +434,57 @@ app.delete("/api/v1/usuarios/:id_usuario/relojes", validarRelojUsuario, async (r
 	}
 	
 	return res.status(ELIMINADO).send("Se le quitó el reloj al usuario con éxito.\n");
+});
+
+
+// --------------------------------- Métodos de características extras de relojes -------------------------------------------
+
+
+app.get("/api/v1/relojes/:id_reloj/extras", async (req, res) => {
+	const reloj = await getReloj(req.params.id_reloj);
+	if(reloj === undefined) {
+		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
+	}
+	
+	const extras_reloj = await getExtrasReloj(req.params.id_reloj);
+	if(extras_reloj === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las características extras del reloj.\n");
+	}
+	
+	return res.status(EXITO).json(extras_reloj);
+});
+
+
+app.post("/api/v1/relojes/:id_reloj/extras", async (req,res) => {
+	const reloj = await getReloj(req.params.id_reloj);
+	if(reloj === undefined) {
+		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
+	}
+	
+	const extra_agregado = await agregarExtraReloj(req.params.id_reloj, req.body.atributo);
+	if(extra_agregado === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando la característica extra al reloj.\n");
+	}
+	
+	return res.status(CREADO).send("Característica agregada al reloj con éxito.\n");
+});
+
+
+app.delete("/api/v1/relojes/:id_reloj/extras", async (req,res) => {
+	const reloj = await getReloj(req.params.id_reloj);
+	if(reloj === undefined) {
+		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
+	}
+	
+	const resultado = await quitarExtraReloj(req.params.id_reloj, req.body.atributo);
+	if(resultado === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno interno quitándole la característica extra al reloj.\n");
+	}
+	else if(resultado === NO_ENCONTRADO) {
+		return res.status(NO_ENCONTRADO).send("El reloj no posee la característica en la base de datos, por lo que no es posible quitársela.\n");
+	}
+	
+	return res.status(ELIMINADO).send("Se le quitó la característica al reloj con éxito.\n");
 });
 
 
