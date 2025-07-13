@@ -8,13 +8,13 @@ const {
 } = require("../codigosStatusHttp.js");
 
 
-async function getAllRelojes(filtros) {
+async function getRelojesFiltro(filtros) {
 	const [min_precio, max_precio] = filtros.precio.split(',').map(Number);
 	const [min_diam, max_diam] = filtros.diametro.split(',').map(Number);
 	const [min_res, max_res] = filtros.resistencia_agua.split(',').map(Number);
 	const [min_reloj, max_reloj] = filtros.relojes.split(',').map(Number);
 	const marcas = filtros.marcas ? filtros.marcas.split(',').map(Number) : [];
-	const mecanismos = filtros.mecanismos ? filtros.mecanismos.split(',') : ["Cuarzo", "Mecánico", "Automático"];
+	const mecanismos = filtros.mecanismos ? filtros.mecanismos.split(',') : ["Cuarzo", "Mecánico", "Automático", "Solar"];
 	const materiales = filtros.materiales ? filtros.materiales.split(',') : ["Plástico", "Acero-inox", "Aluminio", "Titanio", "Latón", "Oro"];
 	const sexo = filtros.sexo ? filtros.sexo.split(',') : ["H", "M"];
 	
@@ -53,6 +53,7 @@ async function getAllRelojes(filtros) {
 	}
 }
 
+
 async function getReloj(id_reloj) {
 	try {
 		const reloj = await dbClient.query(`
@@ -69,22 +70,6 @@ async function getReloj(id_reloj) {
 			WHERE id_reloj = $1`, 
 			[id_reloj]
 		);
-		
-		if(reloj.rows.length === 0) {
-			return NO_ENCONTRADO;
-		}
-		
-		return reloj.rows[0];
-	} catch(error_recibido) {
-		console.error("Error en getReloj: ", error_recibido);
-		return undefined;
-	}
-}
-
-
-async function getReloj(id_reloj) {
-	try {
-		const reloj = await dbClient.query("SELECT * FROM relojes WHERE id_reloj = $1", [id_reloj]);
 		
 		if(reloj.rows.length === 0) {
 			return NO_ENCONTRADO;
@@ -202,7 +187,7 @@ async function patchearReloj(req) {
 	
 	if(id_marca !== undefined) reloj.id_marca = id_marca;
 	if(nombre !== undefined) reloj.nombre = nombre;
-	if(mecanismo === 'Cuarzo' || mecanismo === 'Mecánico' || mecanismo === 'Automático') reloj.mecanismo = mecanismo;
+	if(mecanismo === 'Cuarzo' || mecanismo === 'Mecánico' || mecanismo === 'Automático' || mecanismo === 'Solar') reloj.mecanismo = mecanismo;
 	if(material === "Plástico" || material === "Acero-inox" || material === "Aluminio" || material === "Titanio" || material === "Latón" || material === "Oro") reloj.material = material;
 	if(resistencia_agua !== undefined && resistencia_agua >= 0 && resistencia_agua <= 300) reloj.resistencia_agua = resistencia_agua;
 	if(diametro !== undefined && diametro >= 0 && diametro <= 55) reloj.diametro = diametro;
@@ -238,7 +223,7 @@ async function patchearReloj(req) {
 }
 
 module.exports = {
-	getAllRelojes,
+	getRelojesFiltro,
 	getReloj,
 	crearReloj,
 	esRelojExistente,

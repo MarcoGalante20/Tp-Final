@@ -58,7 +58,7 @@ function validarReloj(tieneQueExistir) {
 			}
 		}
 		
-		if(mecanismo !== "Cuarzo" && mecanismo !== "Automático" && mecanismo !== "Mecánico") {
+		if(mecanismo !== "Cuarzo" && mecanismo !== "Automático" && mecanismo !== "Mecánico" && mecanismo !== "Solar") {
 			return res.status(REQUEST_INVALIDA).send("El mecánismo brindado no es válido.\n");
 		}
 		
