@@ -78,7 +78,7 @@ function validarReloj(tieneQueExistir) {
 			return res.status(REQUEST_INVALIDA).send("El precio del reloj no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
 		
-		if(sexo !== 'H' && sexo !== 'M' && sexo !== '-') {
+		if(sexo !== 'H' && sexo !== 'M') {
 			return res.status(REQUEST_INVALIDA).send("El sexo del reloj no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
 		

@@ -42,10 +42,6 @@ async function crearMarca(req) {
 			[nombre, imagen]
 		);
 		
-		if(resultado.rowCount === 0) {
-			return undefined;
-		}
-		
 		return {
 			nombre,
 			imagen,

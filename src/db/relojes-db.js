@@ -16,7 +16,7 @@ async function getAllRelojes(filtros) {
 	const marcas = filtros.marcas ? filtros.marcas.split(',').map(Number) : [];
 	const mecanismos = filtros.mecanismos ? filtros.mecanismos.split(',') : ["Cuarzo", "Mecánico", "Automático"];
 	const materiales = filtros.materiales ? filtros.materiales.split(',') : ["Plástico", "Acero-inox", "Aluminio", "Titanio", "Latón", "Oro"];
-	const sexo = filtros.sexo ? filtros.sexo.split(',') : ["H", "M", "-"];
+	const sexo = filtros.sexo ? filtros.sexo.split(',') : ["H", "M"];
 	
 	if([min_precio, max_precio, min_diam, max_diam, min_res, max_res, min_reloj, max_reloj].some(isNaN)) {
 		return REQUEST_INVALIDA;
@@ -106,10 +106,6 @@ async function crearReloj(req) {
 			"INSERT INTO relojes (id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
 			[id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo]
 		);
-		
-		if(resultado.rowCount === 0) {
-			return undefined;
-		}
 		
 		return {
 			id_marca, 
@@ -211,7 +207,7 @@ async function patchearReloj(req) {
 	if(resistencia_agua !== undefined && resistencia_agua >= 0 && resistencia_agua <= 300) reloj.resistencia_agua = resistencia_agua;
 	if(diametro !== undefined && diametro >= 0 && diametro <= 55) reloj.diametro = diametro;
 	if(precio !== undefined && precio >= 0) reloj.precio = precio;
-	if(sexo === 'H' || sexo === 'M' || sexo === '-') reloj.sexo = sexo;
+	if(sexo === 'H' || sexo === 'M') reloj.sexo = sexo;
 	
 	try {
 		const resultado = await dbClient.query(

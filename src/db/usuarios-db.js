@@ -43,10 +43,6 @@ async function crearUsuario(req) {
 			[nombre, contrasenia, sexo, edad, precio_buscado]
 		);
 		
-		if(resultado.rowCount === 0) {
-			return undefined;
-		}
-		
 		return {
 			nombre,
 			contrasenia, 

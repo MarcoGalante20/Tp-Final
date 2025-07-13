@@ -40,10 +40,6 @@ async function agregarRelojUsuario(req) {
 			[req.params.id_usuario, req.body.id_reloj]
 		);
 		
-		if(resultado.rowCount === 0) {
-			return undefined;
-		}
-		
 		return resultado.rowCount;
 	} catch(error_devuelto) {
 		console.error("Error en agregarRelojUsuario: ", error_devuelto);

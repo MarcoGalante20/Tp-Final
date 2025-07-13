@@ -26,10 +26,6 @@ async function agregarExtraReloj(id_reloj, atributo) {
 			[id_reloj, atributo]
 		);
 		
-		if(resultado.rowCount === 0) {
-			return undefined;
-		}
-		
 		return resultado.rowCount;
 	} catch(error_devuelto) {
 		console.error("Error en agregarExtraReloj: ", error_devuelto);
