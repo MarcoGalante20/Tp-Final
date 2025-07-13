@@ -34,6 +34,22 @@ async function getResenias(id_reloj) {
 }
 
 
+async function getResenia(id_resenia) {
+	try {
+		const resenia = await dbClient.query("SELECT * FROM resenias WHERE id_resenia = $1", [id_resenia]);
+		
+		if(resenia.rows.length === undefined) {
+			return NO_ENCONTRADO;
+		}
+		
+		return resenia.rows[0];
+	} catch(error_recibido) {
+		console.error("Error en getResenia: ", error_recibido);
+		return undefined;
+	}
+}
+
+
 async function crearResenia(req) {
 	const { id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso } = req.body;
 	
@@ -129,8 +145,11 @@ async function actualizarResenia(req) {
 
 async function patchearResenia(req) {
 	const resenia_obj = await getResenia(req.params.id_resenia);
-	if(resenia_obj === undefined) {
+	if(resenia_obj === NO_ENCONTRADO) {
 		return NO_ENCONTRADO;
+	}
+	else if(resenia_obj === undefined) {
+		return undefined;
 	}
 	
 	const { id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso } = req.body;
@@ -169,7 +188,6 @@ async function patchearResenia(req) {
 	} catch(error_devuelto) {
 		console.error("Error en patchResenia: ", error_devuelto);
 		return undefined;
-		
 	}
 }
 
