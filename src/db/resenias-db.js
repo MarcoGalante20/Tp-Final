@@ -26,7 +26,7 @@ async function getResenias(id_reloj) {
 			[id_reloj]
 		);
 		
-		return resenias.rows[0];
+		return resenias.rows;
 	} catch(error_recibido) {
 		console.error("Error en getResenia: ", error_recibido);
 		return undefined;

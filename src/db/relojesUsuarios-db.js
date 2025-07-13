@@ -22,7 +22,8 @@ async function getRelojesUsuario(id_usuario) {
 			JOIN relojes r ON ru.id_reloj = r.id_reloj
 			JOIN marcas m ON r.id_marca = m.id_marca
 			WHERE ru.id_usuario = $1`,
-		[id_usuario]);
+			[id_usuario]
+		);
 		
 		return relojes.rows;
 	} catch(error_recibido) {
@@ -33,13 +34,10 @@ async function getRelojesUsuario(id_usuario) {
 
 
 async function agregarRelojUsuario(req) {
-	const id_usuario = req.params.id_usuario;
-	const id_reloj = req.body.id_reloj;
-	
 	try { 
 		const resultado = await dbClient.query(
 			"INSERT INTO relojes_usuarios (id_usuario, id_reloj) VALUES ($1, $2)",
-			[id_usuario, id_reloj]
+			[req.params.id_usuario, req.body.id_reloj]
 		);
 		
 		if(resultado.rowCount === 0) {
@@ -64,11 +62,10 @@ async function quitarRelojUsuario(req) {
 		}
 		
 		return ELIMINADO;
-	} catch (reloj_devuelto) {
+	} catch (error_devuelto) {
 		console.error("Error en quitarRelojUsuario: ", error_devuelto);
 		return undefined;
 	}
-	
 }
 
 
