@@ -51,32 +51,44 @@ function eliminarReview(id_resenia) {
     });
 }
 
-function formatearReview(review) {
+function formatearReview(resenia) {
     const textoReview = document.createElement("p");
-    textoReview.innerHTML = `<strong>${review.nombre_usuario}</strong> <small>${review.fecha}, ${review.meses_de_uso} meses de uso</small>
+    textoReview.innerHTML = `<strong>${resenia.nombre_usuario}</strong> <small>${resenia.fecha}, ${resenia.meses_de_uso} meses de uso</small>
                             <br />
-                            <strong>${review.titulo}</strong> <br />
-                            ${review.resenia} <br />
-                            <strong>${review.calificacion}/5</strong>`;
+                            <strong>${resenia.titulo}</strong> <br />
+                            ${resenia.resenia} <br />
+                            <strong>${resenia.calificacion}/5</strong>`;
     
-    const buttonEliminar = document.createElement("button");
-    buttonEliminar.classList.add("button", "is-danger");
-    buttonEliminar.textContent = "Eliminar";
-    buttonEliminar.addEventListener("click", () => (
-        eliminarReview(review.id_resenia)
+    const botonEditar = document.createElement("button");
+    botonEditar.classList.add("button", "is-warning");
+    botonEditar.textContent = "Editar";
+    botonEditar.addEventListener("click", () => {
+        editarReview(resenia.id_resenia);
+    })
+
+    const botonEliminar = document.createElement("button");
+    botonEliminar.classList.add("button", "is-danger");
+    botonEliminar.textContent = "Eliminar";
+    botonEliminar.addEventListener("click", () => (
+        eliminarReview(resenia.id_resenia)
     ));
+    
+    const botones = document.createElement("div");
+    botones.classList.add("buttons");
+    botones.appendChild(botonEditar);
+    botones.appendChild(botonEliminar);
 
     const divMediaContent = document.createElement("div");
     divMediaContent.classList.add("media-content", "content");
     divMediaContent.appendChild(textoReview);
-    divMediaContent.appendChild(buttonEliminar);
+    divMediaContent.appendChild(botones);
 
     const articleMedia = document.createElement("article");
     articleMedia.classList.add("media");
     articleMedia.appendChild(divMediaContent);
 
     const boxReview = document.createElement("div");
-    boxReview.id=`resenia${review.id_resenia}`
+    boxReview.id=`resenia${resenia.id_resenia}`
     boxReview.classList.add("box");
     boxReview.appendChild(articleMedia);
 
@@ -104,11 +116,23 @@ async function insertarReviews (idReloj) {
 }
 
 async function publicarReview(idReloj) {
-    const titulo = document.getElementById("inputTitulo").value;
-    const resenia = document.getElementById("inputReview").value;
-    const calificacion = document.getElementById("inputCalificacion").value;
+    const inputTitulo = document.getElementById("inputTitulo");
+    const titulo = inputTitulo.value;
+    inputTitulo.value = "";
+
+    const inputResenia = document.getElementById("inputReview");
+    const resenia = inputResenia.value;
+    inputResenia.value = "";
+
+    const inputCalificacion = document.getElementById("inputCalificacion");
+    const calificacion = inputCalificacion.value;
+    inputCalificacion.value = "";
+
     const fecha = (new Date()).toISOString().slice(0, 10);
-    const meses_de_uso = document.getElementById("inputMesesUso").value;
+
+    const inputMeses_de_uso = document.getElementById("inputMesesUso");
+    const meses_de_uso = inputMeses_de_uso.value;
+    inputMeses_de_uso.value = "";
 
     fetch('http://localhost:3000/api/v1/resenias', {
         method: 'POST',
