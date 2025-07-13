@@ -156,8 +156,29 @@ function insertarRelojes(data) {
     });
 }
 
+function diccionarioAQueryString(diccionario) {
+    const partes = [];
+
+    for (const clave in diccionario) {
+        const valor = diccionario[clave];
+
+        if (Array.isArray(valor)) {
+            const filtrado = valor.filter(v => v !== undefined && v !== null && v !== "");
+            if (filtrado.length > 0) {
+                // Las comas no se codifican
+                partes.push(`${encodeURIComponent(clave)}=${filtrado.join(",")}`);
+            }
+        } else if (valor !== undefined && valor !== null && valor !== "") {
+            partes.push(`${encodeURIComponent(clave)}=${encodeURIComponent(valor)}`);
+        }
+    }
+
+    return partes.join("&");
+}
+
 async function cargarRelojesNuevos() {
-    const params = new URLSearchParams(escucharFiltrado())
+    const params = diccionarioAQueryString(escucharFiltrado())
+    console.log(`http://localhost:3000/api/v1/relojes?${params}`);
     return fetch(`http://localhost:3000/api/v1/relojes?${params}`)
     .then((respuesta) => {
         return respuesta.json();
