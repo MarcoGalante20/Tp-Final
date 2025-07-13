@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 create table marcas (
 	id_marca serial primary key,
 	nombre varchar(20),
@@ -26,7 +28,6 @@ create table usuarios (
 	precio_buscado int
 );
 
-
 create table resenias (
 	id_resenia serial primary key,
 	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE,
@@ -44,11 +45,11 @@ create table relojes_usuarios (
 	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE
 );
 
-
 create table extras_reloj (
 	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE,
 	atributo varchar(50) not null
 );
+
 
 INSERT INTO marcas (nombre, imagen) VALUES
 	('Casio', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZWOJNh_QN9wy735YRBL7M7ZWQTNFMw0fl2g&s'),
@@ -120,3 +121,17 @@ INSERT INTO resenias (id_reloj, id_usuario, titulo, resenia, calificacion, fecha
 	(5, 5, 'Buena relación calidad/precio', 'No esperaba tanto por este precio.', 4, '2024-12-10', 10),
 	(7, 6, 'Una joya', 'Elegancia y calidad incomparables.', 5, '2024-09-05', 24),
 	(9, 7, 'El mejor cronógrafo', 'Preciso y hermoso.', 5, '2025-04-30', 18);
+
+
+CREATE MATERIALIZED VIEW busqueda_relojes AS
+	SELECT
+		r.id_reloj,
+		marca.nombr-e AS marca,
+		r.nombre,
+		r.imagen,
+		r.precio,
+		r.nombre || ' ' || marca.nombre || ' ' || r.mecanismo || ' ' || r.material AS propiedades
+	FROM relojes r
+	JOIN marcas ON r.id_marca = marca.id_marca;
+
+CREATE INDEX index_trig_relojes ON busqueda_relojes USING GIN (propiedades, gin_trgm_ops);
