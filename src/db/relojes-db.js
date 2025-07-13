@@ -54,6 +54,33 @@ async function getRelojesFiltro(filtros) {
 }
 
 
+async function getRelojesBusqueda(busqueda, relojes) {
+	try {
+		const [min_reloj, max_reloj] = relojes.split(',').map(Number);
+		
+		const relojes = await dbClient.query(`
+			SELECT 
+				id_reloj, 
+				marca, 
+				nombre, 
+				imagen, 
+				precio
+			FROM busqueda_relojes
+			WHERE propiedades % $1
+			ORDER BY similarity(propiedades, $1) DESC
+			OFFSET $2
+			LIMIT $3`,
+			[busqueda, min_reloj, max_reloj]
+		);
+		
+		return relojes.rows;
+	} catch(error_recibido) {
+		console.error("Error en getRelojesBusqueda: ", error_recibido);
+		return undefined;
+	}
+}
+
+
 async function getReloj(id_reloj) {
 	try {
 		const reloj = await dbClient.query(`
@@ -224,6 +251,7 @@ async function patchearReloj(req) {
 
 module.exports = {
 	getRelojesFiltro,
+	getRelojesBusqueda,
 	getReloj,
 	crearReloj,
 	esRelojExistente,
