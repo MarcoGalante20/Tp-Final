@@ -59,10 +59,6 @@ async function crearResenia(req) {
 			[id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso]
 		);
 		
-		if(resultado.rowCount === 0) {
-			return undefined;
-		}
-		
 		return {
 			id_reloj,
 			id_usuario,
