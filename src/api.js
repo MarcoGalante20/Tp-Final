@@ -307,11 +307,13 @@ app.post("/api/v1/usuarios", validarUsuario(false), async (req, res) => {
 
 
 app.post("/api/v1/usuarios/login", async (req, res) => {
-	const usuario = getUsuario(undefined, req.body.nombre);
-	if(usuario === undefined) {
-		return res.status(NO_ENCONTRADO).send("No existe un usuario con el nombre brindado en la base de datos.\n");
+	const existe = esUsuarioExistente(undefined, req.body.nombre);
+	if(existe === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el usuario de la base de datos.\n")
 	}
-	
+	else if(!existe) {
+		return res.status(NO_ENCONTRADO).send("No existe un usuario con el nombre brindado en la base de datos.\n")
+	}
 	
 	const logeado = await logearUsuario(req.body.nombre, req.body.contrasenia);
 	if(logeado === undefined) {
@@ -431,8 +433,11 @@ app.patch("/api/v1/usuarios/:id_usuario/admins", validarToken, necesitaAdmin, as
 
 
 app.get("/api/v1/resenias/:id_reloj", async (req, res) => {
-	const reloj = await getReloj(req.params.id_reloj);
-	if(reloj === undefined) {
+	const existe = await esRelojExistente(req.params.id_reloj, undefined);
+	if(existe === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el reloj de la base de datos.\n");
+	}
+	else if(!existe) {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
 	}
 	
@@ -521,11 +526,11 @@ app.patch("/api/v1/resenias/:id_resenia", validarToken, async (req, res) => {
 
 
 app.get("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, async (req, res) => {
-	const usuario = await getUsuario(req.params.id_usuario, undefined);
-	if(usuario === undefined) {
+	const existe = await esUsuarioExistente(req.params.id_usuario, undefined);
+	if(existe === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error accediendo al usuario especificado.\nNo se pudo completar la operación pedida.\n");
 	}
-	else if(usuario === NO_ENCONTRADO) {
+	else if(!existe) {
 		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
 	}
 	
@@ -541,7 +546,7 @@ app.get("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, asy
 app.get("api/v1/usuarios/misRelojes", validarToken, async (req, res) => {
 	const { id_usuario, nombre } = req.usuario;
 	
-	const existe = await esUsuarioExistente(nombre);
+	const existe = await esUsuarioExistente(id_usuario, undefined);
 	if(existe === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error accediendo al usuario especificado.\nNo se pudo completar la operación pedida.\n");
 	}
@@ -610,8 +615,11 @@ app.delete("/api/v1/usuarios/misRelojes", validarToken, validarRelojUsuario(req.
 
 
 app.get("/api/v1/relojes/:id_reloj/extras", validarToken, necesitaAdmin, async (req, res) => {
-	const reloj = await getReloj(req.params.id_reloj);
-	if(reloj === undefined) {
+	const existe = await esRelojExistente(req.params.id_reloj, undefined);
+	if(existe === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el reloj de la base de datos.\n");
+	}
+	else if(!existe) {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
 	}
 	
@@ -625,8 +633,11 @@ app.get("/api/v1/relojes/:id_reloj/extras", validarToken, necesitaAdmin, async (
 
 
 app.post("/api/v1/relojes/:id_reloj/extras", validarToken, necesitaAdmin, async (req,res) => {
-	const reloj = await getReloj(req.params.id_reloj);
-	if(reloj === undefined) {
+	const existe = await esRelojExistente(req.params.id_reloj, undefined);
+	if(existe === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el reloj de la base de datos.\n");
+	}
+	else if(!existe) {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
 	}
 	
@@ -640,8 +651,11 @@ app.post("/api/v1/relojes/:id_reloj/extras", validarToken, necesitaAdmin, async 
 
 
 app.delete("/api/v1/relojes/:id_reloj/extras", validarToken, necesitaAdmin, async (req,res) => {
-	const reloj = await getReloj(req.params.id_reloj);
-	if(reloj === undefined) {
+	const existe = await esRelojExistente(req.params.id_reloj, undefined);
+	if(existe === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el reloj de la base de datos.\n");
+	}
+	else if(!existe) {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
 	}
 	

@@ -109,9 +109,18 @@ async function logearUsuario(nombre, contrasenia) {
 }
 
 
-async function esUsuarioExistente(nombre) {
+async function esUsuarioExistente(id_usuario, nombre) {
+	let respuesta;
+	
 	try {
-		const respuesta = await dbClient.query("SELECT 1 FROM usuarios WHERE nombre = $1", [nombre]);
+		if(nombre === undefined) {
+			if(id_usuario === undefined) {
+				return undefined;
+			}
+			respuesta = await dbClient.query("SELECT 1 FROM usuarios WHERE id_usuario = $1", [id_usuario]);
+		} else {
+			respuesta = await dbClient.query("SELECT 1 FROM usuarios WHERE nombre = $1", [nombre]);
+		};
 		
 		if(respuesta.rows.length !== 0) {
 			return true;

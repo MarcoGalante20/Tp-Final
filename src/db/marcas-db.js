@@ -37,14 +37,15 @@ async function crearMarca(req) {
 	const { nombre, imagen } = req.body;
 	
 	try { 
-		const resultado = await dbClient.query(
-			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2)",
+		const id_marca = await dbClient.query(
+			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2) RETURNING id_marca",
 			[nombre, imagen]
 		);
 		
 		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
 		
 		return {
+			id_marca,
 			nombre,
 			imagen,
 		};
@@ -63,9 +64,9 @@ async function esMarcaExistente(id_marca, nombre) {
 			if(id_marca === undefined) {
 				return undefined;
 			}
-			respuesta = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [id_marca]);
+			respuesta = await dbClient.query("SELECT 1 FROM marcas WHERE id_marca = $1", [id_marca]);
 		} else {
-			respuesta = await dbClient.query("SELECT * FROM marcas WHERE nombre = $1", [nombre]);
+			respuesta = await dbClient.query("SELECT 1 FROM marcas WHERE nombre = $1", [nombre]);
 		}
 		
 		if(respuesta.rows.length === 0) {

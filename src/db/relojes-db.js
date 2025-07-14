@@ -140,13 +140,23 @@ async function crearReloj(req) {
 }
 
 
-async function esRelojExistente(nombre) {
+async function esRelojExistente(id_reloj, nombre) {
+	let respuesta;
+	
 	try {
-		const respuesta = await dbClient.query("SELECT * FROM relojes WHERE nombre = $1", [nombre]);
+		if(nombre === undefined) {
+			if(id_reloj === undefined) {
+				return undefined;
+			}
+			respuesta = await dbClient.query("SELECT 1 FROM relojs WHERE id_reloj = $1", [id_reloj]);
+		} else {
+			respuesta = await dbClient.query("SELECT 1 FROM relojes WHERE nombre = $1", [nombre]);
+		}
 		
 		if(respuesta.rows.length !== 0) {
 			return true;
 		}
+		
 		return false;
 	} catch(error_recibido) {
 		console.error("Error en esRelojExistente: ", error_recibido);

@@ -38,6 +38,26 @@ const {
 } = require("./codigosStatusHttp.js");
 
 
+async function validarRelojyUsuario(id_reloj, id_usuario, res) {
+	const existe_reloj = await esRelojExistente(req.body.id_reloj, undefined);
+	if(existe_reloj === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo al reloj en la base de datos.\n");
+	}
+	else if(!existe_reloj) {
+		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
+	}
+	
+	const existe_usuario = await esUsuarioExistente(id_usuario, undefined);
+	if(existe_usuario === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo al usuario en la base de datos.\n");
+	}
+	else if(!existe_usuario) {
+		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
+	}
+	return true;
+}
+
+
 // ---------------------------- Validaciones de los relojes ------------------------------
 
 
@@ -49,44 +69,42 @@ function validarReloj(tieneQueExistir) {
 		
 		const { id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo } = req.body;
 		
-		if(id_marca === undefined) {
-			return res.status(REQUEST_INVALIDA).send("No se brindó la marca del reloj.\n");
+		const existe_marca = await esMarcaExistente(id_marca, undefined);
+		if(existe_marca === undefined) {
+			return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo a la marca del reloj.\n");
 		}
-		
-		if(!(await esMarcaExistente(id_marca, undefined))) {
-			return res.status(REQUEST_INVALIDA).send("La marca brindada no existe.\n");
+		else if(!existe_marca) {
+			return res.status(NO_ENCONTRADO).send("No existe una marca con el id brindado en la base de datos.\n");
 		}
 		
 		if(nombre === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó el nombre del reloj.\n");
 		}
-		
 		if(!tieneQueExistir) {
-			if(await esRelojExistente(nombre)) {
-				return res.status(CONFLICTO).send("El reloj ya existe en la base de datos.\n");
+			const existe_reloj = await esRelojExistente(undefined, nombre);
+			if(existe_reloj === undefined) {
+				return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo al reloj en la base de datos.\n");
+			}
+			else if(existe_reloj) {
+				return res.status(CONFLICTO).send("El reloj recibido ya existe en la base de datos.\n");
 			}
 		}
 		
 		if(mecanismo !== "Cuarzo" && mecanismo !== "Automático" && mecanismo !== "Mecánico" && mecanismo !== "Solar") {
 			return res.status(REQUEST_INVALIDA).send("El mecánismo brindado no es válido.\n");
 		}
-		
 		if(material !== "Plástico" && material !== "Acero Inoxidable" && material !== "Aluminio" && material !== "Titanio" && material !== "Latón" && material !== "Oro") {
 			return res.status(REQUEST_INVALIDA).send("El material del reloj no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
-		
 		if(resistencia_agua === undefined || resistencia_agua < 0 || resistencia_agua > 600) {
 			return res.status(REQUEST_INVALIDA).send("La resistencia al agua del reloj no es correcta.\nVerifique que la haya ingresado y sea válida.\n");
 		}
-		
 		if(diametro === undefined || diametro < 0 || diametro > 55) {
 			return res.status(REQUEST_INVALIDA).send("El diámetro del reloj no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
-		
 		if(precio === undefined || precio < 0) {
 			return res.status(REQUEST_INVALIDA).send("El precio del reloj no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
-		
 		if(sexo !== 'H' && sexo !== 'M') {
 			return res.status(REQUEST_INVALIDA).send("El sexo del reloj no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
@@ -112,8 +130,12 @@ function validarMarca(tieneQueExistir) {
 		}
 		
 		if(!tieneQueExistir) {
-			if(await esMarcaExistente(undefined, nombre)) {
-				return res.status(CONFLICTO).send("La marca ya existe en la base de datos.\n");
+			const existe_marca = await esMarcaExistente(undefined, nombre);
+			if(existe_marca === undefined) {
+				return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo a la marca en la base de datos.\n");
+			}
+			else if(existe_marca) {
+				return res.status(CONFLICTO).send("Ya existe la marca brindada en la base de datos.\n");
 			}
 		}
 		
@@ -142,8 +164,12 @@ function validarUsuario(tieneQueExistir) {
 		}
 		
 		if(!tieneQueExistir) {
-			if(await esUsuarioExistente(nombre)) {
-				return res.status(CONFLICTO).send("El usuario ya existe en la base de datos.\n");
+			const existe_usuario = await esUsuarioExistente(undefined, nombre);
+			if(existe_usuario === undefined) {
+				return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo al usuario en la base de datos.\n");
+			}
+			else if(existe_usuario) {
+				return res.status(CONFLICTO).send("El usuario brindado ya existe en la base de datos.\n");
 			}
 		}
 		
@@ -216,14 +242,14 @@ function validarResenia(tieneQueExistir) {
 		
 		const { id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso } = req.body;
 		
-		const reloj = await getReloj(id_reloj);
-		if(reloj === NO_ENCONTRADO || reloj === undefined) return res.status(REQUEST_INVALIDA).send("El reloj brindado no es válido.\nPor favor reviselo y vuelva a intentarlo.\n");
-		
-		const usuario = await getUsuario(id_usuario, undefined);
-		if(usuario === NO_ENCONTRADO || usuario === undefined) return res.status(REQUEST_INVALIDA).send("El usuario brindado no es válido.\nPor favor reviselo y vuelva a intentarlo.\n");
+		if(!(await validarRelojyUsuario(id_reloj, id_usuario, res))) return;
 		
 		if(!tieneQueExistir) {
-			if(await esReseniaExistente(id_reloj, id_usuario)) {
+			const existe_resenia = await esReseniaExistente(id_reloj, id_usuario);
+			if(existe_resenia === undefined) {
+				return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo a la resenia en la base de datos.\n");
+			}
+			else if(existe_resenia) {
 				return res.status(CONFLICTO).send("La resenia ya existe en la base de datos.\n");
 			}
 		}
@@ -254,14 +280,7 @@ function validarResenia(tieneQueExistir) {
 
 function validarRelojUsuario(id_usuario) {
 	return async function(req, res, next) {
-		const usuario = await getUsuario(id_usuario, undefined);
-		if(usuario === undefined) {
-			return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado.\n");
-		}
-		const reloj = await getReloj(req.body.id_reloj);
-		if(reloj === undefined) {
-			return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado.\n");
-		}
+		if(!(await validarRelojyUsuario(req.body.id_reloj, id_usuario, res))) return;
 		
 		next();
 	};

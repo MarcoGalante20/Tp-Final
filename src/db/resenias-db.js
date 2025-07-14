@@ -77,7 +77,7 @@ async function crearResenia(req) {
 
 async function esReseniaExistente(id_reloj, id_usuario) {
 	try {
-		const respuesta = await dbClient.query("SELECT * FROM resenias WHERE id_reloj = $1 AND id_usuario = $2", [id_reloj, id_usuario]);
+		const respuesta = await dbClient.query("SELECT 1 FROM resenias WHERE id_reloj = $1 AND id_usuario = $2", [id_reloj, id_usuario]);
 		
 		if(respuesta.rows.length !== 0) {
 			return true;
