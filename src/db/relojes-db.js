@@ -54,9 +54,9 @@ async function getRelojesFiltro(filtros) {
 }
 
 
-async function getRelojesBusqueda(busqueda, relojes) {
+async function getRelojesBusqueda(busqueda, relojes_cant) {
 	try {
-		const [min_reloj, max_reloj] = relojes.split(',').map(Number);
+		const [min_reloj, max_reloj] = relojes_cant.split(',').map(Number);
 		
 		const relojes = await dbClient.query(`
 			SELECT 
@@ -66,7 +66,6 @@ async function getRelojesBusqueda(busqueda, relojes) {
 				imagen, 
 				precio
 			FROM busqueda_relojes
-			WHERE propiedades % LOWER($1)
 			ORDER BY similarity(propiedades, LOWER($1)) DESC
 			OFFSET $2
 			LIMIT $3`,

@@ -98,7 +98,7 @@ app.get("/api/v1/relojes/busqueda", async (req, res) => {
 	}
 	
 	return res.status(EXITO).json(relojes);
-}
+});
 
 
 app.get("/api/v1/relojes/:id_reloj", async (req, res) => {

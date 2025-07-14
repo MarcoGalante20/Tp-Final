@@ -126,12 +126,12 @@ INSERT INTO resenias (id_reloj, id_usuario, titulo, resenia, calificacion, fecha
 CREATE MATERIALIZED VIEW busqueda_relojes AS
 	SELECT
 		r.id_reloj,
-		marca.nombre AS marca,
+		marcas.nombre AS marca,
 		r.nombre,
 		r.imagen,
 		r.precio,
-		LOWER(r.nombre || ' ' || marca.nombre || ' ' || r.mecanismo || ' ' || r.material) AS propiedades
+		LOWER(r.nombre || ' ' || marcas.nombre || ' ' || r.mecanismo || ' ' || r.material) AS propiedades
 	FROM relojes r
-	JOIN marcas ON r.id_marca = marca.id_marca;
+	JOIN marcas ON r.id_marca = marcas.id_marca;
 
 CREATE INDEX index_trig_relojes ON busqueda_relojes USING GIN (propiedades gin_trgm_ops);
