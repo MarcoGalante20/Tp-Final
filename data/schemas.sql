@@ -1,53 +1,53 @@
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
-create table marcas (
-	id_marca serial primary key,
-	nombre varchar(20),
-	imagen varchar(200)
+CREATE TABLE marcas (
+	id_marca serial PRIMARY HEY,
+	nombre VARCHAR(20) NOT NULL UNIQUE,
+	imagen VARCHAR(200)
 );
 
-create table relojes (
-	id_reloj serial primary key,
-	id_marca int REFERENCES marcas (id_marca) ON DELETE CASCADE,
-	nombre varchar(50) not null,
-	mecanismo varchar(50) not null default 'Cuarzo',
-	material varchar(50) not null default 'Acero-inox',
-	imagen varchar(200),
-	resistencia_agua int not null default 30,
-	diametro int not null,
-	precio int not null,
-	sexo char
+CREATE TABLE relojes (
+	id_reloj serial PRIMARY KEY,
+	id_marca INT REFERENCES marcas (id_marca) ON DELETE CASCADE,
+	nombre VARCHAR(50) NOT NULL UNIQUE,
+	mecanismo VARCHAR(50) NOT NULL,
+	material VARCHAR(50) NOT NULL,
+	imagen VARCHAR(200),
+	resistencia_agua INT NOT NULL,
+	diametro INT NOT NULL,
+	precio INT NOT NULL,
+	sexo CHAR NOT NULL
 );
 
-create table usuarios (
-	id_usuario serial primary key,
-	nombre varchar(50) not null,
-	contrasenia varchar(50) not null,
-	sexo char,
-	edad int,
-	precio_buscado int
+CREATE TABLE usuarios (
+	id_usuario serial PRIMARY KEY,
+	nombre VARCHAR(50) NOT NULL UNIQUE,
+	hash_contrasenia VARCHAR(255) NOT NULL,
+	sexo CHAR,
+	edad INT,
+	precio_buscado INT
 );
 
-create table resenias (
-	id_resenia serial primary key,
-	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE,
-	id_usuario int REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
-	titulo varchar(50),
-	resenia text not null,
-	calificacion int not null,
-	fecha date not null,
-	meses_de_uso int not null
+CREATE TABLE resenias (
+	id_resenia serial PRIMARY KEY,
+	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
+	id_usuario INT REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
+	titulo VARCHAR(50),
+	resenia TEXT NOT NULL,
+	calificacion INT NOT NULL,
+	fecha DATE NOT NULL,
+	meses_de_uso INT NOT NULL
 );
 
 
-create table relojes_usuarios (
-	id_usuario int REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
-	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE
+CREATE TABLE relojes_usuarios (
+	id_usuario INT REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
+	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE
 );
 
-create table extras_reloj (
-	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE,
-	atributo varchar(50) not null
+CREATE TABLE extras_reloj (
+	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
+	atributo VARCHAR(50) NOT NULL
 );
 
 
