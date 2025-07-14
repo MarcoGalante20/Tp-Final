@@ -1,4 +1,5 @@
 const dbClient = require("./conexion.js");
+const bcrypt = require("bcrypt");
 
 const {
 	ELIMINADO,
@@ -34,13 +35,26 @@ async function getUsuario(id_usuario) {
 }
 
 
+async function getHashUsuario(nombre) {
+	try {
+		const hash = dbClient.query("SELECT hash_contrasenia FROM usuarios WHERE nombre = $1", [nombre]);
+		
+		return hash.rows[0].hash_contrasenia;
+	} catch(error_recibido) {
+		console.error("Error en getUsuarioId: ", error_recibido);
+		return undefined;
+	}
+}
+
+
 async function crearUsuario(req) {
-	const { nombre, contrasenia, sexo, edad, precio_buscado} = req.body;
-	
 	try { 
+		const { nombre, contrasenia, sexo, edad, precio_buscado} = req.body;
+		const hash_contrasenia = await bcrypt.hash(contrasenia, 10);
+		
 		const resultado = await dbClient.query(
-			"INSERT INTO usuarios (nombre, contrasenia, sexo, edad, precio_buscado) VALUES ($1, $2, $3, $4, $5)",
-			[nombre, contrasenia, sexo, edad, precio_buscado]
+			"INSERT INTO usuarios (nombre, hash_contrasenia, sexo, edad, precio_buscado) VALUES ($1, $2, $3, $4, $5)",
+			[nombre, hash_contrasenia, sexo, edad, precio_buscado]
 		);
 		
 		return {
@@ -52,6 +66,25 @@ async function crearUsuario(req) {
 		};
 	} catch(error_devuelto) {
 		console.error("Error en crearUsuario: ", error_devuelto);
+		return undefined;
+	}
+}
+
+
+async function logearUsuario(nombre, contrasenia) {
+	try {
+		const hash = getHashUsuario(nombre); 
+		if(hash === undefined) return undefined;
+		
+		const es_correcta = await bcrypt.compare(contrasenia, hash);
+		
+		if(!es_correcta) {
+			return REQUEST_INVALIDA;
+		}
+		
+		return EXITO;
+	} catch(error_recibido) {
+		console.error("Error en logearUsuario: ", error_recibido);
 		return undefined;
 	}
 }

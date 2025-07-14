@@ -1,6 +1,8 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
+var cors = require("cors");
 
-var cors = require('cors');
+const IDENTIFICACION = "Tp-Final-IntroSoftware";
 
 const { 
 	getRelojesFiltro, 
@@ -282,6 +284,26 @@ app.post("/api/v1/usuarios", validarUsuario(false), async (req, res) => {
 	}
 	
 	return res.status(CREADO).json(usuario);
+});
+
+
+app.post("/api/v1/usuarios/login", async (req, res) => {
+	if(!(await esUsuarioExistente(req.body.nombre))) {
+		return res.status(NO_ENCONTRADO).send("No existe un usuario con el nombre brindado en la base de datos.\n");
+	}
+	
+	const logeado = await logearUsuario(req.body.nombre, req.body.contrasenia);
+	if(logeado === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno logeando el usuario al sistema.\nNo fue posible relizar la operación.\n")
+	}
+	else if(logeado === REQUEST_INVALIDA) {
+		return res.status(REQUEST_INVALIDA).send("La contrasenia recibida no es correcta.\n No se pudo logear el usuario al sistema\n");
+	}
+	
+	const identidad = { nombre: req.body.nombre };
+	const token = jwt.sign(identidad, IDENTIFICACION, { expiresIn: "7d" });
+	
+	return res.status(EXITO).json({ token });
 });
 
 
