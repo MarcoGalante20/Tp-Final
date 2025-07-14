@@ -49,12 +49,11 @@
                         <div class="select is-multiple block">
                             <select id="selectMateriales" multiple size="4">
                                 <option value="Plástico">Plástico</option>
-                                <option value="Acero-inox">Acero-inox</option>
+                                <option value="Acerio Inoxidable">Acero Inoxidable</option>
                                 <option value="Aluminio">Aluminio</option>
                                 <option value="Titanio">Titanio</option>
                                 <option value="Latón">Latón</option>
                                 <option value="Oro">Oro</option>
-                                
                             </select>
                         </div>
 
@@ -79,7 +78,13 @@
                     <input class="input" type="text" placeholder="Busca tu reloj: " />
                     <div class="box mt-4">
                         <h1 class = "title is-4">Relojes: </h1>
-                        <div id="contenedorRelojes" class="container is-flex is-flex-wrap-wrap is-fluid is-4"></div>
+                        <div id="contenedorRelojes" class="container is-flex is-flex-wrap-wrap is-fluid is-4">
+                            <div id="agregarReloj" class="nuevoReloj">
+                                <img src="https://images.icon-icons.com/2550/PNG/512/plus_circle_icon_152558.png" style="width:128px;height:128px;">
+                                <h1 class="title is-6" style="margin: 0px;">Agregar</h1>
+                                <h1 class="title is-6">Reloj</h1>
+                            </div>
+                        </div>
                     </div>
                     <button id="cargarRelojes" class="button is-info">Cargar más relojes</button>
                 </div>
@@ -92,7 +97,83 @@
             </div>
         </div>
         
+
         
+        <div id="modalAgregarReloj" class="modal">
+            <div id="modalAgregarRelojBackground" class="modal-background"></div>
+            
+            <div class="modal-content">
+                <div class="box">
+                    <div class="media-content">
+                        <div class="field">
+                            <h1 class="title is-4">Nuevo reloj: </h1>
+                            <input id="inputNombreRelojModal" class="input block" placeholder="Nombre del reloj">
+                            <div class="columns">
+                                <div class="column">
+                                    
+                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Marca: </h1>
+                                    <div class="select block">
+                                        <select id="selectMarcaModal">
+                                        </select>
+                                    </div>
+                                    <br />
+
+                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Sexo: </h1>
+                                    <div class="select block">
+                                        <select id="selectSexoModal">
+                                            <option value="H">Hombre</option>
+                                            <option value="M">Mujer</option>
+                                        </select>
+                                    </div>
+                                    <br />
+
+                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Material: </h1>
+                                    <div class="select block">
+                                        <select id="selectMaterialModal">
+                                            <option value="Plástico">Plástico</option>
+                                            <option value="Acerio Inoxidable">Acero Inoxidable</option>
+                                            <option value="Aluminio">Aluminio</option>
+                                            <option value="Titanio">Titanio</option>
+                                            <option value="Latón">Latón</option>
+                                            <option value="Oro">Oro</option>
+                                        </select>
+                                    </div>
+                                    <br />
+                                    
+                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Mecanismo: </h1>
+                                    <div class="select block">
+                                        <select id="selectMecanismoModal">
+                                            <option value="Mecánico">Mecánico</option>
+                                            <option value="Automático">Automático</option>
+                                            <option value="Cuarzo">Cuarzo</option>
+                                        </select>
+                                    </div>
+                                    <br />
+                                    
+                                </div>
+                                <div class="column">
+                                    <input id="inputImagenRelojModal" class="input block" placeholder="Link de la imagen">
+                                    <input id="inputPrecioModal" class="input block" type="number" placeholder="Precio">
+                                    <input id="inputDiametroModal" class="input block" type="number" placeholder="Diametro">
+                                    <input id="inputResistenciaModal" class="input block" type="number" placeholder="Resistencia al agua">
+
+                                </div>
+                            </div>   
+
+                        </div>
+                        <nav class="level">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    <a id="botonGuardarReloj" class="button is-info">Guardar</a>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+
         
         <script src="./scripts/index.js"></script>
     </body>

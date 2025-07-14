@@ -243,9 +243,9 @@ async function publicarReview(idReloj) {
     }
 }
 
-function atribuirFunciones() {
-    const botonPublicar = document.getElementById("botonPublicar");
-    botonPublicar.addEventListener("click", () => {
+function inicializarBotonPublicarResenia() {
+    const botonPublicarResenia = document.getElementById("botonPublicarResenia");
+    botonPublicarResenia.addEventListener("click", () => {
         publicarReview(idReloj);
     })
 }
@@ -260,13 +260,14 @@ async function crearPagina(idReloj) {
         insertarCaracteristicasReloj(datos);
         insertarImagenes(datos);
         insertarReviews(idReloj);
-        atribuirFunciones();
+        inicializarBotonPublicarResenia();
     })
 
     .catch((error) => {
         console.error("Hubo un error al obtener los relojes: ", error);
     });
 }
+
 
 const params = new URLSearchParams(window.location.search);
 const idReloj = params.get("id");

@@ -83,12 +83,12 @@ async function getReloj(id_reloj) {
 
 
 async function crearReloj(req) {
-	const { id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo } = req.body;
+	const { id_marca, nombre, mecanismo, material, imagen, resistencia_agua, diametro, precio, sexo } = req.body;
 	
 	try { 
 		const resultado = await dbClient.query(
-			"INSERT INTO relojes (id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-			[id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo]
+			"INSERT INTO relojes (id_marca, nombre, mecanismo, material, imagen, resistencia_agua, diametro, precio, sexo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+			[id_marca, nombre, mecanismo, material, imagen, resistencia_agua, diametro, precio, sexo]
 		);
 		
 		return {
@@ -96,6 +96,7 @@ async function crearReloj(req) {
 			nombre,
 			mecanismo,
 			material,
+			imagen,
 			resistencia_agua,
 			diametro,
 			precio,

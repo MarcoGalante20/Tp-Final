@@ -1,6 +1,120 @@
+function inicializarBotonCargarRelojes() {
+    const boton = document.getElementById("cargarRelojes");
+    boton.addEventListener("click", () => {
+        inicio += 16;
+        final += 16;
+        cargarRelojesNuevos();
+    })
+} 
+
+
+function inicializarAgregarReloj() {
+    const agregarReloj = document.getElementById("agregarReloj");
+    const modalAgregarReloj = document.getElementById("modalAgregarReloj");
+    agregarReloj.addEventListener("click", () => {
+        modalAgregarReloj.classList.add("is-active");
+    })
+    const modalAgregarRelojBackground = document.getElementById("modalAgregarRelojBackground");
+    modalAgregarRelojBackground.addEventListener("click", () => {
+        modalAgregarReloj.classList.remove("is-active");
+    })
+}
+
+function crearNuevoReloj() {
+    const inputNombreRelojModal = document.getElementById("inputNombreRelojModal");
+    const nombre = inputNombreRelojModal.value;
+    inputNombreRelojModal.value = "";
+
+    const selectMarcaModal = document.getElementById("selectMarcaModal");
+    const id_marca = selectMarcaModal.value;
+
+    const selectSexoModal = document.getElementById("selectSexoModal");
+    const sexo = selectSexoModal.value;
+
+    const selectMaterialModal = document.getElementById("selectMaterialModal");
+    const material = selectMaterialModal.value;
+
+    const selectMecanismoModal = document.getElementById("selectMecanismoModal");
+    const mecanismo = selectMecanismoModal.value;
+
+    const inputImagenRelojModal = document.getElementById("inputImagenRelojModal");
+    const imagen = inputImagenRelojModal.value;
+    inputImagenRelojModal.value = "";
+
+    const inputPrecioModal = document.getElementById("inputPrecioModal");
+    const precio = inputPrecioModal.value;
+    inputPrecioModal.value = "";
+
+    const inputDiametroModal = document.getElementById("inputDiametroModal");
+    const diametro = inputDiametroModal.value;
+    inputDiametroModal.value = "";
+    
+    const inputResistenciaModal = document.getElementById("inputResistenciaModal");
+    const resistencia_agua = inputResistenciaModal.value;
+    inputResistenciaModal.value = "";
+
+    if ((nombre != "") && (imagen != "") && (precio != "") && (diametro != "") && (resistencia_agua != "")) {
+    fetch("http://localhost:3000/api/v1/relojes", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            id_marca,
+            nombre,
+            mecanismo,
+            material,
+            imagen,
+            resistencia_agua,
+            diametro,
+            precio,
+            sexo
+        })
+    })
+    .then(respuesta => {
+        if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
+        return respuesta.json();
+    })
+    .then(data => {
+        console.log("Reloj agregado:", data);
+    })
+    .catch(error => {
+        console.error("Error al agregar el reloj:", error);
+    });
+    }
+    else {
+        alert("Todos los campos necesitan tener un valor")
+    }
+
+
+}
+
+function inicializarBotonGuardarReloj() {
+    const botonGuardarReloj = document.getElementById("botonGuardarReloj");
+    botonGuardarReloj.addEventListener("click", () => {
+        crearNuevoReloj();
+        document.getElementById("modalAgregarReloj").classList.remove("is-active");
+    })
+}
+
+function inicializarModalAgregarReloj() {
+    inicializarAgregarReloj();
+    inicializarBotonGuardarReloj();
+
+    const selectMarcaModal = document.getElementById("selectMarcaModal");
+    const selectMarcas = document.getElementById("selectMarcas");
+    selectMarcaModal.innerHTML = "";
+    for (const opcion of selectMarcas.options) {
+        selectMarcaModal.appendChild(opcion.cloneNode(true));
+    }
+}
+
 function vaciarContenedorRelojes() {
     const contenedorRelojes = document.getElementById("contenedorRelojes");
-    contenedorRelojes.innerHTML = "";
+
+    while (contenedorRelojes.children.length > 1) {
+        contenedorRelojes.removeChild(contenedorRelojes.firstElementChild);
+    }
 }
 
 function estandarizarDataFiltrado(data) {
@@ -91,23 +205,38 @@ function atribuirEscucharFiltrado() {
         elemento.addEventListener("change", () => {
             inicio = 0;
             final = 15;
-            vaciarContenedorRelojes()
+            vaciarContenedorRelojes();
             cargarRelojesNuevos();
         })
     })
 }
 
-function inicializarBotonCargarRelojes() {
-    const boton = document.getElementById("cargarRelojes");
-    boton.addEventListener("click", () => {
-        inicio += 16;
-        final += 16;
-        cargarRelojesNuevos();
-    })
-} 
+
+
+function diccionarioAQueryString(diccionario) {
+    const partes = [];
+
+    for (const clave in diccionario) {
+        const valor = diccionario[clave];
+
+        if (Array.isArray(valor)) {
+            const filtrado = valor.filter(v => v !== undefined && v !== null && v !== "");
+            if (filtrado.length > 0) {
+                // Las comas no se codifican
+                partes.push(`${encodeURIComponent(clave)}=${filtrado.join(",")}`);
+            }
+        } else if (valor !== undefined && valor !== null && valor !== "") {
+            partes.push(`${encodeURIComponent(clave)}=${encodeURIComponent(valor)}`);
+        }
+    }
+
+    return partes.join("&");
+}
 
 function insertarRelojes(data) {
     if (!data) throw new Error("Datos inválidos");
+    const contenedorRelojes = document.getElementById("contenedorRelojes");
+    const agregarReloj = document.getElementById("agregarReloj");
     data.forEach(infoReloj => {
         const imagenReloj = document.createElement("img");
         imagenReloj.src = infoReloj.imagen
@@ -138,28 +267,8 @@ function insertarRelojes(data) {
         nuevoReloj.appendChild(nombreReloj);
         nuevoReloj.appendChild(marcaReloj);
 
-        document.getElementById("contenedorRelojes").appendChild(nuevoReloj);
+        contenedorRelojes.insertBefore(nuevoReloj, agregarReloj);
     });
-}
-
-function diccionarioAQueryString(diccionario) {
-    const partes = [];
-
-    for (const clave in diccionario) {
-        const valor = diccionario[clave];
-
-        if (Array.isArray(valor)) {
-            const filtrado = valor.filter(v => v !== undefined && v !== null && v !== "");
-            if (filtrado.length > 0) {
-                // Las comas no se codifican
-                partes.push(`${encodeURIComponent(clave)}=${filtrado.join(",")}`);
-            }
-        } else if (valor !== undefined && valor !== null && valor !== "") {
-            partes.push(`${encodeURIComponent(clave)}=${encodeURIComponent(valor)}`);
-        }
-    }
-
-    return partes.join("&");
 }
 
 async function cargarRelojesNuevos() {
@@ -180,9 +289,9 @@ async function cargarRelojesNuevos() {
 
 async function cargarMarcas() {
     const selectMarcas = document.getElementById("selectMarcas");
-    return fetch("http://localhost:3000/api/v1/marcas")
-    .then((respuesta) => {
-        return respuesta.json();
+    return await fetch("http://localhost:3000/api/v1/marcas")
+    .then( async (respuesta) => {
+        return await respuesta.json();
     })
     .then((data) => {
         data.forEach((marca) => {
@@ -199,10 +308,16 @@ async function cargarMarcas() {
 
 
 
+
 let inicio = 0;
 let final = 15;
 
-atribuirEscucharFiltrado();
-inicializarBotonCargarRelojes();
-cargarRelojesNuevos();
-cargarMarcas();
+async function main() {
+    await cargarMarcas();
+    inicializarBotonCargarRelojes();
+    inicializarModalAgregarReloj(); 
+    atribuirEscucharFiltrado();
+    await cargarRelojesNuevos(); 
+}
+
+main();

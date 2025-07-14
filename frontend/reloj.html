@@ -41,27 +41,26 @@
                     <div id="boxReviews" class="box mt-4">
                         <h1 class = "title is-5">Reseñas: </h1>
 
-                        <article class="media">
-                            <div class="media-content">
-                                <div class="field">
-                                    <input id="inputTitulo" class="input block" placeholder="Titulo">
-                                    <div class="container is-flex block">
-                                        <input id="inputCalificacion" class="input" type="number" placeholder="Calificacion /5">
-                                        <input id="inputMesesUso" class="input" type="number" placeholder="Meses de uso">
-                                    </div>
-                                    <p class="control">
-                                        <textarea id="inputReview" class="textarea" placeholder="Agregar una reseña..."></textarea>
-                                    </p>
+                        <div class="media-content">
+                            <div class="field">
+                                <input id="inputTitulo" class="input block" placeholder="Titulo">
+                                <div class="container is-flex block">
+                                    <input id="inputCalificacion" class="input" type="number" placeholder="Calificacion /5">
+                                    <input id="inputMesesUso" class="input" type="number" placeholder="Meses de uso">
                                 </div>
-                                <nav class="level">
-                                    <div class="level-left">
-                                        <div class="level-item">
-                                            <a id="botonPublicar" class="button is-info">Publicar</a>
-                                        </div>
-                                    </div>
-                                </nav>
+                                <p class="control">
+                                    <textarea id="inputReview" class="textarea" placeholder="Agregar una reseña..."></textarea>
+                                </p>
                             </div>
-                        </article>
+                            <nav class="level">
+                                <div class="level-left">
+                                    <div class="level-item">
+                                        <a id="botonPublicarResenia" class="button is-info">Publicar</a>
+                                    </div>
+                                </div>
+                            </nav>
+                        </div>
+                        
                         <div id="containerReviews" class="is-flex is-flex-direction-column"></div>
                     </div>
                 </div>
@@ -73,8 +72,7 @@
             <div id="modalEdicionBackground" class="modal-background"></div>
             
             <div class="modal-content">
-                <div id="modalEdicionContent" class="box">
-                    <article class="media">
+                <div class="box">
                         <div class="media-content">
                             <div class="field">
                                 <input id="inputEdicionTitulo" class="input block" placeholder="Titulo">
@@ -94,7 +92,6 @@
                                 </div>
                             </nav>
                         </div>
-                    </article>
                 </div>
             </div>
         
