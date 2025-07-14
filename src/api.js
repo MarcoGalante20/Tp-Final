@@ -31,6 +31,7 @@ const {
 	actualizarUsuario,
 	patchearUsuario,
 	logearUsuario,
+	hacerAdmin,
 } = require("./db/usuarios-db.js");
 
 const {
@@ -282,10 +283,8 @@ app.get("/api/v1/usuarios/:id_usuario", validarToken, necesitaAdmin, async (req,
 });
 
 
-app.get("/api/v1/usuarios/enSesion", validarToken, async (req, res) => {
-	const { nombre } = req.usuario;
-	
-	const usuario = getUsuario(undefined, nombre);
+app.get("/api/v1/usuarios/miUsuario", validarToken, async (req, res) => {
+	const usuario = getUsuario(req.usuario.id_usuario, undefined);
 	if(usuario === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el usuario de la base de datos.\n");
 	}
@@ -342,8 +341,34 @@ app.delete("/api/v1/usuarios/:id_usuario", validarToken, necesitaAdmin, async (r
 });
 
 
+app.delete("/api/v1/usuarios/miUsuario", validarToken, async (req, res) => {
+	const resultado = await eliminarUsuario(req.usuario.id_usuario);
+	if(resultado === ERROR_INTERNO) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno eliminando el usuario de la base de datos.\n");
+	}
+	else if(resultado === NO_ENCONTRADO) {
+		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
+	}
+	
+	return res.status(ELIMINADO).send("El usuario fue eliminado de la base de datos con éxito.\n");;
+});
+
+
 app.put("/api/v1/usuarios/:id_usuario", validarToken, necesitaAdmin, validarUsuario(true), async (req, res) => {
 	const usuario_actualizado = await actualizarUsuario(req.params.id_usuario, req);
+	if(usuario_actualizado === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno actualizando el usuario en la base de datos.\n");
+	}
+	else if(usuario_actualizado === NO_ENCONTRADO) {
+		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
+	}
+	
+	return res.status(EXITO).json(usuario_actualizado);
+});
+
+
+app.put("/api/v1/usuarios/miUsuario", validarToken, validarUsuario(true), async (req, res) => {
+	const usuario_actualizado = await actualizarUsuario(req.usuario.id_usuario, req);
 	if(usuario_actualizado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno actualizando el usuario en la base de datos.\n");
 	}
@@ -369,6 +394,36 @@ app.patch("/api/v1/usuarios/:id_usuario", validarToken, necesitaAdmin, async (re
 	}
 	
 	return res.status(EXITO).json(usuario_patcheado);
+});
+
+
+app.patch("/api/v1/usuarios/miUsuario", validarToken, async (req, res) => {
+	if(req.body === undefined || Object.keys(req.body).length === 0) {
+		return res.status(REQUEST_INVALIDA).send("El cuerpo de la request se encuentra vacío.\n");
+	}
+	
+	const usuario_patcheado = await patchearUsuario(req.usuario.id_usuario, req);
+	if(usuario_patcheado === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno patcheando el usuario en la base de datos.\n");
+	}
+	else if(usuario_patcheado === NO_ENCONTRADO) {
+		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado.\n");
+	}
+	
+	return res.status(EXITO).json(usuario_patcheado);
+});
+
+
+app.patch("/api/v1/usuarios/:id_usuario/admins", validarToken, necesitaAdmin, async (req,res) => {
+	const resultado = await hacerAdmin(req.params.id_usuario);
+	if(resultado === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error orotgándole permisos de administrador al usuario brindado.\n");
+	}
+	else if(resultado === NO_ENCONTRADO) {
+		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado.\n");
+	}
+	
+	return res.status(EXITO).send("Se le otorgaron permisos de administrador al usuario de manera exitosa.\n");
 });
 
 
@@ -468,6 +523,9 @@ app.patch("/api/v1/resenias/:id_resenia", validarToken, async (req, res) => {
 app.get("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, async (req, res) => {
 	const usuario = await getUsuario(req.params.id_usuario, undefined);
 	if(usuario === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error accediendo al usuario especificado.\nNo se pudo completar la operación pedida.\n");
+	}
+	else if(usuario === NO_ENCONTRADO) {
 		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
 	}
 	
@@ -480,8 +538,28 @@ app.get("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, asy
 });
 
 
-app.post("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, validarRelojUsuario, async (req,res) => {
-	const reloj_agregado = await agregarRelojUsuario(req);
+app.get("api/v1/usuarios/misRelojes", validarToken, async (req, res) => {
+	const { id_usuario, nombre } = req.usuario;
+	
+	const existe = await esUsuarioExistente(nombre);
+	if(existe === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error accediendo al usuario especificado.\nNo se pudo completar la operación pedida.\n");
+	}
+	else if(!existe) {
+		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
+	}
+	
+	const relojes_usuario = await getRelojesUsuario(id_usuario);
+	if(relojes_usuario === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo los relojes del usuario.\n");
+	}
+	
+	return res.status(EXITO).json(relojes_usuario);
+});
+
+
+app.post("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, validarRelojUsuario(req.params.id_usuario), async (req,res) => {
+	const reloj_agregado = await agregarRelojUsuario(req.params.id_usuario, req.body.id_reloj);
 	if(reloj_agregado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando el reloj al usuario.\n");
 	}
@@ -490,8 +568,32 @@ app.post("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, va
 });
 
 
-app.delete("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, validarRelojUsuario, async (req,res) => {
-	const resultado = await quitarRelojUsuario(req);
+app.post("/api/v1/usuarios/misRelojes", validarToken, validarRelojUsuario(req.usuario.id_usuario), async (req,res) => {
+	const reloj_agregado = await agregarRelojUsuario(req.usuario.id_usuario, req.body.id_reloj);
+	if(reloj_agregado === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando el reloj al usuario.\n");
+	}
+	
+	return res.status(CREADO).send("Reloj agregado al usuario con éxito.\n");
+});
+
+
+app.delete("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, validarRelojUsuario(req.params.id_usuario), async (req,res) => {
+	const resultado = await quitarRelojUsuario(req.params.id_usuario, req.body.id_reloj);
+	
+	if(resultado === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno interno quitándole el reloj al usuario\n");
+	}
+	else if(resultado === NO_ENCONTRADO) {
+		return res.status(NO_ENCONTRADO).send("El usuario no posee el reloj en la base de datos, por lo que no es posible quitárselo.\n");
+	}
+	
+	return res.status(ELIMINADO).send("Se le quitó el reloj al usuario con éxito.\n");
+});
+
+
+app.delete("/api/v1/usuarios/misRelojes", validarToken, validarRelojUsuario(req.usuario.id_usuario), async (req,res) => {
+	const resultado = await quitarRelojUsuario(req.usuario.id_usuario, req.body.id_reloj);
 	
 	if(resultado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno interno quitándole el reloj al usuario\n");

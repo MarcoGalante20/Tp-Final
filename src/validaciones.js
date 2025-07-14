@@ -222,10 +222,6 @@ function validarResenia(tieneQueExistir) {
 		const usuario = await getUsuario(id_usuario, undefined);
 		if(usuario === NO_ENCONTRADO || usuario === undefined) return res.status(REQUEST_INVALIDA).send("El usuario brindado no es válido.\nPor favor reviselo y vuelva a intentarlo.\n");
 		
-		const relojes_usuario = await getRelojesUsuario(id_usuario);
-		const ids_relojes = relojes_usuario.map(r => r.id_reloj);
-		if(!(ids_relojes.includes(id_reloj))) return res.status(REQUEST_INVALIDA).send("El usuario no posee el reloj que desea reseñar.\n");
-		
 		if(!tieneQueExistir) {
 			if(await esReseniaExistente(id_reloj, id_usuario)) {
 				return res.status(CONFLICTO).send("La resenia ya existe en la base de datos.\n");
@@ -256,9 +252,9 @@ function validarResenia(tieneQueExistir) {
 // ---------------------------- Validaciones de los relojes de los usuarios ------------------------------
 
 
-function validarRelojUsuario() {
+function validarRelojUsuario(id_usuario) {
 	return async function(req, res, next) {
-		const usuario = await getUsuario(req.params.id_usuario, undefined);
+		const usuario = await getUsuario(id_usuario, undefined);
 		if(usuario === undefined) {
 			return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado.\n");
 		}

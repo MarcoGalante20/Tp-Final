@@ -180,7 +180,7 @@ async function patchearResenia(req) {
 		);
 		
 		if(resultado.rowCount === 0) {
-			return undefined;
+			return NO_ENCONTRADO;
 		}
 		
 		return {

@@ -130,6 +130,9 @@ async function actualizarMarca(req) {
 async function patchearMarca(req) {
 	const marca = await getMarca(req.params.id_marca);
 	if(marca === undefined) {
+		return undefined;
+	}
+	else if(marca === NO_ENCONTRADO) {
 		return NO_ENCONTRADO;
 	}
 	
@@ -145,7 +148,7 @@ async function patchearMarca(req) {
 		);
 		
 		if(resultado.rowCount === 0) {
-			return undefined;
+			return NO_ENCONTRADO;
 		}
 		
 		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");

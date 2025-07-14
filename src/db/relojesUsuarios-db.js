@@ -33,11 +33,11 @@ async function getRelojesUsuario(id_usuario) {
 }
 
 
-async function agregarRelojUsuario(req) {
+async function agregarRelojUsuario(id_usuario, id_reloj) {
 	try { 
 		const resultado = await dbClient.query(
 			"INSERT INTO relojes_usuarios (id_usuario, id_reloj) VALUES ($1, $2)",
-			[req.params.id_usuario, req.body.id_reloj]
+			[id_usuario, id_reloj]
 		);
 		
 		return resultado.rowCount;
@@ -48,10 +48,10 @@ async function agregarRelojUsuario(req) {
 }
 
 
-async function quitarRelojUsuario(req) {
+async function quitarRelojUsuario(id_usuario, id_reloj) {
 	try {
 		const resultado = await dbClient.query("DELETE FROM relojes_usuarios WHERE id_usuario = $1 AND id_reloj = $2", 
-		[req.params.id_usuario, req.body.id_reloj]);
+		[id_usuario, id_reloj]);
 		
 		if(resultado.rowCount === 0) {
 			return NO_ENCONTRADO;

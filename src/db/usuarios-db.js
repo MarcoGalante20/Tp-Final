@@ -111,11 +111,12 @@ async function logearUsuario(nombre, contrasenia) {
 
 async function esUsuarioExistente(nombre) {
 	try {
-		const respuesta = await dbClient.query("SELECT * FROM usuarios WHERE nombre = $1", [nombre]);
+		const respuesta = await dbClient.query("SELECT 1 FROM usuarios WHERE nombre = $1", [nombre]);
 		
 		if(respuesta.rows.length !== 0) {
 			return true;
 		}
+		
 		return false;
 	} catch(error_recibido) {
 		console.error("Error en esUsuarioExistente: ", error_recibido);
@@ -171,9 +172,12 @@ async function actualizarUsuario(id_usuario, req) {
 }
 
 
-async function patchearUsuario(req) {
-	const usuario = await getUsuario(req.usuario.id_usuario, undefined);
+async function patchearUsuario(id_usuario, req) {
+	const usuario = await getUsuario(id_usuario, undefined);
 	if(usuario === undefined) {
+		return undefined;
+	}
+	else if(usuario === NO_ENCONTRADO) {
 		return NO_ENCONTRADO;
 	}
 	
@@ -193,7 +197,7 @@ async function patchearUsuario(req) {
 		);
 		
 		if(resultado.rowCount === 0) {
-			return undefined;
+			return NO_ENCONTRADO;
 		}
 		
 		return {
@@ -211,6 +215,31 @@ async function patchearUsuario(req) {
 }
 
 
+async function hacerAdmin(id_usuario) {
+	const usuario = await getUsuario(id_usuario, undefined);
+	if(usuario === undefined) {
+		return undefined;
+	}
+	else if(usuario === NO_ENCONTRADO) {
+		return NO_ENCONTRADO;
+	}
+	
+	try {
+		const resultado = await dbClient.query(
+			"UPDATE usuarios SET rol = $1 WHERE id_usuario = $2",
+			['admin', id_usuario]
+		);
+		
+		if(resultado.rowCount === 0) {
+			return NO_ENCONTRADO;
+		}
+		
+	
+	
+	
+}
+
+
 module.exports = {
     getAllUsuarios,
     getUsuario,
@@ -220,4 +249,5 @@ module.exports = {
     actualizarUsuario,
     patchearUsuario,
     logearUsuario,
+    hacerAdmin,
 };

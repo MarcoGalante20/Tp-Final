@@ -4,6 +4,7 @@ const {
 	NO_ENCONTRADO,
 } = require("../codigosStatusHttp.js");
 
+
 async function getExtrasReloj(id_reloj) {
 	try {
 		const atributos = await dbClient.query(`

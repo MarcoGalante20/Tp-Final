@@ -112,12 +112,12 @@ async function getReloj(id_reloj) {
 
 
 async function crearReloj(req) {
-	const { id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo } = req.body;
+	const { id_marca, nombre, mecanismo, material, imagen, resistencia_agua, diametro, precio, sexo } = req.body;
 	
 	try { 
 		const resultado = await dbClient.query(
-			"INSERT INTO relojes (id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-			[id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo]
+			"INSERT INTO relojes (id_marca, nombre, mecanismo, material, imagen, resistencia_agua, diametro, precio, sexo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+			[id_marca, nombre, mecanismo, material, imagen, resistencia_agua, diametro, precio, sexo]
 		);
 		
 		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
@@ -127,6 +127,7 @@ async function crearReloj(req) {
 			nombre,
 			mecanismo,
 			material,
+			imagen,
 			resistencia_agua,
 			diametro,
 			precio,
@@ -209,6 +210,9 @@ async function actualizarReloj(req) {
 async function patchearReloj(req) {
 	const reloj = await getReloj(req.params.id_reloj);
 	if(reloj === undefined) {
+		return undefined;
+	}
+	else if(reloj === NO_ENCONTRADO) {
 		return 'r';
 	}
 	
@@ -216,6 +220,9 @@ async function patchearReloj(req) {
 	
 	const marca = getMarca(id_marca);
 	if(marca === undefined) {
+		return undefined;
+	}
+	else if(marca === NO_ENCONTRADO) {
 		return 'm';
 	}
 	
@@ -235,7 +242,7 @@ async function patchearReloj(req) {
 		);
 		
 		if(resultado.rowCount === 0) {
-			return undefined;
+			return NO_ENCONTRADO;
 		}
 		
 		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
