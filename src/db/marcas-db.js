@@ -42,6 +42,8 @@ async function crearMarca(req) {
 			[nombre, imagen]
 		);
 		
+		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
+		
 		return {
 			nombre,
 			imagen,
@@ -86,6 +88,8 @@ async function eliminarMarca(id_marca) {
 			return NO_ENCONTRADO;
 		} 
 		
+		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
+		
 		return ELIMINADO;
 	} catch (error_devuelto) {
 		console.error("Error en eliminarMarca: ", error_devuelto);
@@ -108,6 +112,8 @@ async function actualizarMarca(req) {
 		if(resultado.rowCount === 0) {
 			return NO_ENCONTRADO;
 		}
+		
+		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
 		
 		return {
 			id_marca,
@@ -141,6 +147,8 @@ async function patchearMarca(req) {
 		if(resultado.rowCount === 0) {
 			return undefined;
 		}
+		
+		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
 		
 		return {
 			id_marca: req.params.id_marca,

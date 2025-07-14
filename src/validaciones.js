@@ -62,7 +62,7 @@ function validarReloj(tieneQueExistir) {
 			return res.status(REQUEST_INVALIDA).send("El mecánismo brindado no es válido.\n");
 		}
 		
-		if(material !== "Plástico" && material !== "Acero-inox" && material !== "Aluminio" && material !== "Titanio" && material !== "Latón" && material !== "Oro") {
+		if(material !== "Plástico" && material !== "Acero Inoxidable" && material !== "Aluminio" && material !== "Titanio" && material !== "Latón" && material !== "Oro") {
 			return res.status(REQUEST_INVALIDA).send("El material del reloj no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
 		
