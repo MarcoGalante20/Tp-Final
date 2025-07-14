@@ -303,9 +303,11 @@ app.post("/api/v1/usuarios", validarUsuario(false), async (req, res) => {
 
 
 app.post("/api/v1/usuarios/login", async (req, res) => {
-	if(!(await esUsuarioExistente(req.body.nombre))) {
+	const usuario = getUsuario(undefined, req.body.nombre);
+	if(usuario === undefined) {
 		return res.status(NO_ENCONTRADO).send("No existe un usuario con el nombre brindado en la base de datos.\n");
 	}
+	
 	
 	const logeado = await logearUsuario(req.body.nombre, req.body.contrasenia);
 	if(logeado === undefined) {
@@ -315,7 +317,7 @@ app.post("/api/v1/usuarios/login", async (req, res) => {
 		return res.status(REQUEST_INVALIDA).send("La contrasenia recibida no es correcta.\n No se pudo logear el usuario al sistema\n");
 	}
 	
-	const identidad = { nombre: req.body.nombre };
+	const identidad = { nombre: usuario.nombre, rol: usuario.rol };
 	const token = jwt.sign(identidad, AUTENTICACION, { expiresIn: "7d" });
 	
 	return res.status(EXITO).json({ token });

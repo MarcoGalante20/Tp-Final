@@ -23,6 +23,7 @@ CREATE TABLE usuarios (
 	id_usuario serial PRIMARY KEY,
 	nombre VARCHAR(50) NOT NULL UNIQUE,
 	hash_contrasenia VARCHAR(255) NOT NULL,
+	rol VARCHAR(20) DEFAULT 'usuario',
 	sexo CHAR,
 	edad INT,
 	precio_buscado INT
@@ -95,14 +96,14 @@ INSERT INTO extras_reloj (id_reloj, atributo) VALUES
 	(10, 'Buceo'),
 	(10, 'Elegante');
 
-INSERT INTO usuarios (nombre, contrasenia, sexo, edad, precio_buscado) VALUES
-	('Marco12', 'Boquitael+grande', 'M', 19, 120000),
-	('Juanfran', 'Calamardexvida', 'M', 19, 300000),
-	('Ana', 'pass123', 'F', 25, 150000),
-	('Luis', 'contraseña', 'M', 32, 500000),
-	('Sofía', 'abcd1234', 'F', 28, 200000),
-	('Carlos', 'qwerty', 'M', 40, 1000000),
-	('Marta', 'zxcvbn', 'F', 35, 70000);
+INSERT INTO usuarios (nombre, contrasenia, rol, sexo, edad, precio_buscado) VALUES
+	('Marco12', '$2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'M', 19, 120000),
+	('Juanfran', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'M', 19, 300000),
+	('Ana', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 25, 150000),
+	('Luis', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 32, 500000),
+	('Sofía', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 28, 200000),
+	('Carlos', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 40, 1000000),
+	('Marta', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 35, 70000);
 
 INSERT INTO relojes_usuarios (id_usuario, id_reloj) VALUES 
 	(1, 2), 

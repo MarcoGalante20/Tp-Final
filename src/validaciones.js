@@ -22,6 +22,10 @@ const {
 } = require("./db/resenias-db.js");
 
 const {
+	getRelojesUsuario,
+} = require("./db/relojesUsuarios-db.js");
+
+const {
 	EXITO,
 	CREADO,
 	ELIMINADO,
@@ -167,7 +171,14 @@ function validarUsuario(tieneQueExistir) {
 function validarToken() {
 	return async function(req, res, next) {
 		const autenticador = req.headers["authorization"];
-		const token = autenticador && autenticador.split(' ')[1];
+		
+		let token = null;
+		if(autenticador) {
+			const partes = autenticador.split(' ');
+			if(partes.length === 2 && partes[0] === 'Bearer') {
+				token = partes[1];
+			}
+		}
 		
 		if(!token) {
 			return res.status(NO_AUTORIZADO).send("No se proporcionó un token de usuario.\n");
@@ -184,6 +195,16 @@ function validarToken() {
 }
 
 
+function necesitaAdmin() {
+	return async function(req, res, next) {
+		if(req.usuario.rol !== 'admin') {
+			return res.status(PROHIBIDO).send("Acceso denegado.\nPara acceder a esta ruta necesita ser administrador.\n");
+		}
+		next();
+	}
+}
+
+
 // ---------------------------- Validaciones de las resenias ------------------------------
 
 
@@ -195,24 +216,15 @@ function validarResenia(tieneQueExistir) {
 		
 		const { id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso } = req.body;
 		
-		if(id_reloj === undefined) {
-			return res.status(REQUEST_INVALIDA).send("No se brindó el id del reloj de la resenia.\n");
-		}
-		
-		if(id_usuario === undefined) {
-			return res.status(REQUEST_INVALIDA).send("No se brindó el id del usuario de la resenia.\n");
-		}
-		
 		const reloj = await getReloj(id_reloj);
+		if(reloj === NO_ENCONTRADO || reloj === undefined) return res.status(REQUEST_INVALIDA).send("El reloj brindado no es válido.\nPor favor reviselo y vuelva a intentarlo.\n");
+		
 		const usuario = await getUsuario(id_usuario, undefined);
+		if(usuario === NO_ENCONTRADO || usuario === undefined) return res.status(REQUEST_INVALIDA).send("El usuario brindado no es válido.\nPor favor reviselo y vuelva a intentarlo.\n");
 		
-		if(reloj === undefined) {
-			return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
-		}
-		
-		if(usuario === undefined) {
-			return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
-		}
+		const relojes_usuario = await getRelojesUsuario(id_usuario);
+		const ids_relojes = relojes_usuario.map(r => r.id_reloj);
+		if(!(ids_relojes.includes(id_reloj))) return res.status(REQUEST_INVALIDA).send("El usuario no posee el reloj que desea reseñar.\n");
 		
 		if(!tieneQueExistir) {
 			if(await esReseniaExistente(id_reloj, id_usuario)) {
@@ -223,22 +235,19 @@ function validarResenia(tieneQueExistir) {
 		if(titulo === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó el título de la resenia.\n");
 		}
-		
 		if(resenia === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó el texto de la resenia.\n");
 		}
-		
+		if(fecha === undefined) {
+			return res.status(REQUEST_INVALIDA).send("No se brindó la fecha de la resenia.\n");
+		}
+		if(meses_de_uso === undefined || meses_de_uso < 0) {
+			return res.status(REQUEST_INVALIDA).send("Los meses de uso brindados no son correctos.\nVerifique que los haya ingresado y sean válidos.");
+		}
 		if(calificacion === undefined || calificacion < 0 || calificacion > 5) {
 			return res.status(REQUEST_INVALIDA).send("La calificación brindada no es correcta.\nVerifique que la haya ingresado y sea válida.");
 		}
 		
-		if(fecha === undefined) {
-			return res.status(REQUEST_INVALIDA).send("No se brindó la fecha de la resenia.\n");
-		}
-		
-		if(meses_de_uso === undefined || meses_de_uso < 0) {
-			return res.status(REQUEST_INVALIDA).send("Los meses de uso brindados no son correctos.\nVerifique que los haya ingresado y sean válidos.");
-		}
 		next();
 	};
 }
