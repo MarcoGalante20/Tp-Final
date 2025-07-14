@@ -29,40 +29,28 @@ function escucharFiltrado() {
         .filter(opt => opt.selected)
         .map(opt => opt.value);
 
-    //console.log("Marcas seleccionadas:", seleccionadosMarcas);
-
 
     const minPrecio = document.getElementById("minPrecio");
     const maxPrecio = document.getElementById("maxPrecio");
-    //console.log("Precio: min: ", minPrecio.value, ", max: ", maxPrecio.value);
-
 
     const selectSexo = document.getElementById("selectSexo");
-    //console.log("Sexo: ", selectSexo.value);
-
 
     const minDiametro = document.getElementById("minDiametro");
     const maxDiametro = document.getElementById("maxDiametro");
-    //console.log("Diametro: min: ", minDiametro.value, ", max: ", maxDiametro.value);
-
 
     const selectMateriales = document.getElementById("selectMateriales");
     const seleccionadosMateriales = Array.from(selectMateriales.options)
         .filter(opt => opt.selected)
         .map(opt => opt.value);
 
-    //console.log("Materiales seleccionadas:", seleccionadosMateriales);
-
     const selectMecanismos = document.getElementById("selectMecanismos");
     const seleccionadosMecanismos = Array.from(selectMecanismos.options)
         .filter(opt => opt.selected)
         .map(opt => opt.value);
 
-    //console.log("Mecanismos seleccionadas:", seleccionadosMecanismos);
-
     const minResistencia = document.getElementById("minResistencia");
     const maxResistencia = document.getElementById("maxResistencia");
-    //console.log("Resistencia: min: ", minResistencia.value, ", max: ", maxResistencia.value);
+
 
     let data = {
         marcas: seleccionadosMarcas,
@@ -76,8 +64,6 @@ function escucharFiltrado() {
     };
 
     data = estandarizarDataFiltrado(data);
-
-    console.log(JSON.stringify(data));
 
     return data;
 }
@@ -104,7 +90,7 @@ function atribuirEscucharFiltrado() {
     elementos.forEach((elemento) => {
         elemento.addEventListener("change", () => {
             inicio = 0;
-            final = 20;
+            final = 15;
             vaciarContenedorRelojes()
             cargarRelojesNuevos();
         })
@@ -114,8 +100,8 @@ function atribuirEscucharFiltrado() {
 function inicializarBotonCargarRelojes() {
     const boton = document.getElementById("cargarRelojes");
     boton.addEventListener("click", () => {
-        inicio += 20;
-        final += 20;
+        inicio += 16;
+        final += 16;
         cargarRelojesNuevos();
     })
 } 
@@ -178,7 +164,6 @@ function diccionarioAQueryString(diccionario) {
 
 async function cargarRelojesNuevos() {
     const params = diccionarioAQueryString(escucharFiltrado())
-    console.log(`http://localhost:3000/api/v1/relojes?${params}`);
     return fetch(`http://localhost:3000/api/v1/relojes?${params}`)
     .then((respuesta) => {
         return respuesta.json();
@@ -189,15 +174,35 @@ async function cargarRelojesNuevos() {
     })
 
     .catch((error) => {
-        console.error("Hubo un error al obtener los relojes: ", error);
+        console.error("Hubo un error al obtener los relojes:\n", error);
     });
+}
+
+async function cargarMarcas() {
+    const selectMarcas = document.getElementById("selectMarcas");
+    return fetch("http://localhost:3000/api/v1/marcas")
+    .then((respuesta) => {
+        return respuesta.json();
+    })
+    .then((data) => {
+        data.forEach((marca) => {
+            const elementoMarca = document.createElement("option");
+            elementoMarca.value = marca.id_marca;
+            elementoMarca.textContent = marca.nombre;
+            selectMarcas.appendChild(elementoMarca);
+        });
+    })
+    .catch((error) => {
+        console.error("Hubo un error al obtener las marcas:\n", error);
+    })
 }
 
 
 
 let inicio = 0;
-let final = 20;
+let final = 15;
 
 atribuirEscucharFiltrado();
 inicializarBotonCargarRelojes();
 cargarRelojesNuevos();
+cargarMarcas();

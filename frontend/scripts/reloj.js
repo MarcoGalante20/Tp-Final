@@ -3,7 +3,7 @@ function insertarCaracteristicasReloj(datos) {
     nombreReloj.textContent = `${datos.marca} ${datos.nombre}`;
 
     const precioReloj = document.createElement("li");
-    precioReloj.textContent = `Precio: ${datos.precio}`;
+    precioReloj.textContent = `Precio: ${datos.precio} USD`;
 
     const materialReloj = document.createElement("li");
     materialReloj.textContent = `Material: ${datos.material}`;
@@ -51,19 +51,95 @@ function eliminarReview(id_resenia) {
     });
 }
 
+async function editarResenia(id_resenia) {
+    const inputEdicionTitulo = document.getElementById("inputEdicionTitulo");
+    const titulo = inputEdicionTitulo.value;
+    inputEdicionTitulo.value = "";
+
+    const inputEdicionReview = document.getElementById("inputEdicionReview");
+    const resenia = inputEdicionReview.value;
+    inputEdicionReview.value = "";
+
+    const inputEdicionCalificacion = document.getElementById("inputEdicionCalificacion");
+    const calificacion = inputEdicionCalificacion.value;
+    inputEdicionCalificacion.value = "";
+
+    const fecha = (new Date()).toISOString().slice(0, 10);
+
+    const inputEdicionMesesUso = document.getElementById("inputEdicionMesesUso");
+    const meses_de_uso = inputEdicionMesesUso.value;
+    inputEdicionMesesUso.value = "";
+
+    if ((titulo != "") && (resenia != "") && (calificacion != "") && (meses_de_uso != "")) {
+        return fetch(`http://localhost:3000/api/v1/resenias/${id_resenia}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                titulo,
+                resenia,
+                calificacion,
+                fecha,
+                meses_de_uso
+            })
+        })
+        .then(async (respuesta) => {
+            if (!respuesta.ok) {
+                console.log("HOLA");
+                const mensajeError = await respuesta.text();
+                throw new Error(`${respuesta.status}\n${mensajeError}`);
+            }
+        })
+        .catch(error => {
+            alert(`${error}`);
+            throw error;
+        });
+    }
+    alert("Todos los campos tienen que tener un valor");
+    return null;
+}
+
+function incializarModalEdicion(id_resenia) {
+    const modalEdicionBackground = document.getElementById("modalEdicionBackground");
+    modalEdicionBackground.addEventListener("click", () => {
+        document.getElementById("modalEdicion").classList.remove("is-active");
+    })
+    const botonGuardar = document.getElementById("botonGuardar");
+    botonGuardar.onclick = async () => {
+        await editarResenia(id_resenia);
+        document.getElementById("modalEdicion").classList.remove("is-active");
+        insertarReviews(idReloj);
+    };
+
+    document.getElementById("inputEdicionTitulo").value = document.getElementById(`titulo${id_resenia}`).textContent;
+    document.getElementById("inputEdicionReview").value = document.getElementById(`reseniaTexto${id_resenia}`).textContent;
+    document.getElementById("inputEdicionCalificacion").value = document.getElementById(`calificacion${id_resenia}`).textContent;
+    console.log(document.getElementById(`mesesUso${id_resenia}`).textContent);
+    document.getElementById("inputEdicionMesesUso").value = parseInt(document.getElementById(`mesesUso${id_resenia}`).textContent);
+}
+
+function abrirModalEdicion(id_resenia) {
+    const modalEdicion = document.getElementById("modalEdicion");
+    incializarModalEdicion(id_resenia); 
+    modalEdicion.classList.add("is-active");
+}
+
 function formatearReview(resenia) {
     const textoReview = document.createElement("p");
-    textoReview.innerHTML = `<strong>${resenia.nombre_usuario}</strong> <small>${resenia.fecha}, ${resenia.meses_de_uso} meses de uso</small>
-                            <br />
-                            <strong>${resenia.titulo}</strong> <br />
-                            ${resenia.resenia} <br />
-                            <strong>${resenia.calificacion}/5</strong>`;
+    textoReview.innerHTML =
+        `<strong>${resenia.nombre_usuario}</strong> 
+        <small>${resenia.fecha}</small>, <small id="mesesUso${resenia.id_resenia}">${resenia.meses_de_uso} meses de uso</small>
+        <br />
+        <strong id="titulo${resenia.id_resenia}">${resenia.titulo}</strong> <br />
+        <span id="reseniaTexto${resenia.id_resenia}">${resenia.resenia}</span> <br />
+        <strong id="calificacion${resenia.id_resenia}">${resenia.calificacion}</strong>/5`;
     
     const botonEditar = document.createElement("button");
     botonEditar.classList.add("button", "is-warning");
     botonEditar.textContent = "Editar";
     botonEditar.addEventListener("click", () => {
-        editarReview(resenia.id_resenia);
+        abrirModalEdicion(resenia.id_resenia);
     })
 
     const botonEliminar = document.createElement("button");
@@ -96,17 +172,18 @@ function formatearReview(resenia) {
     return boxReview;
 }
 
-async function insertarReviews (idReloj) {
+async function insertarReviews(idReloj) {
     return fetch(`http://localhost:3000/api/v1/resenias/${idReloj}`)
     .then((respuesta) => {
         return respuesta.json();
     })
 
     .then((datos) => { 
-        const boxReviews = document.getElementById("boxReviews");
+        const containerReviews = document.getElementById("containerReviews");
+        containerReviews.innerHTML = "";
         datos.forEach((review) => {
             nuevaReview = formatearReview(review); 
-            boxReviews.appendChild(nuevaReview);
+            containerReviews.appendChild(nuevaReview);
         })  
     })
 
@@ -134,31 +211,36 @@ async function publicarReview(idReloj) {
     const meses_de_uso = inputMeses_de_uso.value;
     inputMeses_de_uso.value = "";
 
-    fetch('http://localhost:3000/api/v1/resenias', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            id_reloj: idReloj,
-            id_usuario: 2,
-            titulo,
-            resenia,
-            calificacion,
-            fecha,
-            meses_de_uso
+    if ((titulo != "") && (resenia != "") && (calificacion != "") && (meses_de_uso != "")) {
+        fetch('http://localhost:3000/api/v1/resenias', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id_reloj: idReloj,
+                id_usuario: 2,
+                titulo,
+                resenia,
+                calificacion,
+                fecha,
+                meses_de_uso
+            })
         })
-    })
-    .then(async (respuesta) => {
-        if (!respuesta.ok) {
-            const mensajeError = await respuesta.text();
-            throw new Error(`${respuesta.status}\n${mensajeError}`);
-        }
-        insertarReviews(idReloj);
-    })
-    .catch(error => {
-        alert(`${error}`);
-    });
+        .then(async (respuesta) => {
+            if (!respuesta.ok) {
+                const mensajeError = await respuesta.text();
+                throw new Error(`${respuesta.status}\n${mensajeError}`);
+            }
+            insertarReviews(idReloj);
+        })
+        .catch(error => {
+            alert(`${error}`);
+        });
+    }
+    else {
+        alert("Todos los campos tienen que tener un valor");
+    }
 }
 
 function atribuirFunciones() {
@@ -190,6 +272,8 @@ const params = new URLSearchParams(window.location.search);
 const idReloj = params.get("id");
 
 crearPagina(idReloj);
+
+
 
 
 

@@ -82,22 +82,6 @@ async function getReloj(id_reloj) {
 }
 
 
-async function getReloj(id_reloj) {
-	try {
-		const reloj = await dbClient.query("SELECT * FROM relojes WHERE id_reloj = $1", [id_reloj]);
-		
-		if(reloj.rows.length === 0) {
-			return NO_ENCONTRADO;
-		}
-		
-		return reloj.rows[0];
-	} catch(error_recibido) {
-		console.error("Error en getReloj: ", error_recibido);
-		return undefined;
-	}
-}
-
-
 async function crearReloj(req) {
 	const { id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo } = req.body;
 	
