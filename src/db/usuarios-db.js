@@ -19,9 +19,20 @@ async function getAllUsuarios() {
 }
 
 
-async function getUsuario(id_usuario) {
+async function getUsuario(id_usuario, nombre) {
 	try {
-		const usuario = await dbClient.query("SELECT * FROM usuarios WHERE id_usuario = $1", [id_usuario]);
+		let usuario;
+		
+		if(nombre === undefined) {
+			if(id_usuario === undefined) {
+				return undefined;
+			}
+			usuario = await dbClient.query("SELECT * FROM usuarios WHERE id_usuario = $1", [id_usuario]);
+		}
+		else {
+			usuario = await dbClient.query("SELECT * FROM usuarios WHERE nombre = $1", [nombre]);
+		}
+		
 		
 		if(usuario.rows.length === 0) {
 			return NO_ENCONTRADO;
@@ -153,7 +164,7 @@ async function actualizarUsuario(req) {
 
 
 async function patchearUsuario(req) {
-	const usuario = await getUsuario(req.params.id_usuario);
+	const usuario = await getUsuario(req.params.id_usuario, undefined);
 	if(usuario === undefined) {
 		return NO_ENCONTRADO;
 	}

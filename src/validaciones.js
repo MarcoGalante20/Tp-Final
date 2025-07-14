@@ -1,3 +1,6 @@
+const jwt = require("jsonwebtoken");
+const AUTENTICACION = "Tp-Final-IntroSoftware";
+
 const {
 	getReloj,
 	esRelojExistente,
@@ -23,6 +26,8 @@ const {
 	CREADO,
 	ELIMINADO,
 	REQUEST_INVALIDA,
+	NO_AUTORIZADO,
+	PROHIBIDO,
 	NO_ENCONTRADO,
 	CONFLICTO,
 	ERROR_INTERNO,
@@ -33,7 +38,7 @@ const {
 
 
 function validarReloj(tieneQueExistir) {
-	return async function (req, res, next) {
+	return async function(req, res, next) {
 		if(req.body === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó un cuerpo para la request.\n");
 		}
@@ -91,7 +96,7 @@ function validarReloj(tieneQueExistir) {
 
 
 function validarMarca(tieneQueExistir) {
-	return async function (req, res, next) {
+	return async function(req, res, next) {
 		if(req.body === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó un cuerpo para la request.\n");
 		}
@@ -121,7 +126,7 @@ function validarMarca(tieneQueExistir) {
 
 
 function validarUsuario(tieneQueExistir) {
-	return async function (req, res, next) {
+	return async function(req, res, next) {
 		if(req.body === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó un cuerpo para la request.\n");
 		}
@@ -159,11 +164,31 @@ function validarUsuario(tieneQueExistir) {
 }
 
 
+function validarToken() {
+	return async function(req, res, next) {
+		const autenticador = req.headers["authorization"];
+		const token = autenticador && autenticador.split(' ')[1];
+		
+		if(!token) {
+			return res.status(NO_AUTORIZADO).send("No se proporcionó un token de usuario.\n");
+		}
+		
+		jwt.verify(token, AUTENTICACION, (error, datos_usuario) => {
+			if(error) {
+				return res.status(PROHIBIDO).send("El token recibido no es válido.\nAcceso denegado.\n");
+			}
+			req.usuario = datos_usuario;
+			next();
+		});
+	}
+}
+
+
 // ---------------------------- Validaciones de las resenias ------------------------------
 
 
 function validarResenia(tieneQueExistir) {
-	return async function (req, res, next) {
+	return async function(req, res, next) {
 		if(req.body === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó un cuerpo para la request.\n");
 		}
@@ -179,7 +204,7 @@ function validarResenia(tieneQueExistir) {
 		}
 		
 		const reloj = await getReloj(id_reloj);
-		const usuario = await getUsuario(id_usuario);
+		const usuario = await getUsuario(id_usuario, undefined);
 		
 		if(reloj === undefined) {
 			return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
@@ -223,8 +248,8 @@ function validarResenia(tieneQueExistir) {
 
 
 function validarRelojUsuario() {
-	return async function (req, res, next) {
-		const usuario = await getUsuario(req.params.id_usuario);
+	return async function(req, res, next) {
+		const usuario = await getUsuario(req.params.id_usuario, undefined);
 		if(usuario === undefined) {
 			return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado.\n");
 		}

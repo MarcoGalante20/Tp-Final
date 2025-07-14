@@ -2,7 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 var cors = require("cors");
 
-const IDENTIFICACION = "Tp-Final-IntroSoftware";
+const AUTENTICACION = "Tp-Final-IntroSoftware";
 
 const { 
 	getRelojesFiltro, 
@@ -265,12 +265,27 @@ app.get("/api/v1/usuarios", async (req,res) => {
 
 
 app.get("/api/v1/usuarios/:id_usuario", async (req, res) => {
-	const usuario = await getUsuario(req.params.id_usuario);
+	const usuario = await getUsuario(req.params.id_usuario, undefined);
 	if(usuario === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el usuario de la base de datos.\n");
 	}
 	else if(usuario === NO_ENCONTRADO) {
 		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
+	}
+	
+	return res.status(EXITO).json(usuario);
+});
+
+
+app.get("/api/v1/usuarios/enSesion", validarToken, async (req, res) => {
+	const { nombre } = req.usuario;
+	
+	const usuario = getUsuario(undefined, nombre);
+	if(usuario === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el usuario de la base de datos.\n");
+	}
+	else if(usuario === NO_ENCONTRADO) {
+		return res.status(NO_ENCONTRADO).send("No existe un usuario con el nombre brindado en la base de datos.\n");
 	}
 	
 	return res.status(EXITO).json(usuario);
@@ -301,7 +316,7 @@ app.post("/api/v1/usuarios/login", async (req, res) => {
 	}
 	
 	const identidad = { nombre: req.body.nombre };
-	const token = jwt.sign(identidad, IDENTIFICACION, { expiresIn: "7d" });
+	const token = jwt.sign(identidad, AUTENTICACION, { expiresIn: "7d" });
 	
 	return res.status(EXITO).json({ token });
 });
@@ -432,7 +447,7 @@ app.patch("/api/v1/resenias/:id_resenia", async (req, res) => {
 
 
 app.get("/api/v1/usuarios/:id_usuario/relojes", async (req, res) => {
-	const usuario = await getUsuario(req.params.id_usuario);
+	const usuario = await getUsuario(req.params.id_usuario, undefined);
 	if(usuario === undefined) {
 		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
 	}
