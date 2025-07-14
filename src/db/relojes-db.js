@@ -83,15 +83,17 @@ async function getRelojesBusqueda(busqueda, relojes_cant) {
 async function getReloj(id_reloj) {
 	try {
 		const reloj = await dbClient.query(`
-			SELECT relojes.nombre,
+			SELECT 
+				relojes.nombre,
 				marcas.nombre as marca,
 				marcas.imagen AS imagen_marca,
-				mecanismo,
-				material,
+				relojes.mecanismo,
+				relojes.material,
 				relojes.imagen,
-				resistencia_agua,
-				diametro,
-				precio, sexo
+				relojes.resistencia_agua,
+				relojes.diametro,
+				relojes.precio, 
+				relojes.sexo
 			FROM relojes JOIN marcas ON relojes.id_marca = marcas.id_marca
 			WHERE id_reloj = $1`, 
 			[id_reloj]

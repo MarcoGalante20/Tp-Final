@@ -38,7 +38,7 @@ async function getResenia(id_resenia) {
 	try {
 		const resenia = await dbClient.query("SELECT * FROM resenias WHERE id_resenia = $1", [id_resenia]);
 		
-		if(resenia.rows.length === undefined) {
+		if(resenia.rows.length === 0) {
 			return NO_ENCONTRADO;
 		}
 		
@@ -51,12 +51,12 @@ async function getResenia(id_resenia) {
 
 
 async function crearResenia(req) {
-	const { id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso } = req.body;
+	const { id_reloj, titulo, resenia, calificacion, fecha, meses_de_uso } = req.body;
 	
 	try { 
 		const resultado = await dbClient.query(
 			"INSERT INTO resenias (id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-			[id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso]
+			[id_reloj, req.usuario.id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso]
 		);
 		
 		return {
@@ -85,6 +85,18 @@ async function esReseniaExistente(id_reloj, id_usuario) {
 		return false;
 	} catch(error_recibido) {
 		console.error("Error en esReseniaExistente: ", error_recibido);
+		return undefined;
+	}
+}
+
+
+async function hizoLaResenia(id_usuario, id_resenia) {
+	try {
+		const resultado = await dbClient.query("SELECT 1 FROM resenias WHERE id_resenia = $1 AND id_usuario = $2", [id_resenia, id_usuario]);
+		
+		return (resultado.rows.length > 0);
+	} catch(error_recibido) {
+		console.error("Error en hizoLaResenia: ", error_recibido);
 		return undefined;
 	}
 }

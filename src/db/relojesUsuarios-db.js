@@ -8,16 +8,16 @@ async function getRelojesUsuario(id_usuario) {
 	try {
 		const relojes = await dbClient.query(`
 			SELECT 
-			r.id_reloj,
-			m.nombre AS marca,
-			r.nombre,
-			r.mecanismo,
-			r.material,
-			r.imagen,
-			r.resistencia_agua,
-			r.diametro,
-			r.precio,
-			r.sexo
+				r.id_reloj,
+				m.nombre AS marca,
+				r.nombre,
+				r.mecanismo,
+				r.material,
+				r.imagen,
+				r.resistencia_agua,
+				r.diametro,
+				r.precio,
+				r.sexo
 			FROM relojes_usuarios ru
 			JOIN relojes r ON ru.id_reloj = r.id_reloj
 			JOIN marcas m ON r.id_marca = m.id_marca

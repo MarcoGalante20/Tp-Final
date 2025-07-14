@@ -9,7 +9,15 @@ const {
 
 async function getAllUsuarios() {
 	try {
-		const usuarios = await dbClient.query("SELECT * FROM usuarios ORDER BY id_usuario ASC");
+		const usuarios = await dbClient.query(`
+			SELECT 
+				u.id_usuario,
+				u.nombre,
+				u.rol,
+				u.sexo
+			FROM usuarios u 
+			ORDER BY id_usuario ASC`
+		);
 		
 		return usuarios.rows;
 	} catch(error_recibido) {
@@ -134,14 +142,14 @@ async function eliminarUsuario(id_usuario) {
 
 
 // Devuelve el nuevo usuario si se pudo actualizar y undefined en caso contrario
-async function actualizarUsuario(req) {
-	const id_usuario = req.params.id_usuario;
+async function actualizarUsuario(id_usuario, req) {
 	const { nombre, contrasenia, sexo, edad, precio_buscado } = req.body;
+	const hash_contrasenia = await bcrypt.hash(contrasenia, 10);
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE usuarios SET nombre = $2, contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
-			[id_usuario, nombre, contrasenia, sexo, edad, precio_buscado]
+			"UPDATE usuarios SET nombre = $2, hash_contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
+			[id_usuario, nombre, hash_contrasenia, sexo, edad, precio_buscado]
 		);
 		
 		if(resultado.rowCount === 0) {
@@ -164,7 +172,7 @@ async function actualizarUsuario(req) {
 
 
 async function patchearUsuario(req) {
-	const usuario = await getUsuario(req.params.id_usuario, undefined);
+	const usuario = await getUsuario(req.usuario.id_usuario, undefined);
 	if(usuario === undefined) {
 		return NO_ENCONTRADO;
 	}
@@ -176,11 +184,12 @@ async function patchearUsuario(req) {
 	if(edad !== undefined && edad > 0 && edad < 122) usuario.edad = edad;
 	if(sexo === 'H' || sexo === 'M' || sexo === '-') usuario.sexo = sexo;
 	if(precio_buscado !== undefined && precio_buscado > 0) usuario.precio_buscado = precio_buscado;
+	const hash_contrasenia = await bcrypt.hash(contrasenia, 10);
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE usuarios SET nombre = $2, contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
-			[req.params.id_usuario, usuario.nombre, usuario.contrasenia, usuario.sexo, usuario.edad, usuario.precio_buscado]
+			"UPDATE usuarios SET nombre = $2, hash_contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
+			[req.params.id_usuario, usuario.nombre, hash_contrasenia, usuario.sexo, usuario.edad, usuario.precio_buscado]
 		);
 		
 		if(resultado.rowCount === 0) {
@@ -210,4 +219,5 @@ module.exports = {
     eliminarUsuario,
     actualizarUsuario,
     patchearUsuario,
+    logearUsuario,
 };

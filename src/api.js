@@ -30,6 +30,7 @@ const {
 	eliminarUsuario,
 	actualizarUsuario,
 	patchearUsuario,
+	logearUsuario,
 } = require("./db/usuarios-db.js");
 
 const {
@@ -58,6 +59,8 @@ const {
 	validarUsuario,
 	validarResenia,
 	validarRelojUsuario,
+	validarToken,
+	necesitaAdmin,
 } = require("./validaciones.js");
 
 const {
@@ -65,6 +68,8 @@ const {
 	CREADO,
 	ELIMINADO,
 	REQUEST_INVALIDA,
+	NO_AUTORIZADO,
+	PROHIBIDO,
 	NO_ENCONTRADO,
 	CONFLICTO,
 	ERROR_INTERNO,
@@ -116,7 +121,7 @@ app.get("/api/v1/relojes/:id_reloj", async (req, res) => {
 });
 
 
-app.post("/api/v1/relojes", validarReloj(false), async (req, res) => {
+app.post("/api/v1/relojes", validarToken, necesitaAdmin, validarReloj(false), async (req, res) => {
 	const reloj = await crearReloj(req);
 	if(reloj === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando el reloj a la base de datos.\n");
@@ -126,7 +131,7 @@ app.post("/api/v1/relojes", validarReloj(false), async (req, res) => {
 });
 
 
-app.delete("/api/v1/relojes/:id_reloj", async (req, res) => {
+app.delete("/api/v1/relojes/:id_reloj", validarToken, necesitaAdmin, async (req, res) => {
 	const resultado = await eliminarReloj(req.params.id_reloj);
 	if(resultado === ERROR_INTERNO) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno eliminando el reloj de la base de datos.\n");
@@ -139,7 +144,7 @@ app.delete("/api/v1/relojes/:id_reloj", async (req, res) => {
 });
 
 
-app.put("/api/v1/relojes/:id_reloj", validarReloj(true), async (req, res) => {
+app.put("/api/v1/relojes/:id_reloj", validarToken, necesitaAdmin, validarReloj(true), async (req, res) => {
 	const reloj_actualizado = await actualizarReloj(req);
 	if(reloj_actualizado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno actualizando el reloj en la base de datos.\n");
@@ -152,7 +157,7 @@ app.put("/api/v1/relojes/:id_reloj", validarReloj(true), async (req, res) => {
 });
 
 
-app.patch("/api/v1/relojes/:id_reloj", async (req, res) => {
+app.patch("/api/v1/relojes/:id_reloj", validarToken, necesitaAdmin, async (req, res) => {
 	if(req.body === undefined || Object.keys(req.body).length === 0) {
 		return res.status(REQUEST_INVALIDA).send("El cuerpo de la request se encuentra vacío.\n");
 	}
@@ -198,7 +203,7 @@ app.get("/api/v1/marcas/:id_marca", async (req, res) => {
 });
 
 
-app.post("/api/v1/marcas", validarMarca(false), async (req, res) => {
+app.post("/api/v1/marcas", validarToken, necesitaAdmin, validarMarca(false), async (req, res) => {
 	const marca = await crearMarca(req);
 	if(marca === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando la marca a la base de datos.\n");;
@@ -208,7 +213,7 @@ app.post("/api/v1/marcas", validarMarca(false), async (req, res) => {
 });
 
 
-app.delete("/api/v1/marcas/:id_marca", async (req, res) => {
+app.delete("/api/v1/marcas/:id_marca", validarToken, necesitaAdmin, async (req, res) => {
 	resultado = await eliminarMarca(req.params.id_marca);
 	if(resultado === ERROR_INTERNO) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno eliminando la marca de la base de datos.\n");
@@ -221,7 +226,7 @@ app.delete("/api/v1/marcas/:id_marca", async (req, res) => {
 });
 
 
-app.put("/api/v1/marcas/:id_marca", validarMarca(true), async (req, res) => {
+app.put("/api/v1/marcas/:id_marca", validarToken, necesitaAdmin, validarMarca(true), async (req, res) => {
 	const marca_actualizada = await actualizarMarca(req);
 	if(marca_actualizada === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno actualizando la marca en la base de datos.\n");
@@ -234,7 +239,7 @@ app.put("/api/v1/marcas/:id_marca", validarMarca(true), async (req, res) => {
 });
 
 
-app.patch("/api/v1/marcas/:id_marca", async (req, res) => {
+app.patch("/api/v1/marcas/:id_marca", validarToken, necesitaAdmin, async (req, res) => {
 	if(req.body === undefined || Object.keys(req.body).length === 0) {
 		return res.status(REQUEST_INVALIDA).send("El cuerpo de la request se encuentra vacío.\n");
 	}
@@ -264,7 +269,7 @@ app.get("/api/v1/usuarios", async (req,res) => {
 });
 
 
-app.get("/api/v1/usuarios/:id_usuario", async (req, res) => {
+app.get("/api/v1/usuarios/:id_usuario", validarToken, necesitaAdmin, async (req, res) => {
 	const usuario = await getUsuario(req.params.id_usuario, undefined);
 	if(usuario === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el usuario de la base de datos.\n");
@@ -317,14 +322,14 @@ app.post("/api/v1/usuarios/login", async (req, res) => {
 		return res.status(REQUEST_INVALIDA).send("La contrasenia recibida no es correcta.\n No se pudo logear el usuario al sistema\n");
 	}
 	
-	const identidad = { nombre: usuario.nombre, rol: usuario.rol };
+	const identidad = { id_usuario: usuario.id_usuario, nombre: usuario.nombre, rol: usuario.rol };
 	const token = jwt.sign(identidad, AUTENTICACION, { expiresIn: "7d" });
 	
 	return res.status(EXITO).json({ token });
 });
 
 
-app.delete("/api/v1/usuarios/:id_usuario", async (req, res) => {
+app.delete("/api/v1/usuarios/:id_usuario", validarToken, necesitaAdmin, async (req, res) => {
 	const resultado = await eliminarUsuario(req.params.id_usuario);
 	if(resultado === ERROR_INTERNO) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno eliminando el usuario de la base de datos.\n");
@@ -337,8 +342,8 @@ app.delete("/api/v1/usuarios/:id_usuario", async (req, res) => {
 });
 
 
-app.put("/api/v1/usuarios/:id_usuario", validarUsuario(true), async (req, res) => {
-	const usuario_actualizado = await actualizarUsuario(req);
+app.put("/api/v1/usuarios/:id_usuario", validarToken, necesitaAdmin, validarUsuario(true), async (req, res) => {
+	const usuario_actualizado = await actualizarUsuario(req.params.id_usuario, req);
 	if(usuario_actualizado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno actualizando el usuario en la base de datos.\n");
 	}
@@ -350,12 +355,12 @@ app.put("/api/v1/usuarios/:id_usuario", validarUsuario(true), async (req, res) =
 });
 
 
-app.patch("/api/v1/usuarios/:id_usuario", async (req, res) => {
+app.patch("/api/v1/usuarios/:id_usuario", validarToken, necesitaAdmin, async (req, res) => {
 	if(req.body === undefined || Object.keys(req.body).length === 0) {
 		return res.status(REQUEST_INVALIDA).send("El cuerpo de la request se encuentra vacío.\n");
 	}
 	
-	const usuario_patcheado = await patchearUsuario(req);
+	const usuario_patcheado = await patchearUsuario(req.params.id_usuario, req);
 	if(usuario_patcheado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno patcheando el usuario en la base de datos.\n");
 	}
@@ -389,7 +394,7 @@ app.get("/api/v1/resenias/:id_reloj", async (req, res) => {
 });
 
 
-app.post("/api/v1/resenias", validarResenia(false), async (req, res) => {
+app.post("/api/v1/resenias", validarToken, validarResenia(false), async (req, res) => {
 	const resenia = await crearResenia(req);
 	if(resenia === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando la resenia a la base de datos.\n");;
@@ -399,7 +404,11 @@ app.post("/api/v1/resenias", validarResenia(false), async (req, res) => {
 });
 
 
-app.delete("/api/v1/resenias/:id_resenia", async (req, res) => {
+app.delete("/api/v1/resenias/:id_resenia", validarToken, async (req, res) => {
+	if(!(await hizoLaResenia(req.usuario.id_usuario, req.aprams.id_resenia))) {
+		return res.status(PROHIBIDO).send("El usuario no puede eliminar una resenia que no publicó él mismo.\n");
+	}
+	
 	const resultado = await eliminarResenia(req.params.id_resenia);
 	if(resultado === ERROR_INTERNO) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno eliminando la resenia de la base de datos.\n");
@@ -412,7 +421,11 @@ app.delete("/api/v1/resenias/:id_resenia", async (req, res) => {
 });
 
 
-app.put("/api/v1/resenias/:id_resenia", validarResenia(true), async (req, res) => {
+app.put("/api/v1/resenias/:id_resenia", validarToken, validarResenia(true), async (req, res) => {
+	if(!(await hizoLaResenia(req.usuario.id_usuario, req.aprams.id_resenia))) {
+		return res.status(PROHIBIDO).send("El usuario no puede modificar una resenia que no publicó él mismo.\n");
+	}
+	
 	const resenia_actualizada = await actualizarResenia(req);
 	if(resenia_actualizada === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno actualizando la resenia en la base de datos.\n");
@@ -425,7 +438,11 @@ app.put("/api/v1/resenias/:id_resenia", validarResenia(true), async (req, res) =
 });
 
 
-app.patch("/api/v1/resenias/:id_resenia", async (req, res) => {
+app.patch("/api/v1/resenias/:id_resenia", validarToken, async (req, res) => {
+	if(!(await hizoLaResenia(req.usuario.id_usuario, req.aprams.id_resenia))) {
+		return res.status(PROHIBIDO).send("El usuario no puede modificar una resenia que no publicó él mismo.\n");
+	}
+	
 	if(req.body === undefined || Object.keys(req.body).length === 0) {
 		return res.status(REQUEST_INVALIDA).send("El cuerpo de la request se encuentra vacío.\n");
 	}
@@ -448,7 +465,7 @@ app.patch("/api/v1/resenias/:id_resenia", async (req, res) => {
 // --------------------------------- Métodos de relojes de usuarios -------------------------------------------
 
 
-app.get("/api/v1/usuarios/:id_usuario/relojes", async (req, res) => {
+app.get("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, async (req, res) => {
 	const usuario = await getUsuario(req.params.id_usuario, undefined);
 	if(usuario === undefined) {
 		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
@@ -463,7 +480,7 @@ app.get("/api/v1/usuarios/:id_usuario/relojes", async (req, res) => {
 });
 
 
-app.post("/api/v1/usuarios/:id_usuario/relojes", validarRelojUsuario, async (req,res) => {
+app.post("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, validarRelojUsuario, async (req,res) => {
 	const reloj_agregado = await agregarRelojUsuario(req);
 	if(reloj_agregado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando el reloj al usuario.\n");
@@ -473,7 +490,7 @@ app.post("/api/v1/usuarios/:id_usuario/relojes", validarRelojUsuario, async (req
 });
 
 
-app.delete("/api/v1/usuarios/:id_usuario/relojes", validarRelojUsuario, async (req,res) => {
+app.delete("/api/v1/usuarios/:id_usuario/relojes", validarToken, necesitaAdmin, validarRelojUsuario, async (req,res) => {
 	const resultado = await quitarRelojUsuario(req);
 	
 	if(resultado === undefined) {
@@ -490,7 +507,7 @@ app.delete("/api/v1/usuarios/:id_usuario/relojes", validarRelojUsuario, async (r
 // --------------------------------- Métodos de características extras de relojes -------------------------------------------
 
 
-app.get("/api/v1/relojes/:id_reloj/extras", async (req, res) => {
+app.get("/api/v1/relojes/:id_reloj/extras", validarToken, necesitaAdmin, async (req, res) => {
 	const reloj = await getReloj(req.params.id_reloj);
 	if(reloj === undefined) {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
@@ -505,7 +522,7 @@ app.get("/api/v1/relojes/:id_reloj/extras", async (req, res) => {
 });
 
 
-app.post("/api/v1/relojes/:id_reloj/extras", async (req,res) => {
+app.post("/api/v1/relojes/:id_reloj/extras", validarToken, necesitaAdmin, async (req,res) => {
 	const reloj = await getReloj(req.params.id_reloj);
 	if(reloj === undefined) {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
@@ -520,7 +537,7 @@ app.post("/api/v1/relojes/:id_reloj/extras", async (req,res) => {
 });
 
 
-app.delete("/api/v1/relojes/:id_reloj/extras", async (req,res) => {
+app.delete("/api/v1/relojes/:id_reloj/extras", validarToken, necesitaAdmin, async (req,res) => {
 	const reloj = await getReloj(req.params.id_reloj);
 	if(reloj === undefined) {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
