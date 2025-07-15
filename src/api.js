@@ -4,6 +4,7 @@ var cors = require('cors');
 
 const { 
 	getRelojesFiltro, 
+	getRelojesBusqueda,
 	getReloj, 
 	crearReloj, 
 	eliminarReloj,
@@ -77,13 +78,23 @@ app.use(cors());
 // -------------------------- Métodos de los relojes ---------------------------------
 
 
-app.get("/api/v1/relojes/", async (req, res) => {
+app.get("/api/v1/relojes", async (req, res) => {
 	const relojes = await getRelojesFiltro(req.query);
 	if(relojes === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo los relojes filtrados.\n");
 	}
 	else if(relojes === REQUEST_INVALIDA) {
 		return res.status(REQUEST_INVALIDA).send("Se recibió uno o más parámetros incorrectos en la request.\nVerifique que todos existan y sean válidos.\n");
+	}
+	
+	return res.status(EXITO).json(relojes);
+});
+
+
+app.get("/api/v1/relojes/busqueda", async (req, res) => {
+	const relojes = await getRelojesBusqueda(req.query.busqueda, req.query.relojes);
+	if(relojes === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno buscando los relojes en la base de datos.\n");
 	}
 	
 	return res.status(EXITO).json(relojes);

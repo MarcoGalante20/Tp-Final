@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 create table marcas (
 	id_marca serial primary key,
 	nombre varchar(20),
@@ -26,7 +28,6 @@ create table usuarios (
 	precio_buscado int
 );
 
-
 create table resenias (
 	id_resenia serial primary key,
 	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE,
@@ -44,11 +45,11 @@ create table relojes_usuarios (
 	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE
 );
 
-
 create table extras_reloj (
 	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE,
 	atributo varchar(50) not null
 );
+
 
 INSERT INTO marcas (nombre, imagen) VALUES
 	('Casio', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZWOJNh_QN9wy735YRBL7M7ZWQTNFMw0fl2g&s'),
@@ -60,17 +61,17 @@ INSERT INTO marcas (nombre, imagen) VALUES
 
 INSERT INTO relojes (id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) VALUES
 	(1, 'Forester', 'Cuarzo', 'Plástico', 100, 38, 90000, 'M'), 
-	(1, 'Edifice EFV-100', 'Cuarzo', 'Acero-inox', 100, 41, 170000, 'M'),
-	(2, 'Seiko 5', 'Automático', 'Acero-inox', 100, 42, 120000, 'M'),
+	(1, 'Edifice EFV-100', 'Cuarzo', 'Acero Inoxidable', 100, 41, 170000, 'M'),
+	(2, 'Seiko 5', 'Automático', 'Acero Inoxidable', 100, 42, 120000, 'M'),
 	(2, 'Prospex Diver', 'Automático', 'Titanio', 200, 44, 250000, 'M'),
-	(3, 'Eco-Drive', 'Solar', 'Acero-inox', 100, 40, 180000, 'M'),
+	(3, 'Eco-Drive', 'Solar', 'Acero Inoxidable', 100, 40, 180000, 'M'),
 	(3, 'Promaster', 'Solar', 'Titanio', 200, 45, 300000, 'M'),
 	(4, 'Weekender', 'Cuarzo', 'Latón', 30, 38, 40000, 'M'),
 	(4, 'Expedition Scout', 'Cuarzo', 'Plástico', 50, 42, 50000, 'M'),
 	(5, 'Submariner', 'Automático', 'Oro', 300, 40, 1500000, 'M'),
-	(5, 'Datejust', 'Automático', 'Acero-inox', 100, 36, 1300000, 'M'),
-	(6, 'Speedmaster', 'Mecánico', 'Acero-inox', 50, 42, 500000, 'M'),
-	(6, 'Seamaster', 'Automático', 'Acero-inox', 300, 42, 700000, 'M');
+	(5, 'Datejust', 'Automático', 'Acero Inoxidable', 100, 36, 1300000, 'M'),
+	(6, 'Speedmaster', 'Mecánico', 'Acero Inoxidable', 50, 42, 500000, 'M'),
+	(6, 'Seamaster', 'Automático', 'Acero Inoxidable', 300, 42, 700000, 'M');
 
 INSERT INTO extras_reloj (id_reloj, atributo) VALUES
 	(1, 'Aventurero'), 
@@ -120,3 +121,17 @@ INSERT INTO resenias (id_reloj, id_usuario, titulo, resenia, calificacion, fecha
 	(5, 5, 'Buena relación calidad/precio', 'No esperaba tanto por este precio.', 4, '2024-12-10', 10),
 	(7, 6, 'Una joya', 'Elegancia y calidad incomparables.', 5, '2024-09-05', 24),
 	(9, 7, 'El mejor cronógrafo', 'Preciso y hermoso.', 5, '2025-04-30', 18);
+
+
+CREATE MATERIALIZED VIEW busqueda_relojes AS
+	SELECT
+		r.id_reloj,
+		marcas.nombre AS marca,
+		r.nombre,
+		r.imagen,
+		r.precio,
+		LOWER(r.nombre || ' ' || marcas.nombre || ' ' || r.mecanismo || ' ' || r.material) AS propiedades
+	FROM relojes r
+	JOIN marcas ON r.id_marca = marcas.id_marca;
+
+CREATE INDEX index_trig_relojes ON busqueda_relojes USING GIN (propiedades gin_trgm_ops);

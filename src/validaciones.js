@@ -62,11 +62,11 @@ function validarReloj(tieneQueExistir) {
 			return res.status(REQUEST_INVALIDA).send("El mecánismo brindado no es válido.\n");
 		}
 		
-		if(material !== "Plástico" && material !== "Acero-inox" && material !== "Aluminio" && material !== "Titanio" && material !== "Latón" && material !== "Oro") {
+		if(material !== "Plástico" && material !== "Acero Inoxidable" && material !== "Aluminio" && material !== "Titanio" && material !== "Latón" && material !== "Oro") {
 			return res.status(REQUEST_INVALIDA).send("El material del reloj no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
 		
-		if(resistencia_agua === undefined || resistencia_agua < 0 || resistencia_agua > 300) {
+		if(resistencia_agua === undefined || resistencia_agua < 0 || resistencia_agua > 600) {
 			return res.status(REQUEST_INVALIDA).send("La resistencia al agua del reloj no es correcta.\nVerifique que la haya ingresado y sea válida.\n");
 		}
 		
