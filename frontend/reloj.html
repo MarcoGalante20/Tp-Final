@@ -30,6 +30,7 @@
                                         <ul id="caracteristicasReloj">
 
                                         </ul>
+                                        <div id="botones" class="buttons"></div>
                                     </div>
                                 </div>
                             </div>
@@ -60,7 +61,7 @@
                                 </div>
                             </nav>
                         </div>
-                        
+
                         <div id="containerReviews" class="is-flex is-flex-direction-column"></div>
                     </div>
                 </div>
@@ -68,33 +69,76 @@
         </div>
 
 
-        <div id="modalEdicion" class="modal">
-            <div id="modalEdicionBackground" class="modal-background"></div>
+        <div id="modalEditarReloj" class="modal">
+            <div id="modalEditarBackground" class="modal-background"></div>
             
             <div class="modal-content">
                 <div class="box">
-                        <div class="media-content">
-                            <div class="field">
-                                <input id="inputEdicionTitulo" class="input block" placeholder="Titulo">
-                                <div class="container is-flex block">
-                                    <input id="inputEdicionCalificacion" class="input" type="number" placeholder="Calificacion /5">
-                                    <input id="inputEdicionMesesUso" class="input" type="number" placeholder="Meses de uso">
-                                </div>
-                                <p class="control">
-                                    <textarea id="inputEdicionReview" class="textarea" placeholder="Agregar una reseña..."></textarea>
-                                </p>
-                            </div>
-                            <nav class="level">
-                                <div class="level-left">
-                                    <div class="level-item">
-                                        <a id="botonGuardar" class="button is-info">Guardar</a>
+                    <div class="media-content">
+                        <div class="field">
+                            <h1 class="title is-4">Editar reloj: </h1>
+                            <input id="inputNombreRelojModalEditar" class="input block" placeholder="Nuevo nombre del reloj">
+                            <div class="columns">
+                                <div class="column">
+
+                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Nueva marca: </h1>
+                                    <div class="select block">
+                                        <select id="selectMarcaModalEditar">
+                                        </select>
+                                    </div>
+                                    <br />
+
+                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Nuevo sexo: </h1>
+                                    <div class="select block">
+                                        <select id="selectSexoModalEditar">
+                                            <option value="H">Hombre</option>
+                                            <option value="M">Mujer</option>
+                                        </select>
+                                    </div>
+                                    <br />
+
+                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Nuevo material: </h1>
+                                    <div class="select block">
+                                        <select id="selectMaterialModalEditar">
+                                            <option value="Plástico">Plástico</option>
+                                            <option value="Acerio Inoxidable">Acero Inoxidable</option>
+                                            <option value="Aluminio">Aluminio</option>
+                                            <option value="Titanio">Titanio</option>
+                                            <option value="Latón">Latón</option>
+                                            <option value="Oro">Oro</option>
+                                        </select>
+                                    </div>
+                                    <br />
+
+                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Nuevo mecanismo: </h1>
+                                    <div class="select block">
+                                        <select id="selectMecanismoModalEditar">
+                                            <option value="Mecánico">Mecánico</option>
+                                            <option value="Automático">Automático</option>
+                                            <option value="Cuarzo">Cuarzo</option>
+                                        </select>
                                     </div>
                                 </div>
-                            </nav>
+
+                                <div class="column">
+                                    <input id="inputImagenRelojModalEditar" class="input block" placeholder="Nuevo link de la imagen">
+                                    <input id="inputPrecioModalEditar" class="input block" type="number" placeholder="Nuevo precio">
+                                    <input id="inputDiametroModalEditar" class="input block" type="number" placeholder="Nuevo diametro">
+                                    <input id="inputResistenciaModalEditar" class="input block" type="number" placeholder="Nueva resistencia al agua">
+                                </div>
+                            </div>   
+
                         </div>
+                    </div>
+                    <nav class="level">
+                        <div class="level-left">
+                            <div class="level-item">
+                                <a id="botonEditar" class="button is-warning">Editar</a>
+                            </div>
+                        </div>
+                    </nav>
                 </div>
             </div>
-        
         </div>
         
         <script src="./scripts/reloj.js"></script>

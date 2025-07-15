@@ -38,11 +38,14 @@ async function crearMarca(req) {
 	
 	try { 
 		const resultado = await dbClient.query(
-			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2)",
+			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2) RETURNING id_marca",
 			[nombre, imagen]
 		);
 		
+		//await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
+
 		return {
+			id_marca: resultado.rows[0].id_marca,
 			nombre,
 			imagen,
 		};

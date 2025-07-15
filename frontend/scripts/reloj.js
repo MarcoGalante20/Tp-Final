@@ -25,6 +25,7 @@ function insertarCaracteristicasReloj(datos) {
     caracteristicasReloj.appendChild(resistenciaReloj);
 }
 
+
 function insertarImagenes(datos) {
     const imagenReloj = document.getElementById("imagenReloj");
     imagenReloj.src = datos.imagen;
@@ -34,6 +35,68 @@ function insertarImagenes(datos) {
     imagenMarca.style.width="200px";
     imagenMarca.style.height="100px"; 
 }
+
+function eliminarReloj() {
+    fetch(`http://localhost:3000/api/v1/relojes/${idReloj}`, {
+    method: 'DELETE'
+    })
+    .then(async respuesta => {
+        if (!respuesta.ok) {
+            const mensaje = await respuesta.text();
+            throw new Error(`Error ${respuesta.status}: ${mensaje}`);
+        }
+        window.location.href = ("http://localhost:8080");
+    })
+    .catch(error => {
+        alert(error);
+    });
+}
+
+
+function insertarBotones() {
+    const editarReloj = document.createElement("button");
+    editarReloj.classList.add("button", "is-warning");
+    editarReloj.id = "editarReloj";
+    editarReloj.textContent = "Editar";
+
+    const botonEliminarReloj = document.createElement("button");
+    botonEliminarReloj.classList.add("button", "is-danger");
+    botonEliminarReloj.id = "botonEliminarReloj";
+    botonEliminarReloj.textContent = "Eliminar";
+    botonEliminarReloj.addEventListener("click", () => {
+        eliminarReloj();
+    })
+
+    const botones = document.getElementById("botones");
+    botones.appendChild(editarReloj);
+    botones.appendChild(botonEliminarReloj);
+}
+
+
+function inicializarEditarReloj() {
+    const editarReloj = document.getElementById("editarReloj");
+    const modalEditarReloj = document.getElementById("modalEditarReloj");
+    editarReloj.addEventListener("click", () => {
+        modalEditarReloj.classList.add("is-active");
+    })
+    const modalEditarRelojBackground = document.getElementById("modalEditarRelojBackground");
+    modalEditarRelojBackground.addEventListener("click", () => {
+        modalEditarReloj.classList.remove("is-active");
+    })
+}
+
+//function inicializarModalEdicionReloj() {
+//    inicializarEditarReloj();
+//    inicializarBotonEditarReloj();
+//}
+
+
+
+
+
+
+
+
 
 function eliminarReview(id_resenia) {
     fetch(`http://localhost:3000/api/v1/resenias/${id_resenia}`, {
@@ -50,6 +113,7 @@ function eliminarReview(id_resenia) {
         alert(error);
     });
 }
+
 
 async function editarResenia(id_resenia) {
     const inputEdicionTitulo = document.getElementById("inputEdicionTitulo");
@@ -86,7 +150,6 @@ async function editarResenia(id_resenia) {
         })
         .then(async (respuesta) => {
             if (!respuesta.ok) {
-                console.log("HOLA");
                 const mensajeError = await respuesta.text();
                 throw new Error(`${respuesta.status}\n${mensajeError}`);
             }
@@ -124,6 +187,7 @@ function abrirModalEdicion(id_resenia) {
     incializarModalEdicion(id_resenia); 
     modalEdicion.classList.add("is-active");
 }
+
 
 function formatearReview(resenia) {
     const textoReview = document.createElement("p");
@@ -243,12 +307,15 @@ async function publicarReview(idReloj) {
     }
 }
 
+
 function inicializarBotonPublicarResenia() {
     const botonPublicarResenia = document.getElementById("botonPublicarResenia");
     botonPublicarResenia.addEventListener("click", () => {
         publicarReview(idReloj);
     })
 }
+
+
 
 async function crearPagina(idReloj) {
     return fetch(`http://localhost:3000/api/v1/relojes/${idReloj}`)
@@ -259,6 +326,8 @@ async function crearPagina(idReloj) {
     .then((datos) => {
         insertarCaracteristicasReloj(datos);
         insertarImagenes(datos);
+        insertarBotones();
+        //inicializarModalEdicionReloj();
         insertarReviews(idReloj);
         inicializarBotonPublicarResenia();
     })
@@ -273,8 +342,4 @@ const params = new URLSearchParams(window.location.search);
 const idReloj = params.get("id");
 
 crearPagina(idReloj);
-
-
-
-
 

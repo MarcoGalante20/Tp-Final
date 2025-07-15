@@ -19,7 +19,11 @@
                     <div class="box mt-4">
                         <h1 class = "title is-5">Filtros: </h1>
 
-                        <h1 class = "title is-6">Marca: </h1>
+                        <h1 class = "title is-6" style="display:inline-block;">Marca: </h1> 
+                        <img id="agregarMarca" src="https://icones.pro/wp-content/uploads/2021/04/nouveau-symbole-vert.png" style="width:24px;height:24px;">
+                        <img id="editarMarca" src="https://cdn-icons-png.flaticon.com/512/126/126794.png" style="width:24px;height:24px;">
+                        <img id="eliminarMarca" src="https://us.123rf.com/450wm/kaoien/kaoien1602/kaoien160200022/52222478-se%C3%B1al-de-tr%C3%A1fico-advertencia-icono-del-c%C3%ADrculo-rojo-sobre-fondo-blanco-concepto-de-prohibici%C3%B3n.jpg?ver=6" style="width:24px;height:24px;">
+                        <br />
                         <div class="select is-multiple block">
                             <select id="selectMarcas" multiple size = 5></select>
                         </div>
@@ -174,6 +178,75 @@
         
         </div>
 
+        <div id="modalAgregarMarca" class="modal">
+            <div id="modalAgregarMarcaBackground" class="modal-background"></div>
+            
+            <div class="modal-content">
+                <div class="box">
+                    <div class="media-content">
+                        <div class="field">
+                            <h1 class="title is-4">Nueva marca: </h1>
+                            <input id="inputNombreMarcaModal" class="input block" placeholder="Nombre de la marca">
+                            <input id="inputImagenMarcaModal" class="input block" placeholder="Imagen de la marca">
+                        </div>
+                        <nav class="level">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    <a id="botonGuardarMarca" class="button is-info">Guardar</a>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+
+        <div id="modalEditarMarca" class="modal">
+            <div id="modalEditarMarcaBackground" class="modal-background"></div>
+
+            <div class="modal-content">
+                <div class="box">
+                    <div class="media-content">
+                        <div class="field">
+                            <h1 class="title is-4">Marca a editar: </h1>
+                            <select id="selectMarcaModalEditar" class="input block"></select>
+                            <input id="inputNombreMarcaModalEditar" class="input block" placeholder="Nuevo nombre de la marca">
+                            <input id="inputImagenMarcaModalEditar" class="input block" placeholder="Nueva imagen de la marca">
+                        </div>
+                        <nav class="level">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    <a id="botonEditarMarca" class="button is-warning">Editar</a>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalEliminarMarca" class="modal">
+            <div id="modalEliminarMarcaBackground" class="modal-background"></div>
+
+            <div class="modal-content">
+                <div class="box">
+                    <div class="media-content">
+                        <div class="field">
+                            <h1 class="title is-4">Marca a eliminar: </h1>
+                            <select id="selectMarcaModalEliminar" class="input block"></select>
+                        </div>
+                        <nav class="level">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    <a id="botonEliminarMarca" class="button is-danger">Eliminar</a>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
         
         <script src="./scripts/index.js"></script>
     </body>

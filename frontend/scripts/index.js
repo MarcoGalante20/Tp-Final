@@ -12,6 +12,8 @@ function inicializarAgregarReloj() {
     const agregarReloj = document.getElementById("agregarReloj");
     const modalAgregarReloj = document.getElementById("modalAgregarReloj");
     agregarReloj.addEventListener("click", () => {
+        document.getElementById("selectMarcaModal").innerHTML = "";
+        agregarOpcionesSelectMarca("selectMarcaModal");
         modalAgregarReloj.classList.add("is-active");
     })
     const modalAgregarRelojBackground = document.getElementById("modalAgregarRelojBackground");
@@ -97,17 +99,210 @@ function inicializarBotonGuardarReloj() {
     })
 }
 
-function inicializarModalAgregarReloj() {
-    inicializarAgregarReloj();
-    inicializarBotonGuardarReloj();
-
-    const selectMarcaModal = document.getElementById("selectMarcaModal");
+function agregarOpcionesSelectMarca(idSelect){
+    const selectMarcaModal = document.getElementById(idSelect);
     const selectMarcas = document.getElementById("selectMarcas");
     selectMarcaModal.innerHTML = "";
     for (const opcion of selectMarcas.options) {
         selectMarcaModal.appendChild(opcion.cloneNode(true));
     }
 }
+
+function inicializarModalAgregarReloj() {
+    inicializarAgregarReloj();
+    inicializarBotonGuardarReloj();
+}
+
+
+
+function inicializarAgregarMarca() {
+    const agregarMarca = document.getElementById("agregarMarca");
+    const modalAgregarMarca = document.getElementById("modalAgregarMarca");
+    agregarMarca.addEventListener("click", () => {
+        modalAgregarMarca.classList.add("is-active");
+        document.getElementById("inputNombreMarcaModal").value="";
+        document.getElementById("inputImagenMarcaModal").value="";
+    })
+    const modalAgregarMarcaBackground = document.getElementById("modalAgregarMarcaBackground");
+    modalAgregarMarcaBackground.addEventListener("click", () => {
+        modalAgregarMarca.classList.remove("is-active");
+    })
+}
+
+function crearNuevaMarca() {
+    const inputNombreMarcaModal = document.getElementById("inputNombreMarcaModal");
+    const nombre = inputNombreMarcaModal.value;
+    inputNombreMarcaModal.value = "";
+
+    const inputImagenMarcaModal = document.getElementById("inputImagenMarcaModal");
+    const imagen = inputImagenMarcaModal.value;
+    inputImagenMarcaModal.value = "";
+
+    if ((nombre != "") && (imagen != "")) {
+    fetch("http://localhost:3000/api/v1/marcas", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            nombre,
+            imagen
+        })
+    })
+    .then(respuesta => {
+        if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
+        return respuesta.json();
+    })
+    .then(data => {
+        console.log("Marca agregada:", data);
+        const opcionNuevaMarca = document.createElement("option");
+        opcionNuevaMarca.value = data.id_marca;
+        opcionNuevaMarca.textContent = nombre;
+
+        document.getElementById("selectMarcas").appendChild(opcionNuevaMarca);
+        document.getElementById("selectMarcaModal").appendChild(opcionNuevaMarca.cloneNode(true));
+    })
+    .catch(error => {
+        console.error("Error al agregar la marca:", error);
+    });
+    }
+    else {
+        alert("Todos los campos necesitan tener un valor")
+    }
+}
+
+function inicializarBotonGuardarMarca() {
+    const botonGuardarMarca = document.getElementById("botonGuardarMarca");
+    botonGuardarMarca.addEventListener("click", () => {
+        crearNuevaMarca();
+        document.getElementById("modalAgregarMarca").classList.remove("is-active");
+    })
+}
+
+function inicializarModalAgregarMarca() {
+    inicializarAgregarMarca();
+    inicializarBotonGuardarMarca();
+}
+
+
+function inicializarEditarMarca() {
+    const editarMarca = document.getElementById("editarMarca");
+    const modalEditarMarca = document.getElementById("modalEditarMarca");
+    editarMarca.addEventListener("click", () => {
+        modalEditarMarca.classList.add("is-active");
+        document.getElementById("selectMarcaModalEditar").innerHTML="";
+        agregarOpcionesSelectMarca("selectMarcaModalEditar");
+        document.getElementById("inputNombreMarcaModalEditar").value="";
+        document.getElementById("inputImagenMarcaModalEditar").value="";
+    })
+    const modalEditarMarcaBackground = document.getElementById("modalEditarMarcaBackground");
+    modalEditarMarcaBackground.addEventListener("click", () => {
+        modalEditarMarca.classList.remove("is-active");
+    })
+}
+
+function editarMarca() {
+    const inputNombreMarcaModalEditar = document.getElementById("inputNombreMarcaModalEditar");
+    const nombre = inputNombreMarcaModalEditar.value;
+    inputNombreMarcaModalEditar.value = "";
+
+    const inputImagenMarcaModalEditar = document.getElementById("inputImagenMarcaModalEditar");
+    const imagen = inputImagenMarcaModalEditar.value;
+    inputImagenMarcaModalEditar.value = "";
+
+    const idMarca = document.getElementById("selectMarcaModalEditar").value;
+
+    if ((nombre != "") && (imagen != "")) {
+        return fetch(`http://localhost:3000/api/v1/marcas/${idMarca}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nombre, 
+                imagen
+            })
+        })
+        .then(async (respuesta) => {
+            if (!respuesta.ok) {
+                const mensajeError = await respuesta.text();
+                throw new Error(`${respuesta.status}\n${mensajeError}`);
+            }
+        })
+        .catch(error => {
+            alert(`${error}`);
+            throw error;
+        });
+    }
+    alert("Todos los campos tienen que tener un valor");
+    return null;
+}
+
+function inicializarBotonEditarMarca() {
+    const botonEditarMarca = document.getElementById("botonEditarMarca");
+    botonEditarMarca.addEventListener("click", () => {
+        editarMarca();
+        document.getElementById("modalEditarMarca").classList.remove("is-active");
+    })
+}
+
+function inicializarModalEditarMarca() {
+    inicializarEditarMarca();
+    inicializarBotonEditarMarca();
+}
+
+
+function inicializarEliminarMarca() {
+    const eliminarMarca = document.getElementById("eliminarMarca");
+    const modalEliminarMarca = document.getElementById("modalEliminarMarca");
+    eliminarMarca.addEventListener("click", () => {
+        modalEliminarMarca.classList.add("is-active");
+        document.getElementById("selectMarcaModalEliminar").innerHTML="";
+        agregarOpcionesSelectMarca("selectMarcaModalEliminar");
+    })
+    const modalEliminarMarcaBackground = document.getElementById("modalEliminarMarcaBackground");
+    modalEliminarMarcaBackground.addEventListener("click", () => {
+        modalEliminarMarca.classList.remove("is-active");
+    }) 
+}
+
+function eliminarMarca() {
+    const idMarca = document.getElementById("selectMarcaModalEliminar").value;
+    fetch(`http://localhost:3000/api/v1/marcas/${idMarca}`, {
+    method: 'DELETE'
+    })
+    .then(async respuesta => {
+        if (!respuesta.ok) {
+            const mensaje = await respuesta.text();
+            throw new Error(`Error ${respuesta.status}: ${mensaje}`);
+        }
+        const selectMarcas = document.getElementById("selectMarcas");
+        const opciones = Array.from(selectMarcas.options);
+        const opcionAEliminar = opciones.find(opcion => opcion.value === idMarca);
+
+    if (opcionAEliminar) {
+        selectMarcas.removeChild(opcionAEliminar);
+    }
+    })
+    .catch(error => {
+        alert(error);
+    });
+}
+
+function inicializarBotonEliminarMarca() {
+    const botonEliminarMarca = document.getElementById("botonEliminarMarca");
+    botonEliminarMarca.addEventListener("click", () => {
+        eliminarMarca();
+        document.getElementById("modalEliminarMarca").classList.remove("is-active");
+    })
+}
+
+function inicializarModalEliminarMarca() {
+    inicializarEliminarMarca();
+    inicializarBotonEliminarMarca();
+}
+
+
 
 function vaciarContenedorRelojes() {
     const contenedorRelojes = document.getElementById("contenedorRelojes");
@@ -316,6 +511,9 @@ async function main() {
     await cargarMarcas();
     inicializarBotonCargarRelojes();
     inicializarModalAgregarReloj(); 
+    inicializarModalAgregarMarca();
+    inicializarModalEditarMarca();
+    inicializarModalEliminarMarca();
     atribuirEscucharFiltrado();
     await cargarRelojesNuevos(); 
 }
