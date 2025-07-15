@@ -85,10 +85,93 @@ function inicializarEditarReloj() {
     })
 }
 
-//function inicializarModalEdicionReloj() {
-//    inicializarEditarReloj();
-//    inicializarBotonEditarReloj();
-//}
+function editarReloj() {
+    const inputNombreRelojModalEditar = document.getElementById("inputNombreRelojModalEditar");
+    const nombre = inputNombreRelojModalEditar.value;
+    inputNombreRelojModalEditar.value = "";
+
+    const selectMarcaModalEditar = document.getElementById("selectMarcaModalEditar");
+    const marca = selectMarcaModalEditar.value;
+
+    const selectSexoModalEditar = document.getElementById("selectSexoModalEditar");
+    const sexo = selectSexoModalEditar.value;
+
+    const selectMaterialModalEditar = document.getElementById("selectMaterialModalEditar");
+    const material = selectMaterialModalEditar.value;
+
+    const selectMecanismoModalEditar = document.getElementById("selectMecanismoModalEditar");
+    const mecanismo = selectMecanismoModalEditar.value;
+
+    const inputImagenRelojModalEditar = document.getElementById("inputImagenRelojModalEditar");
+    const imagen = inputImagenRelojModalEditar.value;
+    inputImagenRelojModalEditar.value = "";
+
+    const inputPrecioModalEditar = document.getElementById("inputPrecioModalEditar");
+    const precio = inputPrecioModalEditar.value;
+    inputPrecioModalEditar.value = "";
+
+    const inputDiametroModalEditar = document.getElementById("inputDiametroModalEditar");
+    const diametro = inputDiametroModalEditar.value;
+    inputDiametroModalEditar.value = "";
+
+    const inputResistenciaModalEditar = document.getElementById("inputResistenciaModalEditar");
+    const resistencia_agua = inputResistenciaModalEditar.value;
+    inputResistenciaModalEditar.value = "";
+
+    if ((nombre != "") && (imagen != "") && (precio != "") && (diametro != "") && (resistencia_agua != "")) {
+        return fetch(`http://localhost:3000/api/v1/relojes/${idReloj}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nombre, 
+                imagen
+            })
+        })
+        .then(async (respuesta) => {
+            if (!respuesta.ok) {
+                const mensajeError = await respuesta.text();
+                throw new Error(`${respuesta.status}\n${mensajeError}`);
+            }
+        })
+        .catch(error => {
+            alert(`${error}`);
+            throw error;
+        });
+    }
+    alert("Todos los campos tienen que tener un valor");
+    return null;
+}
+
+function inicializarBotonEditarReloj() {
+    const botonEditarReloj = document.getElementById("botonEditarReloj");
+    botonEditarReloj.addEventListener("click", () => {
+        editarReloj();
+        document.getElementById("modalEditarReloj").classList.remove("is-active");
+    })
+}
+
+async function inicializarModalEdicionReloj() {
+    inicializarEditarReloj();
+    inicializarBotonEditarReloj();
+    const selectMarcas = document.getElementById("selectMarcaModalEditar");
+    return await fetch("http://localhost:3000/api/v1/marcas")
+    .then( async (respuesta) => {
+        return await respuesta.json();
+    })
+    .then((data) => {
+        data.forEach((marca) => {
+            const elementoMarca = document.createElement("option");
+            elementoMarca.value = marca.id_marca;
+            elementoMarca.textContent = marca.nombre;
+            selectMarcas.appendChild(elementoMarca);
+        });
+    })
+    .catch((error) => {
+        console.error("Hubo un error al obtener las marcas:\n", error);
+    })
+}
 
 
 
@@ -116,23 +199,23 @@ function eliminarReview(id_resenia) {
 
 
 async function editarResenia(id_resenia) {
-    const inputEdicionTitulo = document.getElementById("inputEdicionTitulo");
-    const titulo = inputEdicionTitulo.value;
-    inputEdicionTitulo.value = "";
+    const inputEditarTitulo = document.getElementById("inputEditarTitulo");
+    const titulo = inputEditarTitulo.value;
+    inputEditarTitulo.value = "";
 
-    const inputEdicionReview = document.getElementById("inputEdicionReview");
-    const resenia = inputEdicionReview.value;
-    inputEdicionReview.value = "";
+    const inputEditarResenia = document.getElementById("inputEditarResenia");
+    const resenia = inputEditarResenia.value;
+    inputEditarResenia.value = "";
 
-    const inputEdicionCalificacion = document.getElementById("inputEdicionCalificacion");
-    const calificacion = inputEdicionCalificacion.value;
-    inputEdicionCalificacion.value = "";
+    const inputEditarCalificacion = document.getElementById("inputEditarCalificacion");
+    const calificacion = inputEditarCalificacion.value;
+    inputEditarCalificacion.value = "";
 
     const fecha = (new Date()).toISOString().slice(0, 10);
 
-    const inputEdicionMesesUso = document.getElementById("inputEdicionMesesUso");
-    const meses_de_uso = inputEdicionMesesUso.value;
-    inputEdicionMesesUso.value = "";
+    const inputEditarMesesUso = document.getElementById("inputEditarMesesUso");
+    const meses_de_uso = inputEditarMesesUso.value;
+    inputEditarMesesUso.value = "";
 
     if ((titulo != "") && (resenia != "") && (calificacion != "") && (meses_de_uso != "")) {
         return fetch(`http://localhost:3000/api/v1/resenias/${id_resenia}`, {
@@ -164,28 +247,28 @@ async function editarResenia(id_resenia) {
 }
 
 function incializarModalEdicion(id_resenia) {
-    const modalEdicionBackground = document.getElementById("modalEdicionBackground");
-    modalEdicionBackground.addEventListener("click", () => {
-        document.getElementById("modalEdicion").classList.remove("is-active");
+    const modalEditarReseniaBackground = document.getElementById("modalEditarReseniaBackground");
+    modalEditarReseniaBackground.addEventListener("click", () => {
+        document.getElementById("modalEditarResenia").classList.remove("is-active");
     })
-    const botonGuardar = document.getElementById("botonGuardar");
-    botonGuardar.onclick = async () => {
+    const botonEditar = document.getElementById("botonEditarResenia");
+    botonEditar.onclick = async () => {
         await editarResenia(id_resenia);
-        document.getElementById("modalEdicion").classList.remove("is-active");
+        document.getElementById("modalEditarResenia").classList.remove("is-active");
         insertarReviews(idReloj);
     };
 
-    document.getElementById("inputEdicionTitulo").value = document.getElementById(`titulo${id_resenia}`).textContent;
-    document.getElementById("inputEdicionReview").value = document.getElementById(`reseniaTexto${id_resenia}`).textContent;
-    document.getElementById("inputEdicionCalificacion").value = document.getElementById(`calificacion${id_resenia}`).textContent;
+    document.getElementById("inputEditarTitulo").value = document.getElementById(`titulo${id_resenia}`).textContent;
+    document.getElementById("inputEditarResenia").value = document.getElementById(`reseniaTexto${id_resenia}`).textContent;
+    document.getElementById("inputEditarCalificacion").value = document.getElementById(`calificacion${id_resenia}`).textContent;
     console.log(document.getElementById(`mesesUso${id_resenia}`).textContent);
-    document.getElementById("inputEdicionMesesUso").value = parseInt(document.getElementById(`mesesUso${id_resenia}`).textContent);
+    document.getElementById("inputEditarMesesUso").value = parseInt(document.getElementById(`mesesUso${id_resenia}`).textContent);
 }
 
 function abrirModalEdicion(id_resenia) {
-    const modalEdicion = document.getElementById("modalEdicion");
+    const modalEditarResenia = document.getElementById("modalEditarResenia");
     incializarModalEdicion(id_resenia); 
-    modalEdicion.classList.add("is-active");
+    modalEditarResenia.classList.add("is-active");
 }
 
 
@@ -327,7 +410,7 @@ async function crearPagina(idReloj) {
         insertarCaracteristicasReloj(datos);
         insertarImagenes(datos);
         insertarBotones();
-        //inicializarModalEdicionReloj();
+        inicializarModalEdicionReloj();
         insertarReviews(idReloj);
         inicializarBotonPublicarResenia();
     })
