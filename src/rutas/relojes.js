@@ -13,12 +13,6 @@ const {
 } = require("../db/relojes-db.js");
 
 const {
-	getRelojesUsuario,
-	agregarRelojUsuario,
-	quitarRelojUsuario,
-	} = require("../db/relojesUsuarios-db.js");
-
-const {
 	validarReloj,
 	validarToken,
 	necesitaAdmin,

@@ -40,8 +40,7 @@ CREATE TABLE resenias (
 	meses_de_uso INT NOT NULL
 );
 
-
-CREATE TABLE relojes_usuarios (
+CREATE TABLE relojes_favoritos_usuarios (
 	id_usuario INT REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
 	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
 	PRIMARY KEY (id_usuario, id_reloj)
@@ -107,7 +106,7 @@ INSERT INTO usuarios (nombre, hash_contrasenia, rol, sexo, edad, precio_buscado)
 	('Carlos', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 40, 1000000),
 	('Marta', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 35, 70000);
 
-INSERT INTO relojes_usuarios (id_usuario, id_reloj) VALUES 
+INSERT INTO relojes_favoritos_usuarios (id_usuario, id_reloj) VALUES 
 	(1, 2), 
 	(2, 1),
 	(3, 3),
