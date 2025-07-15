@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const AUTENTICACION = "Tp-Final-IntroSoftware";
 
 const {
@@ -17,10 +18,13 @@ const {
 const {
 	getRelojesFavoritosUsuario,
 	getRecomendadosFavoritos,
-	getRecomendadosVistos,
 	agregarRelojFavoritoUsuario,
 	quitarRelojFavoritoUsuario,
-	} = require("../db/relojesFavoritosUsuarios-db.js");
+} = require("../db/relojesFavoritosUsuarios-db.js");
+
+const {
+	getRecomendadosVistos,
+} = require("../db/relojesVistosUsuarios-db.js");
 
 const {
 	validarUsuario,
@@ -187,7 +191,7 @@ router.delete("/misRelojes", validarToken(), validarRelojUsuario(false), async (
 router.get("/misRecomendados/favoritos", validarToken(), async (req, res) => {
 	const relojes = await getRecomendadosFavoritos(req.usuario.id_usuario);
 	if(relojes === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las recomendaciones del usuario segpun sus relojes favoritos.\n");
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las recomendaciones del usuario según sus relojes favoritos.\n");
 	}
 	else if(relojes === NO_ENCONTRADO) {
 		res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");

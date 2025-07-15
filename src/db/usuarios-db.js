@@ -55,18 +55,6 @@ async function getUsuario(id_usuario, nombre) {
 }
 
 
-async function getHashUsuario(nombre) {
-	try {
-		const hash = await dbClient.query("SELECT hash_contrasenia FROM usuarios WHERE nombre = $1", [nombre]);
-		
-		return hash.rows[0].hash_contrasenia;
-	} catch(error_recibido) {
-		console.error("Ocurrió el siguiente error en la función getUsuarioId: ", error_recibido);
-		return undefined;
-	}
-}
-
-
 async function crearUsuario(req) {
 	try { 
 		const { nombre, contrasenia, sexo, edad, precio_buscado} = req.body;
@@ -86,6 +74,18 @@ async function crearUsuario(req) {
 		};
 	} catch(error_devuelto) {
 		console.error("Ocurrió el siguiente error en la función crearUsuario: ", error_devuelto);
+		return undefined;
+	}
+}
+
+
+async function getHashUsuario(nombre) {
+	try {
+		const hash = await dbClient.query("SELECT hash_contrasenia FROM usuarios WHERE nombre = $1", [nombre]);
+		
+		return hash.rows[0].hash_contrasenia;
+	} catch(error_recibido) {
+		console.error("Ocurrió el siguiente error en la función getUsuarioId: ", error_recibido);
 		return undefined;
 	}
 }

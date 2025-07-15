@@ -27,7 +27,7 @@ function filtroInvalido(min_precio, max_precio, min_diam, max_diam, min_res, max
 }
 
 
-async function getRelojesFiltro(filtros) {
+function obtenerFiltros(filtros) {
 	const [min_precio, max_precio] = filtros.precio ? filtros.precio.split(',').map(Number) : [0, 50000000];
 	const [min_diam, max_diam] = filtros.diametro ? filtros.diametro.split(',').map(Number) : [0, 55];
 	const [min_res, max_res] = filtros.resistencia_agua ? filtros.resistencia_agua.split(',').map(Number) : [0, 600];
@@ -37,10 +37,16 @@ async function getRelojesFiltro(filtros) {
 	const materiales = filtros.materiales ? filtros.materiales.split(',') : ["Plástico", "Acero Inoxidable", "Aluminio", "Titanio", "Latón", "Oro"];
 	const sexo = filtros.sexo ? filtros.sexo.split(',') : ['H', 'M'];
 	
+	return { min_precio, max_precio, min_diam, max_diam, min_res, max_res, min_reloj, max_reloj, marcas, mecanismos, materiales, sexo };
+}
+
+
+async function getRelojesFiltro(filtros) {
+	const { min_precio, max_precio, min_diam, max_diam, min_res, max_res, min_reloj, max_reloj, marcas, mecanismos, materiales, sexo } = obtenerFiltros(filtros);
+	
 	if(filtroInvalido(min_precio, max_precio, min_diam, max_diam, min_res, max_res, min_reloj, max_reloj)) {
 		return REQUEST_INVALIDA;
 	}
-	
 	
 	try {
 		const relojes = await dbClient.query(`
@@ -74,10 +80,14 @@ async function getRelojesFiltro(filtros) {
 }
 
 
-async function getRelojesBusqueda(busqueda, relojes_cant) {
+async function getRelojesBusqueda(filtros) {
+	const { min_precio, max_precio, min_diam, max_diam, min_res, max_res, min_reloj, max_reloj, marcas, mecanismos, materiales, sexo } = obtenerFiltros(filtros);
+	
+	if(filtroInvalido(min_precio, max_precio, min_diam, max_diam, min_res, max_res, min_reloj, max_reloj)) {
+		return REQUEST_INVALIDA;
+	}
+	
 	try {
-		const [min_reloj, max_reloj] = relojes_cant ? relojes_cant.split(',').map(Number) : [0, 9];
-		
 		const relojes = await dbClient.query(`
 			SELECT 
 				id_reloj, 
@@ -86,15 +96,36 @@ async function getRelojesBusqueda(busqueda, relojes_cant) {
 				imagen, 
 				precio
 			FROM busqueda_relojes
-			ORDER BY similarity(propiedades, LOWER($1)) DESC
-			OFFSET $2
-			LIMIT $3`,
-			[busqueda, min_reloj, (max_reloj - min_reloj + 1)]
+			WHERE
+				(array_length($1::int[], 1) IS NULL OR id_marca = ANY($1::int[])) AND
+				(sexo = ANY($2::text[])) AND
+				(material = ANY($3::text[])) AND
+				(mecanismo = ANY($4::text[])) AND
+				(precio BETWEEN $5 AND $6) AND
+				(diametro BETWEEN $7 AND $8) AND
+				(resistencia_agua BETWEEN $9 AND $10) 
+			ORDER BY similarity(propiedades, LOWER($11)) DESC
+			OFFSET $12
+			LIMIT $13`,
+			[marcas, sexo, materiales, mecanismos, min_precio, max_precio, min_diam, max_diam, min_res, max_res, 
+			filtros.busqueda, min_reloj, (max_reloj - min_reloj + 1)]
 		);
 		
 		return relojes.rows;
 	} catch(error_recibido) {
 		console.error("Ocurrió el siguiente error en la función getRelojesBusqueda: ", error_recibido);
+		return undefined;
+	}
+}
+
+
+async function getAllRelojes() {
+	try {
+		const relojes = await dbClient.query("SELECT * FROM relojes ORDER BY id_reloj");
+		
+		return relojes.rows;
+	} catch(error_recibido) {
+		console.error("Ocurrió el siguiente error en la función getAllRelojes: ", error_recibido);
 		return undefined;
 	}
 }
@@ -300,6 +331,7 @@ async function patchearReloj(req) {
 module.exports = {
 	getRelojesFiltro,
 	getRelojesBusqueda,
+	getAllRelojes,
 	getReloj,
 	crearReloj,
 	esRelojExistente,
