@@ -207,12 +207,11 @@ async function eliminarReloj(id_reloj) {
 
 // Devuelve el nuevo reloj si se pudo actualizar y undefined en caso contrario
 async function actualizarReloj(req) {
-	const id_reloj = req.params.id_reloj;
-	const { id_marca, nombre, mecanismo, material, imagen, resistencia_agua, diametro, precio, sexo } = req.body;
+	const { id_reloj, id_marca, nombre, mecanismo, material, imagen, resistencia_agua, diametro, precio, sexo } = req.body;
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE relojes SET id_marca = $2, nombre = $3, mecanismo = $4, material = $5, imagen = $6 resistencia_agua = $7, diametro = $8, precio = $9, sexo = $10 WHERE id_reloj = $1",
+			"UPDATE relojes SET id_marca = $2, nombre = $3, mecanismo = $4, material = $5, imagen = $6, resistencia_agua = $7, diametro = $8, precio = $9, sexo = $10 WHERE id_reloj = $1",
 			[id_reloj, id_marca, nombre, mecanismo, material, imagen, resistencia_agua, diametro, precio, sexo]
 		);
 		

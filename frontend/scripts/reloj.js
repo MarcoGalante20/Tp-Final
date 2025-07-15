@@ -38,7 +38,10 @@ function insertarImagenes(datos) {
 
 function eliminarReloj() {
     fetch(`http://localhost:3000/api/v1/relojes/${idReloj}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem("token")}`
+    }
     })
     .then(async respuesta => {
         if (!respuesta.ok) {
@@ -54,22 +57,24 @@ function eliminarReloj() {
 
 
 function insertarBotones() {
-    const editarReloj = document.createElement("button");
-    editarReloj.classList.add("button", "is-warning");
-    editarReloj.id = "editarReloj";
-    editarReloj.textContent = "Editar";
+    if (localStorage.getItem("rol") == "admin"){
+        const editarReloj = document.createElement("button");
+        editarReloj.classList.add("button", "is-warning");
+        editarReloj.id = "editarReloj";
+        editarReloj.textContent = "Editar";
 
-    const botonEliminarReloj = document.createElement("button");
-    botonEliminarReloj.classList.add("button", "is-danger");
-    botonEliminarReloj.id = "botonEliminarReloj";
-    botonEliminarReloj.textContent = "Eliminar";
-    botonEliminarReloj.addEventListener("click", () => {
-        eliminarReloj();
-    })
+        const botonEliminarReloj = document.createElement("button");
+        botonEliminarReloj.classList.add("button", "is-danger");
+        botonEliminarReloj.id = "botonEliminarReloj";
+        botonEliminarReloj.textContent = "Eliminar";
+        botonEliminarReloj.addEventListener("click", () => {
+            eliminarReloj();
+        })
 
-    const botones = document.getElementById("botones");
-    botones.appendChild(editarReloj);
-    botones.appendChild(botonEliminarReloj);
+        const botones = document.getElementById("botones");
+        botones.appendChild(editarReloj);
+        botones.appendChild(botonEliminarReloj);
+    }
 }
 
 
@@ -91,7 +96,7 @@ function editarReloj() {
     inputNombreRelojModalEditar.value = "";
 
     const selectMarcaModalEditar = document.getElementById("selectMarcaModalEditar");
-    const marca = selectMarcaModalEditar.value;
+    const id_marca = selectMarcaModalEditar.value;
 
     const selectSexoModalEditar = document.getElementById("selectSexoModalEditar");
     const sexo = selectSexoModalEditar.value;
@@ -122,11 +127,20 @@ function editarReloj() {
         return fetch(`http://localhost:3000/api/v1/relojes/${idReloj}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("token")}`
             },
             body: JSON.stringify({
+                id_reloj: idReloj,
+                id_marca, 
                 nombre, 
-                imagen
+                mecanismo, 
+                material, 
+                imagen, 
+                resistencia_agua, 
+                diametro, 
+                precio, 
+                sexo
             })
         })
         .then(async (respuesta) => {
@@ -153,37 +167,36 @@ function inicializarBotonEditarReloj() {
 }
 
 async function inicializarModalEdicionReloj() {
-    inicializarEditarReloj();
-    inicializarBotonEditarReloj();
-    const selectMarcas = document.getElementById("selectMarcaModalEditar");
-    return await fetch("http://localhost:3000/api/v1/marcas")
-    .then( async (respuesta) => {
-        return await respuesta.json();
-    })
-    .then((data) => {
-        data.forEach((marca) => {
-            const elementoMarca = document.createElement("option");
-            elementoMarca.value = marca.id_marca;
-            elementoMarca.textContent = marca.nombre;
-            selectMarcas.appendChild(elementoMarca);
-        });
-    })
-    .catch((error) => {
-        console.error("Hubo un error al obtener las marcas:\n", error);
-    })
+    if (localStorage.getItem("rol") == "admin") {
+        inicializarEditarReloj();
+        inicializarBotonEditarReloj();
+        const selectMarcas = document.getElementById("selectMarcaModalEditar");
+        return await fetch("http://localhost:3000/api/v1/marcas")
+        .then( async (respuesta) => {
+            return await respuesta.json();
+        })
+        .then((data) => {
+            data.forEach((marca) => {
+                const elementoMarca = document.createElement("option");
+                elementoMarca.value = marca.id_marca;
+                elementoMarca.textContent = marca.nombre;
+                selectMarcas.appendChild(elementoMarca);
+            });
+        })
+        .catch((error) => {
+            console.error("Hubo un error al obtener las marcas:\n", error);
+        })
+    }
 }
-
-
-
-
-
-
 
 
 
 function eliminarReview(id_resenia) {
     fetch(`http://localhost:3000/api/v1/resenias/${id_resenia}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem("token")}`
+    }
     })
     .then(async respuesta => {
         if (!respuesta.ok) {
@@ -221,7 +234,8 @@ async function editarResenia(id_resenia) {
         return fetch(`http://localhost:3000/api/v1/resenias/${id_resenia}`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("token")}`
             },
             body: JSON.stringify({
                 titulo,
@@ -272,6 +286,7 @@ function abrirModalEdicion(id_resenia) {
 }
 
 
+
 function formatearReview(resenia) {
     const textoReview = document.createElement("p");
     textoReview.innerHTML =
@@ -282,29 +297,34 @@ function formatearReview(resenia) {
         <span id="reseniaTexto${resenia.id_resenia}">${resenia.resenia}</span> <br />
         <strong id="calificacion${resenia.id_resenia}">${resenia.calificacion}</strong>/5`;
     
-    const botonEditar = document.createElement("button");
-    botonEditar.classList.add("button", "is-warning");
-    botonEditar.textContent = "Editar";
-    botonEditar.addEventListener("click", () => {
-        abrirModalEdicion(resenia.id_resenia);
-    })
-
-    const botonEliminar = document.createElement("button");
-    botonEliminar.classList.add("button", "is-danger");
-    botonEliminar.textContent = "Eliminar";
-    botonEliminar.addEventListener("click", () => (
-        eliminarReview(resenia.id_resenia)
-    ));
-    
-    const botones = document.createElement("div");
-    botones.classList.add("buttons");
-    botones.appendChild(botonEditar);
-    botones.appendChild(botonEliminar);
 
     const divMediaContent = document.createElement("div");
     divMediaContent.classList.add("media-content", "content");
     divMediaContent.appendChild(textoReview);
-    divMediaContent.appendChild(botones);
+
+    if ((resenia.id_usuario == localStorage.getItem("id_usuario")) || 
+        (localStorage.getItem("rol") == "admin")) {
+        const botonEditar = document.createElement("button");
+        botonEditar.classList.add("button", "is-warning");
+        botonEditar.textContent = "Editar";
+        botonEditar.addEventListener("click", () => {
+            abrirModalEdicion(resenia.id_resenia);
+        })
+
+        const botonEliminar = document.createElement("button");
+        botonEliminar.classList.add("button", "is-danger");
+        botonEliminar.textContent = "Eliminar";
+        botonEliminar.addEventListener("click", () => (
+            eliminarReview(resenia.id_resenia)
+        ));
+
+        const botones = document.createElement("div");
+        botones.classList.add("buttons");
+        botones.appendChild(botonEditar);
+        botones.appendChild(botonEliminar);
+        divMediaContent.appendChild(botones);
+    }
+
 
     const articleMedia = document.createElement("article");
     articleMedia.classList.add("media");
@@ -362,7 +382,8 @@ async function publicarReview(idReloj) {
         fetch('http://localhost:3000/api/v1/resenias', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("token")}`
             },
             body: JSON.stringify({
                 id_reloj: idReloj,

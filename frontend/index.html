@@ -19,11 +19,9 @@
                     <div class="box mt-4">
                         <h1 class = "title is-5">Filtros: </h1>
 
-                        <h1 class = "title is-6" style="display:inline-block;">Marca: </h1> 
-                        <img id="agregarMarca" src="https://icones.pro/wp-content/uploads/2021/04/nouveau-symbole-vert.png" style="width:24px;height:24px;">
-                        <img id="editarMarca" src="https://cdn-icons-png.flaticon.com/512/126/126794.png" style="width:24px;height:24px;">
-                        <img id="eliminarMarca" src="https://us.123rf.com/450wm/kaoien/kaoien1602/kaoien160200022/52222478-se%C3%B1al-de-tr%C3%A1fico-advertencia-icono-del-c%C3%ADrculo-rojo-sobre-fondo-blanco-concepto-de-prohibici%C3%B3n.jpg?ver=6" style="width:24px;height:24px;">
-                        <br />
+                        <div id="divBotonesMarcas">
+                            <h1 class = "title is-6" style="display:inline-block;">Marca: </h1> 
+                        </div>
                         <div class="select is-multiple block">
                             <select id="selectMarcas" multiple size = 5></select>
                         </div>
@@ -84,11 +82,7 @@
                     <div class="box mt-4">
                         <h1 class = "title is-4">Relojes: </h1>
                         <div id="contenedorRelojes" class="container is-flex is-flex-wrap-wrap is-fluid is-4">
-                            <div id="agregarReloj" class="nuevoReloj">
-                                <img src="https://images.icon-icons.com/2550/PNG/512/plus_circle_icon_152558.png" style="width:128px;height:128px;">
-                                <h1 class="title is-6" style="margin: 0px;">Agregar</h1>
-                                <h1 class="title is-6">Reloj</h1>
-                            </div>
+
                         </div>
                     </div>
                     <button id="cargarRelojes" class="button is-info">Cargar más relojes</button>

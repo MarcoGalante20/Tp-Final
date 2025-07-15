@@ -22,7 +22,7 @@ function inicializarAgregarReloj() {
     })
 }
 
-function crearNuevoReloj() {
+async function crearNuevoReloj() {
     const inputNombreRelojModal = document.getElementById("inputNombreRelojModal");
     const nombre = inputNombreRelojModal.value;
     inputNombreRelojModal.value = "";
@@ -59,7 +59,8 @@ function crearNuevoReloj() {
     fetch("http://localhost:3000/api/v1/relojes", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${localStorage.getItem("token")}`
         },
         body: JSON.stringify({
             id_marca,
@@ -73,14 +74,18 @@ function crearNuevoReloj() {
             sexo
         })
     })
-    .then(respuesta => {
-        if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
+    .then(async (respuesta) => {
+        if (!respuesta.ok) {
+            const mensajeError = await respuesta.text();
+            throw new Error(`${respuesta.status}\n${mensajeError}`);
+        };
         return respuesta.json();
     })
     .then(data => {
         console.log("Reloj agregado:", data);
     })
     .catch(error => {
+        alert(`${error}`);
         console.error("Error al agregar el reloj:", error);
     });
     }
@@ -129,7 +134,7 @@ function inicializarAgregarMarca() {
     })
 }
 
-function crearNuevaMarca() {
+async function crearNuevaMarca() {
     const inputNombreMarcaModal = document.getElementById("inputNombreMarcaModal");
     const nombre = inputNombreMarcaModal.value;
     inputNombreMarcaModal.value = "";
@@ -142,15 +147,19 @@ function crearNuevaMarca() {
     fetch("http://localhost:3000/api/v1/marcas", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${localStorage.getItem("token")}`
         },
         body: JSON.stringify({
             nombre,
             imagen
         })
     })
-    .then(respuesta => {
-        if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
+    .then( async (respuesta) => {
+        if (!respuesta.ok) {
+            const mensajeError = await respuesta.text();
+            throw new Error(`${respuesta.status}\n${mensajeError}`);
+        } 
         return respuesta.json();
     })
     .then(data => {
@@ -163,6 +172,7 @@ function crearNuevaMarca() {
         document.getElementById("selectMarcaModal").appendChild(opcionNuevaMarca.cloneNode(true));
     })
     .catch(error => {
+        alert(`${error}`);
         console.error("Error al agregar la marca:", error);
     });
     }
@@ -216,7 +226,8 @@ function editarMarca() {
         return fetch(`http://localhost:3000/api/v1/marcas/${idMarca}`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("token")}`
             },
             body: JSON.stringify({
                 nombre, 
@@ -269,7 +280,10 @@ function inicializarEliminarMarca() {
 function eliminarMarca() {
     const idMarca = document.getElementById("selectMarcaModalEliminar").value;
     fetch(`http://localhost:3000/api/v1/marcas/${idMarca}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem("token")}`
+    }
     })
     .then(async respuesta => {
         if (!respuesta.ok) {
@@ -303,11 +317,51 @@ function inicializarModalEliminarMarca() {
 }
 
 
+function insertarIconosEditarMarcas() {
+    divBotonesMarcas = document.getElementById("divBotonesMarcas");
+
+    const agregarMarca = document.createElement("img");
+    agregarMarca.id = "agregarMarca";
+    agregarMarca.src = "https://icones.pro/wp-content/uploads/2021/04/nouveau-symbole-vert.png";
+    agregarMarca.style.width="24px";
+    agregarMarca.style.height="24px";
+
+    const editarMarca = document.createElement("img");
+    editarMarca.id = "editarMarca";
+    editarMarca.src = "https://cdn-icons-png.flaticon.com/512/126/126794.png";
+    editarMarca.style.width="24px";
+    editarMarca.style.height="24px";
+
+    const eliminarMarca = document.createElement("img");
+    eliminarMarca.id = "eliminarMarca";
+    eliminarMarca.src = "https://us.123rf.com/450wm/kaoien/kaoien1602/kaoien160200022/52222478-se%C3%B1al-de-tr%C3%A1fico-advertencia-icono-del-c%C3%ADrculo-rojo-sobre-fondo-blanco-concepto-de-prohibici%C3%B3n.jpg?ver=6";
+    eliminarMarca.style.width="24px";
+    eliminarMarca.style.height="24px";
+
+    divBotonesMarcas.appendChild(agregarMarca);
+    divBotonesMarcas.appendChild(editarMarca);
+    divBotonesMarcas.appendChild(eliminarMarca);                  
+}
+
+function inicializarDivBotonesMarcas() {
+    if (localStorage.getItem("rol") == "admin") {
+        insertarIconosEditarMarcas();
+        inicializarModalAgregarMarca();
+        inicializarModalEditarMarca();
+        inicializarModalEliminarMarca();
+    }
+}
+
 
 function vaciarContenedorRelojes() {
     const contenedorRelojes = document.getElementById("contenedorRelojes");
 
-    while (contenedorRelojes.children.length > 1) {
+    let elementosFijos = 0;
+    if (localStorage.getItem("rol") == "admin") {
+        elementosFijos = 1;
+    }
+
+    while (contenedorRelojes.children.length > elementosFijos) {
         contenedorRelojes.removeChild(contenedorRelojes.firstElementChild);
     }
 }
@@ -428,6 +482,35 @@ function diccionarioAQueryString(diccionario) {
     return partes.join("&");
 }
 
+function inicializarContenedorRelojes() {
+    if (localStorage.getItem("rol") == "admin") {
+        const agregarReloj = document.createElement("div");
+        agregarReloj.id = "agregarReloj";
+        agregarReloj.classList.add("nuevoReloj");
+
+        const imagen = document.createElement("img");
+        imagen.src = "https://images.icon-icons.com/2550/PNG/512/plus_circle_icon_152558.png";
+        imagen.style.width = "128px";
+        imagen.style.height = "128px";
+        agregarReloj.appendChild(imagen);
+
+        const agregar = document.createElement("h1");
+        agregar.classList.add("title", "is-6");
+        agregar.textContent = "Agregar";
+        agregar.style.margin="0px";
+        agregarReloj.appendChild(agregar);
+
+        const reloj = document.createElement("h1");
+        reloj.classList.add("title", "is-6");
+        reloj.textContent = "Reloj";
+        agregarReloj.appendChild(reloj);
+
+        document.getElementById("contenedorRelojes").appendChild(agregarReloj);
+        inicializarModalAgregarReloj(); 
+    }
+
+}
+
 function insertarRelojes(data) {
     if (!data) throw new Error("Datos inválidos");
     const contenedorRelojes = document.getElementById("contenedorRelojes");
@@ -502,19 +585,15 @@ async function cargarMarcas() {
 }
 
 
-
-
 let inicio = 0;
 let final = 15;
 
 async function main() {
     await cargarMarcas();
     inicializarBotonCargarRelojes();
-    inicializarModalAgregarReloj(); 
-    inicializarModalAgregarMarca();
-    inicializarModalEditarMarca();
-    inicializarModalEliminarMarca();
+    inicializarDivBotonesMarcas();
     atribuirEscucharFiltrado();
+    inicializarContenedorRelojes();
     await cargarRelojesNuevos(); 
 }
 
