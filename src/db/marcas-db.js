@@ -1,7 +1,7 @@
 const dbClient = require("./conexion.js");
 
 const {
-	ELIMINADO,
+	EXITO,
 	NO_ENCONTRADO,
 	ERROR_INTERNO,
 } = require("../codigosStatusHttp.js");
@@ -37,7 +37,7 @@ async function crearMarca(req) {
 	const { nombre, imagen } = req.body;
 	
 	try { 
-		const id_marca = await dbClient.query(
+		const resultado_id = await dbClient.query(
 			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2) RETURNING id_marca",
 			[nombre, imagen]
 		);
@@ -45,7 +45,7 @@ async function crearMarca(req) {
 		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
 		
 		return {
-			id_marca,
+			id_marca: resultado_id.rows[0].id_marca,
 			nombre,
 			imagen,
 		};
@@ -91,7 +91,7 @@ async function eliminarMarca(id_marca) {
 		
 		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
 		
-		return ELIMINADO;
+		return EXITO;
 	} catch (error_devuelto) {
 		console.error("Error en eliminarMarca: ", error_devuelto);
 		return ERROR_INTERNO;
@@ -145,7 +145,7 @@ async function patchearMarca(req) {
 	try {
 		const resultado = await dbClient.query(
 			"UPDATE marcas SET nombre = $2, imagen = $3 WHERE id_marca = $1",
-			[req.params.id_marca, marca.nombre, marca.imagen]
+			[marca.id_marca, marca.nombre, marca.imagen]
 		);
 		
 		if(resultado.rowCount === 0) {
@@ -155,7 +155,7 @@ async function patchearMarca(req) {
 		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
 		
 		return {
-			id_marca: req.params.id_marca,
+			id_marca: marca.id_marca,
 			nombre: marca.nombre,
 			imagen: marca.imagen,
 		};

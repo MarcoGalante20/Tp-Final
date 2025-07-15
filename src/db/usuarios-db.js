@@ -2,7 +2,8 @@ const dbClient = require("./conexion.js");
 const bcrypt = require("bcrypt");
 
 const {
-	ELIMINADO,
+	EXITO,
+	REQUEST_INVALIDA,
 	NO_ENCONTRADO,
 	ERROR_INTERNO,
 } = require("../codigosStatusHttp.js");
@@ -56,7 +57,7 @@ async function getUsuario(id_usuario, nombre) {
 
 async function getHashUsuario(nombre) {
 	try {
-		const hash = dbClient.query("SELECT hash_contrasenia FROM usuarios WHERE nombre = $1", [nombre]);
+		const hash = await dbClient.query("SELECT hash_contrasenia FROM usuarios WHERE nombre = $1", [nombre]);
 		
 		return hash.rows[0].hash_contrasenia;
 	} catch(error_recibido) {
@@ -92,7 +93,7 @@ async function crearUsuario(req) {
 
 async function logearUsuario(nombre, contrasenia) {
 	try {
-		const hash = getHashUsuario(nombre); 
+		const hash = await getHashUsuario(nombre); 
 		if(hash === undefined) return undefined;
 		
 		const es_correcta = await bcrypt.compare(contrasenia, hash);
@@ -143,7 +144,7 @@ async function eliminarUsuario(id_usuario) {
 			return NO_ENCONTRADO;
 		}
 		
-		return ELIMINADO;
+		return EXITO;
 	} catch (error_devuelto) {
 		console.error("Error en eliminarUsuario: ", error_devuelto);
 		return ERROR_INTERNO;
@@ -193,16 +194,15 @@ async function patchearUsuario(id_usuario, req) {
 	const { nombre, contrasenia, sexo, edad, precio_buscado } = req.body;
 	
 	if(nombre !== undefined) usuario.nombre = nombre;
-	if(contrasenia !== undefined) usuario.contrasenia = contrasenia;
+	if(contrasenia !== undefined) usuario.hash_contrasenia = await bcrypt.hash(contrasenia, 10);
 	if(edad !== undefined && edad > 0 && edad < 122) usuario.edad = edad;
 	if(sexo === 'H' || sexo === 'M' || sexo === '-') usuario.sexo = sexo;
 	if(precio_buscado !== undefined && precio_buscado > 0) usuario.precio_buscado = precio_buscado;
-	const hash_contrasenia = await bcrypt.hash(contrasenia, 10);
 	
 	try {
 		const resultado = await dbClient.query(
 			"UPDATE usuarios SET nombre = $2, hash_contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
-			[req.params.id_usuario, usuario.nombre, hash_contrasenia, usuario.sexo, usuario.edad, usuario.precio_buscado]
+			[usuario.id_usuario, usuario.nombre, usuario.hash_contrasenia, usuario.sexo, usuario.edad, usuario.precio_buscado]
 		);
 		
 		if(resultado.rowCount === 0) {
@@ -210,7 +210,7 @@ async function patchearUsuario(id_usuario, req) {
 		}
 		
 		return {
-			id_usuario: req.params.id_usuario,
+			id_usuario: usuario.id_usuario,
 			nombre: usuario.nombre,
 			contrasenia: usuario.contrasenia,
 			sexo: usuario.sexo,
@@ -225,14 +225,6 @@ async function patchearUsuario(id_usuario, req) {
 
 
 async function hacerAdmin(id_usuario) {
-	const usuario = await getUsuario(id_usuario, undefined);
-	if(usuario === undefined) {
-		return undefined;
-	}
-	else if(usuario === NO_ENCONTRADO) {
-		return NO_ENCONTRADO;
-	}
-	
 	try {
 		const resultado = await dbClient.query(
 			"UPDATE usuarios SET rol = $1 WHERE id_usuario = $2",
@@ -243,9 +235,11 @@ async function hacerAdmin(id_usuario) {
 			return NO_ENCONTRADO;
 		}
 		
-	
-	
-	
+		return EXITO;
+	} catch(error_recibido) {
+		console.error("Error en hacerAdmin: ", error_recibido);
+		return undefined;
+	}
 }
 
 

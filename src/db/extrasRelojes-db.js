@@ -1,6 +1,7 @@
 const dbClient = require("./conexion.js");
 
 const {
+	EXITO,
 	NO_ENCONTRADO,
 } = require("../codigosStatusHttp.js");
 
@@ -44,7 +45,7 @@ async function quitarExtraReloj(id_reloj, atributo) {
 			return NO_ENCONTRADO;
 		}
 		
-		return ELIMINADO;
+		return EXITO;
 	} catch (error_devuelto) {
 		console.error("Error en quitarExtraReloj: ", error_devuelto);
 		return undefined;

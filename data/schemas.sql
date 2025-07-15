@@ -1,7 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE TABLE marcas (
-	id_marca serial PRIMARY HEY,
+	id_marca serial PRIMARY KEY,
 	nombre VARCHAR(20) NOT NULL UNIQUE,
 	imagen VARCHAR(200)
 );
@@ -43,12 +43,14 @@ CREATE TABLE resenias (
 
 CREATE TABLE relojes_usuarios (
 	id_usuario INT REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
-	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE
+	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
+	PRIMARY KEY (id_usuario, id_reloj)
 );
 
 CREATE TABLE extras_reloj (
 	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
-	atributo VARCHAR(50) NOT NULL
+	atributo VARCHAR(50) NOT NULL,
+	PRIMARY KEY (id_reloj, atributo)
 );
 
 
@@ -96,7 +98,7 @@ INSERT INTO extras_reloj (id_reloj, atributo) VALUES
 	(10, 'Buceo'),
 	(10, 'Elegante');
 
-INSERT INTO usuarios (nombre, contrasenia, rol, sexo, edad, precio_buscado) VALUES
+INSERT INTO usuarios (nombre, hash_contrasenia, rol, sexo, edad, precio_buscado) VALUES
 	('Marco12', '$2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'M', 19, 120000),
 	('Juanfran', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'M', 19, 300000),
 	('Ana', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 25, 150000),

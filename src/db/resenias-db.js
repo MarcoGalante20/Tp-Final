@@ -1,7 +1,7 @@
 const dbClient = require("./conexion.js");
 
 const {
-	ELIMINADO,
+	EXITO,
 	NO_ENCONTRADO,
 	CONFLICTO,
 	ERROR_INTERNO,
@@ -61,7 +61,7 @@ async function crearResenia(req) {
 		
 		return {
 			id_reloj,
-			id_usuario,
+			id_usuario: req.usuario.id_usuario,
 			titulo,
 			resenia,
 			calificacion,
@@ -111,7 +111,7 @@ async function eliminarResenia(id_resenia) {
 			return NO_ENCONTRADO;
 		}
 		
-		return ELIMINADO;
+		return EXITO;
 	} catch (error_devuelto) {
 		console.error("Error en eliminarResenia: ", error_devuelto);
 		return ERROR_INTERNO;
@@ -207,4 +207,5 @@ module.exports = {
     eliminarResenia,
     actualizarResenia,
     patchearResenia,
+    hizoLaResenia,
 };

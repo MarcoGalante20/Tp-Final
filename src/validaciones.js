@@ -28,7 +28,6 @@ const {
 const {
 	EXITO,
 	CREADO,
-	ELIMINADO,
 	REQUEST_INVALIDA,
 	NO_AUTORIZADO,
 	PROHIBIDO,
@@ -39,20 +38,24 @@ const {
 
 
 async function validarRelojyUsuario(id_reloj, id_usuario, res) {
-	const existe_reloj = await esRelojExistente(req.body.id_reloj, undefined);
+	const existe_reloj = await esRelojExistente(id_reloj, undefined);
 	if(existe_reloj === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo al reloj en la base de datos.\n");
+		res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo pepe al reloj en la base de datos.\n");
+		return false;
 	}
 	else if(!existe_reloj) {
-		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
+		res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
+		return false;
 	}
 	
 	const existe_usuario = await esUsuarioExistente(id_usuario, undefined);
 	if(existe_usuario === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo al usuario en la base de datos.\n");
+		res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo al usuario en la base de datos.\n");
+		return false;
 	}
 	else if(!existe_usuario) {
-		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
+		res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
+		return false;
 	}
 	return true;
 }
@@ -210,13 +213,14 @@ function validarToken() {
 			return res.status(NO_AUTORIZADO).send("No se proporcionó un token de usuario.\n");
 		}
 		
-		jwt.verify(token, AUTENTICACION, (error, datos_usuario) => {
-			if(error) {
-				return res.status(PROHIBIDO).send("El token recibido no es válido.\nAcceso denegado.\n");
-			}
+		try {
+			const datos_usuario = jwt.verify(token, AUTENTICACION);
 			req.usuario = datos_usuario;
 			next();
-		});
+		} catch(error_recibido) {
+			console.error("Error verificando el token: ", error_recibido);
+			return res.status(PROHIBIDO).send("El token recibido no es válido.\nAcceso denegado.\n");
+		}
 	}
 }
 
@@ -240,12 +244,12 @@ function validarResenia(tieneQueExistir) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó un cuerpo para la request.\n");
 		}
 		
-		const { id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso } = req.body;
+		const { id_reloj, titulo, resenia, calificacion, fecha, meses_de_uso } = req.body;
 		
-		if(!(await validarRelojyUsuario(id_reloj, id_usuario, res))) return;
+		if(!(await validarRelojyUsuario(id_reloj, req.usuario.id_usuario, res))) return;
 		
 		if(!tieneQueExistir) {
-			const existe_resenia = await esReseniaExistente(id_reloj, id_usuario);
+			const existe_resenia = await esReseniaExistente(id_reloj, req.usuario.id_usuario);
 			if(existe_resenia === undefined) {
 				return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo a la resenia en la base de datos.\n");
 			}
@@ -278,8 +282,13 @@ function validarResenia(tieneQueExistir) {
 // ---------------------------- Validaciones de los relojes de los usuarios ------------------------------
 
 
-function validarRelojUsuario(id_usuario) {
+function validarRelojUsuario(por_params) {
 	return async function(req, res, next) {
+		let id_usuario;
+		
+		if(por_params) id_usuario = req.params.id_usuario; 
+		else id_usuario = req.usuario.id_usuario;
+		
 		if(!(await validarRelojyUsuario(req.body.id_reloj, id_usuario, res))) return;
 		
 		next();
@@ -293,4 +302,6 @@ module.exports = {
 	validarUsuario,
 	validarResenia,
 	validarRelojUsuario,
+	validarToken,
+	necesitaAdmin,
 };
