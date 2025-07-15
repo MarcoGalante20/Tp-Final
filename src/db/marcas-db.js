@@ -12,7 +12,7 @@ async function getAllMarcas() {
 		
 		return marcas.rows;
 	} catch(error_recibido) {
-		console.error("Error en getAllMarcas: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getAllMarcas: ", error_recibido);
 		return undefined;
 	}
 }
@@ -27,7 +27,7 @@ async function getMarca(id_marca) {
 		
 		return marca.rows[0];
 	} catch(error_recibido) {
-		console.error("Error en getMarca: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getMarca: ", error_recibido);
 		return undefined;
 	}
 }
@@ -50,7 +50,7 @@ async function crearMarca(req) {
 			imagen,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en crearReloj: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función crearReloj: ", error_devuelto);
 		return undefined;
 	}
 }
@@ -74,7 +74,7 @@ async function esMarcaExistente(id_marca, nombre) {
 		}
 		return true;
 	} catch(error_recibido) {
-		console.error("Error en esMarcaExistente: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función esMarcaExistente: ", error_recibido);
 		return undefined;
 	}
 }
@@ -93,7 +93,7 @@ async function eliminarMarca(id_marca) {
 		
 		return EXITO;
 	} catch (error_devuelto) {
-		console.error("Error en eliminarMarca: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función eliminarMarca: ", error_devuelto);
 		return ERROR_INTERNO;
 	}
 }
@@ -122,7 +122,7 @@ async function actualizarMarca(req) {
 			imagen,
 		};
 	} catch (error_devuelto) {
-		console.error("Error en actualizarMarca: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función actualizarMarca: ", error_devuelto);
 		return undefined;
 	}
 }
@@ -130,12 +130,8 @@ async function actualizarMarca(req) {
 
 async function patchearMarca(req) {
 	const marca = await getMarca(req.params.id_marca);
-	if(marca === undefined) {
-		return undefined;
-	}
-	else if(marca === NO_ENCONTRADO) {
-		return NO_ENCONTRADO;
-	}
+	if(marca === undefined) return undefined;
+	else if(marca === NO_ENCONTRADO) return NO_ENCONTRADO;
 	
 	const { nombre, imagen } = req.body;
 	
@@ -160,7 +156,7 @@ async function patchearMarca(req) {
 			imagen: marca.imagen,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en patchMarca: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función patchMarca: ", error_devuelto);
 		return undefined;
 		
 	}

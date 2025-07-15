@@ -28,7 +28,7 @@ async function getRelojesUsuario(id_usuario) {
 		
 		return relojes.rows;
 	} catch(error_recibido) {
-		console.error("Error en getRelojesUsuario: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getRelojesUsuario: ", error_recibido);
 		return undefined;
 	}
 }
@@ -43,7 +43,7 @@ async function agregarRelojUsuario(id_usuario, id_reloj) {
 		
 		return resultado.rowCount;
 	} catch(error_devuelto) {
-		console.error("Error en agregarRelojUsuario: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función agregarRelojUsuario: ", error_devuelto);
 		return undefined;
 	}
 }
@@ -60,7 +60,7 @@ async function quitarRelojUsuario(id_usuario, id_reloj) {
 		
 		return EXITO;
 	} catch (error_devuelto) {
-		console.error("Error en quitarRelojUsuario: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función quitarRelojUsuario: ", error_devuelto);
 		return undefined;
 	}
 }

@@ -28,7 +28,7 @@ async function getResenias(id_reloj) {
 		
 		return resenias.rows;
 	} catch(error_recibido) {
-		console.error("Error en getResenia: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getResenia: ", error_recibido);
 		return undefined;
 	}
 }
@@ -44,7 +44,7 @@ async function getResenia(id_resenia) {
 		
 		return resenia.rows[0];
 	} catch(error_recibido) {
-		console.error("Error en getResenia: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getResenia: ", error_recibido);
 		return undefined;
 	}
 }
@@ -69,7 +69,7 @@ async function crearResenia(req) {
 			meses_de_uso,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en crearResenia: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función crearResenia: ", error_devuelto);
 		return undefined;
 	}
 }
@@ -84,7 +84,7 @@ async function esReseniaExistente(id_reloj, id_usuario) {
 		}
 		return false;
 	} catch(error_recibido) {
-		console.error("Error en esReseniaExistente: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función esReseniaExistente: ", error_recibido);
 		return undefined;
 	}
 }
@@ -96,7 +96,7 @@ async function hizoLaResenia(id_usuario, id_resenia) {
 		
 		return (resultado.rows.length > 0);
 	} catch(error_recibido) {
-		console.error("Error en hizoLaResenia: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función hizoLaResenia: ", error_recibido);
 		return undefined;
 	}
 }
@@ -113,7 +113,7 @@ async function eliminarResenia(id_resenia) {
 		
 		return EXITO;
 	} catch (error_devuelto) {
-		console.error("Error en eliminarResenia: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función eliminarResenia: ", error_devuelto);
 		return ERROR_INTERNO;
 	}
 }
@@ -145,21 +145,13 @@ async function actualizarResenia(req) {
 			meses_de_uso,
 		};
 	} catch (error_devuelto) {
-		console.error("Error en actualizarResenia: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función actualizarResenia: ", error_devuelto);
 		return undefined;
 	}
 }
 
 
-async function patchearResenia(req) {
-	const resenia_obj = await getResenia(req.params.id_resenia);
-	if(resenia_obj === NO_ENCONTRADO) {
-		return NO_ENCONTRADO;
-	}
-	else if(resenia_obj === undefined) {
-		return undefined;
-	}
-	
+function determinarCaracteristicas(resenia_obj, req) {
 	const { id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso } = req.body;
 	
 	if((id_reloj !== undefined && id_reloj !== resenia_obj.id_reloj) || (id_usuario !== undefined && id_usuario !== resenia_obj.id_usuario)) {
@@ -171,6 +163,16 @@ async function patchearResenia(req) {
 	if(calificacion !== undefined && calificacion >= 0 && calificacion <= 5) resenia_obj.calificacion = calificacion;
 	if(fecha !== undefined) resenia_obj.fecha = fecha;
 	if(meses_de_uso !== undefined && meses_de_uso >= 0) resenia_obj.meses_de_uso = meses_de_uso;
+}
+
+
+async function patchearResenia(req) {
+	const resenia_obj = await getResenia(req.params.id_resenia);
+	if(resenia_obj === undefined) return undefined;
+	else if(resenia_obj === NO_ENCONTRADO) return NO_ENCONTRADO;
+	
+	const resultado = determinarCaracteristicas(resenia_obj, req);
+	if(resultado === CONFLICTO) return CONFLICTO;
 	
 	try {
 		const resultado = await dbClient.query(
@@ -194,7 +196,7 @@ async function patchearResenia(req) {
 			meses_de_uso: resenia_obj.meses_de_uso,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en patchResenia: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función patchResenia: ", error_devuelto);
 		return undefined;
 	}
 }

@@ -22,7 +22,7 @@ async function getAllUsuarios() {
 		
 		return usuarios.rows;
 	} catch(error_recibido) {
-		console.error("Error en getAllUsuarios: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getAllUsuarios: ", error_recibido);
 		return undefined;
 	}
 }
@@ -49,7 +49,7 @@ async function getUsuario(id_usuario, nombre) {
 		
 		return usuario.rows[0];
 	} catch(error_recibido) {
-		console.error("Error en getUsuario: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getUsuario: ", error_recibido);
 		return undefined;
 	}
 }
@@ -61,7 +61,7 @@ async function getHashUsuario(nombre) {
 		
 		return hash.rows[0].hash_contrasenia;
 	} catch(error_recibido) {
-		console.error("Error en getUsuarioId: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getUsuarioId: ", error_recibido);
 		return undefined;
 	}
 }
@@ -85,7 +85,7 @@ async function crearUsuario(req) {
 			precio_buscado,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en crearUsuario: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función crearUsuario: ", error_devuelto);
 		return undefined;
 	}
 }
@@ -104,7 +104,7 @@ async function logearUsuario(nombre, contrasenia) {
 		
 		return EXITO;
 	} catch(error_recibido) {
-		console.error("Error en logearUsuario: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función logearUsuario: ", error_recibido);
 		return undefined;
 	}
 }
@@ -129,7 +129,7 @@ async function esUsuarioExistente(id_usuario, nombre) {
 		
 		return false;
 	} catch(error_recibido) {
-		console.error("Error en esUsuarioExistente: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función esUsuarioExistente: ", error_recibido);
 		return undefined;
 	}
 }
@@ -146,7 +146,7 @@ async function eliminarUsuario(id_usuario) {
 		
 		return EXITO;
 	} catch (error_devuelto) {
-		console.error("Error en eliminarUsuario: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función eliminarUsuario: ", error_devuelto);
 		return ERROR_INTERNO;
 	}
 }
@@ -176,21 +176,13 @@ async function actualizarUsuario(id_usuario, req) {
 			precio_buscado,
 		};
 	} catch (error_devuelto) {
-		console.error("Error en actualizarUsuario: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función actualizarUsuario: ", error_devuelto);
 		return undefined;
 	}
 }
 
 
-async function patchearUsuario(id_usuario, req) {
-	const usuario = await getUsuario(id_usuario, undefined);
-	if(usuario === undefined) {
-		return undefined;
-	}
-	else if(usuario === NO_ENCONTRADO) {
-		return NO_ENCONTRADO;
-	}
-	
+async function determinarCaracteristicas(usuario, req) {
 	const { nombre, contrasenia, sexo, edad, precio_buscado } = req.body;
 	
 	if(nombre !== undefined) usuario.nombre = nombre;
@@ -198,6 +190,15 @@ async function patchearUsuario(id_usuario, req) {
 	if(edad !== undefined && edad > 0 && edad < 122) usuario.edad = edad;
 	if(sexo === 'H' || sexo === 'M' || sexo === '-') usuario.sexo = sexo;
 	if(precio_buscado !== undefined && precio_buscado > 0) usuario.precio_buscado = precio_buscado;
+}
+
+
+async function patchearUsuario(id_usuario, req) {
+	const usuario = await getUsuario(id_usuario, undefined);
+	if(usuario === undefined) return undefined;
+	else if(usuario === NO_ENCONTRADO) return NO_ENCONTRADO;
+	
+	await determinarCaracteristicas(usuario, req);
 	
 	try {
 		const resultado = await dbClient.query(
@@ -218,7 +219,7 @@ async function patchearUsuario(id_usuario, req) {
 			precio_buscado: usuario.precio_buscado,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en patchUsuario: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función patchUsuario: ", error_devuelto);
 		return undefined;
 	}
 }
@@ -237,7 +238,7 @@ async function hacerAdmin(id_usuario) {
 		
 		return EXITO;
 	} catch(error_recibido) {
-		console.error("Error en hacerAdmin: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función hacerAdmin: ", error_recibido);
 		return undefined;
 	}
 }
