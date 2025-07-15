@@ -1,23 +1,35 @@
 const dbClient = require("./conexion.js");
 
+const {
+	ELIMINADO,
+	NO_ENCONTRADO,
+	ERROR_INTERNO,
+} = require("../codigosStatusHttp.js");
+
 async function getAllMarcas() {
-	const marcas = await dbClient.query("SELECT * FROM marcas ORDER BY id_marca ASC");
-	
-	if(marcas.rows.length === 0) {
+	try {
+		const marcas = await dbClient.query("SELECT * FROM marcas ORDER BY id_marca ASC");
+		
+		return marcas.rows;
+	} catch(error_recibido) {
+		console.error("Error en getAllMarcas: ", error_recibido);
 		return undefined;
 	}
-	
-	return marcas.rows;
 }
 
 async function getMarca(id_marca) {
-	const marca = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [id_marca]);
-	
-	if(marca.rows.length === 0) {
+	try { 
+		const marca = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [id_marca]);
+		
+		if(marca.rows.length === 0) {
+			return NO_ENCONTRADO;
+		}
+		
+		return marca.rows[0];
+	} catch(error_recibido) {
+		console.error("Error en getMarca: ", error_recibido);
 		return undefined;
 	}
-	
-	return marca.rows[0];
 }
 
 
@@ -29,10 +41,6 @@ async function crearMarca(req) {
 			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2)",
 			[nombre, imagen]
 		);
-		
-		if(resultado.rowCount === 0) {
-			return undefined;
-		}
 		
 		return {
 			nombre,
@@ -48,31 +56,40 @@ async function crearMarca(req) {
 async function esMarcaExistente(id_marca, nombre) {
 	let respuesta;
 	
-	if(nombre === undefined) {
-		if(id_marca === undefined) {
-			return undefined;
+	try {
+		if(nombre === undefined) {
+			if(id_marca === undefined) {
+				return undefined;
+			}
+			respuesta = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [id_marca]);
+		} else {
+			respuesta = await dbClient.query("SELECT * FROM marcas WHERE nombre = $1", [nombre]);
 		}
-		respuesta = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [id_marca]);
-	} else {
-		respuesta = await dbClient.query("SELECT * FROM marcas WHERE nombre = $1", [nombre]);
+		
+		if(respuesta.rows.length === 0) {
+			return false;
+		}
+		return true;
+	} catch(error_recibido) {
+		console.error("Error en esMarcaExistente: ", error_recibido);
+		return undefined;
 	}
-	
-	if(respuesta.rows.length === 0) {
-		return false;
-	}
-	return true;
 }
 
 
-// Devuelve true si se pudo eliminar la marca y false en caso contrario
+// Devuelve 204 si pudo eliminar la marca, 404 si no existia y undefined si ocurrió un error
 async function eliminarMarca(id_marca) {
 	try {
 		const resultado = await dbClient.query("DELETE FROM marcas WHERE id_marca = $1", [id_marca]);
 		
-		return (resultado.rowCount === 1);
+		if(resultado.rowCount === 0) {
+			return NO_ENCONTRADO;
+		} 
+		
+		return ELIMINADO;
 	} catch (error_devuelto) {
 		console.error("Error en eliminarMarca: ", error_devuelto);
-		return false;
+		return ERROR_INTERNO;
 	}
 }
 
@@ -89,7 +106,7 @@ async function actualizarMarca(req) {
 		);
 		
 		if(resultado.rowCount === 0) {
-			return undefined;
+			return NO_ENCONTRADO;
 		}
 		
 		return {
@@ -107,7 +124,7 @@ async function actualizarMarca(req) {
 async function patchearMarca(req) {
 	const marca = await getMarca(req.params.id_marca);
 	if(marca === undefined) {
-		return 404;
+		return NO_ENCONTRADO;
 	}
 	
 	const { nombre, imagen } = req.body;

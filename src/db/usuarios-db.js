@@ -1,23 +1,36 @@
 const dbClient = require("./conexion.js");
 
+const {
+	ELIMINADO,
+	NO_ENCONTRADO,
+	ERROR_INTERNO,
+} = require("../codigosStatusHttp.js");
+
 async function getAllUsuarios() {
-	const usuarios = await dbClient.query("SELECT * FROM usuarios ORDER BY id_usuario ASC");
-	
-	if(usuarios.rows.length === 0) {
+	try {
+		const usuarios = await dbClient.query("SELECT * FROM usuarios ORDER BY id_usuario ASC");
+		
+		return usuarios.rows;
+	} catch(error_recibido) {
+		console.error("Error en getAllUsuarios: ", error_recibido);
 		return undefined;
 	}
-	
-	return usuarios.rows;
 }
 
+
 async function getUsuario(id_usuario) {
-	const usuario = await dbClient.query("SELECT * FROM usuarios WHERE id_usuario = $1", [id_usuario]);
-	
-	if(usuario.rows.length === 0) {
+	try {
+		const usuario = await dbClient.query("SELECT * FROM usuarios WHERE id_usuario = $1", [id_usuario]);
+		
+		if(usuario.rows.length === 0) {
+			return NO_ENCONTRADO;
+		}
+		
+		return usuario.rows[0];
+	} catch(error_recibido) {
+		console.error("Error en getUsuario: ", error_recibido);
 		return undefined;
 	}
-	
-	return usuario.rows[0];
 }
 
 
@@ -29,10 +42,6 @@ async function crearUsuario(req) {
 			"INSERT INTO usuarios (nombre, contrasenia, sexo, edad, precio_buscado) VALUES ($1, $2, $3, $4, $5)",
 			[nombre, contrasenia, sexo, edad, precio_buscado]
 		);
-		
-		if(resultado.rowCount === 0) {
-			return undefined;
-		}
 		
 		return {
 			nombre,
@@ -49,12 +58,17 @@ async function crearUsuario(req) {
 
 
 async function esUsuarioExistente(nombre) {
-	const respuesta = await dbClient.query("SELECT * FROM usuarios WHERE nombre = $1", [nombre]);
-	
-	if(respuesta.rows.length !== 0) {
-		return true;
+	try {
+		const respuesta = await dbClient.query("SELECT * FROM usuarios WHERE nombre = $1", [nombre]);
+		
+		if(respuesta.rows.length !== 0) {
+			return true;
+		}
+		return false;
+	} catch(error_recibido) {
+		console.error("Error en esUsuarioExistente: ", error_recibido);
+		return undefined;
 	}
-	return false;
 }
 
 
@@ -63,10 +77,14 @@ async function eliminarUsuario(id_usuario) {
 	try {
 		const resultado = await dbClient.query("DELETE FROM usuarios WHERE id_usuario = $1", [id_usuario]);
 		
-		return (resultado.rowCount === 1);
+		if(resultado.rowCount === 0) {
+			return NO_ENCONTRADO;
+		}
+		
+		return ELIMINADO;
 	} catch (error_devuelto) {
 		console.error("Error en eliminarUsuario: ", error_devuelto);
-		return false;
+		return ERROR_INTERNO;
 	}
 }
 
@@ -83,7 +101,7 @@ async function actualizarUsuario(req) {
 		);
 		
 		if(resultado.rowCount === 0) {
-			return undefined;
+			return NO_ENCONTRADO;
 		}
 		
 		return {
@@ -104,16 +122,16 @@ async function actualizarUsuario(req) {
 async function patchearUsuario(req) {
 	const usuario = await getUsuario(req.params.id_usuario);
 	if(usuario === undefined) {
-		return 404;
+		return NO_ENCONTRADO;
 	}
 	
 	const { nombre, contrasenia, sexo, edad, precio_buscado } = req.body;
 	
 	if(nombre !== undefined) usuario.nombre = nombre;
 	if(contrasenia !== undefined) usuario.contrasenia = contrasenia;
-	if(edad !== undefined) usuario.edad = edad;
-	if(sexo !== undefined) usuario.sexo = sexo;
-	if(precio_buscado !== undefined) usuario.precio_buscado = precio_buscado;
+	if(edad !== undefined && edad > 0 && edad < 122) usuario.edad = edad;
+	if(sexo === 'H' || sexo === 'M' || sexo === '-') usuario.sexo = sexo;
+	if(precio_buscado !== undefined && precio_buscado > 0) usuario.precio_buscado = precio_buscado;
 	
 	try {
 		const resultado = await dbClient.query(
@@ -136,7 +154,6 @@ async function patchearUsuario(req) {
 	} catch(error_devuelto) {
 		console.error("Error en patchUsuario: ", error_devuelto);
 		return undefined;
-		
 	}
 }
 
