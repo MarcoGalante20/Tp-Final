@@ -65,8 +65,10 @@ router.get("/:id_reloj", async (req, res) => {
 
 
 router.delete("/:id_resenia", validarToken(), async (req, res) => {
-	if(!(await hizoLaResenia(req.usuario.id_usuario, req.params.id_resenia))) {
-		return res.status(PROHIBIDO).send("El usuario no puede eliminar una resenia que no publicó él mismo.\n");
+	if(req.usuario.rol !== "admin") {
+		if(!(await hizoLaResenia(req.usuario.id_usuario, req.params.id_resenia))) {
+			return res.status(PROHIBIDO).send("El usuario no puede eliminar una resenia que no publicó él mismo.\n");
+		}
 	}
 	
 	const resultado = await eliminarResenia(req.params.id_resenia);
@@ -82,8 +84,10 @@ router.delete("/:id_resenia", validarToken(), async (req, res) => {
 
 
 router.put("/:id_resenia", validarToken(), validarResenia(true), async (req, res) => {
-	if(!(await hizoLaResenia(req.usuario.id_usuario, req.params.id_resenia))) {
-		return res.status(PROHIBIDO).send("El usuario no puede modificar una resenia que no publicó él mismo.\n");
+	if(req.usuario.rol !== "admin") {
+		if(!(await hizoLaResenia(req.usuario.id_usuario, req.params.id_resenia))) {
+			return res.status(PROHIBIDO).send("El usuario no puede modificar una resenia que no publicó él mismo.\n");
+		}
 	}
 	
 	const resenia_actualizada = await actualizarResenia(req);
@@ -99,8 +103,10 @@ router.put("/:id_resenia", validarToken(), validarResenia(true), async (req, res
 
 
 router.patch("/:id_resenia", validarToken(), async (req, res) => {
-	if(!(await hizoLaResenia(req.usuario.id_usuario, req.params.id_resenia))) {
-		return res.status(PROHIBIDO).send("El usuario no puede modificar una resenia que no publicó él mismo.\n");
+	if(req.usuario.rol !== "admin") {
+		if(!(await hizoLaResenia(req.usuario.id_usuario, req.params.id_resenia))) {
+			return res.status(PROHIBIDO).send("El usuario no puede modificar una resenia que no publicó él mismo.\n");
+		}
 	}
 	
 	if(req.body === undefined || Object.keys(req.body).length === 0) {

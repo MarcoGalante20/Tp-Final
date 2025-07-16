@@ -1,13 +1,13 @@
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE TABLE marcas (
-	id_marca serial PRIMARY KEY,
+	id_marca SERIAL PRIMARY KEY,
 	nombre VARCHAR(20) NOT NULL UNIQUE,
 	imagen VARCHAR(200)
 );
 
 CREATE TABLE relojes (
-	id_reloj serial PRIMARY KEY,
+	id_reloj SERIAL PRIMARY KEY,
 	id_marca INT REFERENCES marcas (id_marca) ON DELETE CASCADE,
 	nombre VARCHAR(50) NOT NULL UNIQUE,
 	mecanismo VARCHAR(50) NOT NULL,
@@ -20,17 +20,16 @@ CREATE TABLE relojes (
 );
 
 CREATE TABLE usuarios (
-	id_usuario serial PRIMARY KEY,
+	id_usuario SERIAL PRIMARY KEY,
 	nombre VARCHAR(50) NOT NULL UNIQUE,
 	hash_contrasenia VARCHAR(255) NOT NULL,
 	rol VARCHAR(20) DEFAULT 'usuario',
 	sexo CHAR,
-	edad INT,
 	precio_buscado INT
 );
 
 CREATE TABLE resenias (
-	id_resenia serial PRIMARY KEY,
+	id_resenia SERIAL PRIMARY KEY,
 	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
 	id_usuario INT REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
 	titulo VARCHAR(50),
@@ -40,17 +39,16 @@ CREATE TABLE resenias (
 	meses_de_uso INT NOT NULL
 );
 
-
-CREATE TABLE relojes_usuarios (
+CREATE TABLE relojes_favoritos_usuarios (
 	id_usuario INT REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
 	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
 	PRIMARY KEY (id_usuario, id_reloj)
 );
 
-CREATE TABLE extras_reloj (
-	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
-	atributo VARCHAR(50) NOT NULL,
-	PRIMARY KEY (id_reloj, atributo)
+CREATE TABLE relojes_vistos_usuarios (
+	antiguedad SERIAL PRIMARY KEY,
+	id_usuario INT REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
+	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE
 );
 
 
@@ -62,59 +60,40 @@ INSERT INTO marcas (nombre, imagen) VALUES
 	('Rolex', 'https://example.com/rolex.jpg'),
 	('Omega', 'https://example.com/omega.jpg');
 
-INSERT INTO relojes (id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) VALUES
-	(1, 'Forester', 'Cuarzo', 'Plástico', 100, 38, 90000, 'M'), 
-	(1, 'Edifice EFV-100', 'Cuarzo', 'Acero Inoxidable', 100, 41, 170000, 'M'),
+INSERT INTO relojes (id_marca, nombre, mecanismo, material, resistencia_agua, diametro, precio, sexo) VALUES 
 	(2, 'Seiko 5', 'Automático', 'Acero Inoxidable', 100, 42, 120000, 'M'),
 	(2, 'Prospex Diver', 'Automático', 'Titanio', 200, 44, 250000, 'M'),
 	(3, 'Eco-Drive', 'Solar', 'Acero Inoxidable', 100, 40, 180000, 'M'),
 	(3, 'Promaster', 'Solar', 'Titanio', 200, 45, 300000, 'M'),
+	(1, 'Tiffany', 'Cuarzo', 'Plástico', 100, 38, 100000, 'M'),
 	(4, 'Weekender', 'Cuarzo', 'Latón', 30, 38, 40000, 'M'),
 	(4, 'Expedition Scout', 'Cuarzo', 'Plástico', 50, 42, 50000, 'M'),
+	(1, 'pls pls pls', 'Cuarzo', 'Plástico', 100, 38, 100000, 'M'),
 	(5, 'Submariner', 'Automático', 'Oro', 300, 40, 1500000, 'M'),
 	(5, 'Datejust', 'Automático', 'Acero Inoxidable', 100, 36, 1300000, 'M'),
+	(1, 'Forester', 'Cuarzo', 'Plástico', 100, 38, 100000, 'M'),
+	(1, 'Edifice EFV-100', 'Cuarzo', 'Plástico', 100, 39, 100000, 'M'),
 	(6, 'Speedmaster', 'Mecánico', 'Acero Inoxidable', 50, 42, 500000, 'M'),
 	(6, 'Seamaster', 'Automático', 'Acero Inoxidable', 300, 42, 700000, 'M');
 
-INSERT INTO extras_reloj (id_reloj, atributo) VALUES
-	(1, 'Aventurero'), 
-	(1, 'Resistente'), 
-	(2, 'Deportivo'), 
-	(2, 'Elegante'),
-	(3, 'Clásico'),
-	(3, 'Resistente al agua'),
-	(4, 'Deportivo'),
-	(4, 'Buena luminosidad'),
-	(5, 'Casual'),
-	(5, 'Económico'),
-	(6, 'Aventurero'),
-	(6, 'Con brújula'),
-	(7, 'Lujo'),
-	(7, 'Duradero'),
-	(8, 'Prestigioso'),
-	(8, 'Diseño clásico'),
-	(9, 'Cronógrafo'),
-	(9, 'Alta precisión'),
-	(10, 'Buceo'),
-	(10, 'Elegante');
+INSERT INTO usuarios (nombre, hash_contrasenia, rol, sexo, precio_buscado) VALUES
+	('Marco12', '$2b$10$a.ngcApdpiEi0d/iZn6beekAMGaQYwmgBiSSccp4ic5EDE8k969T6', 'admin', 'M', 120000),
+	('Juanfran', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'M', 300000),
+	('Ana', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 150000),
+	('Luis', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 500000),
+	('Sofía', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 200000),
+	('Carlos', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 1000000),
+	('Marta', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 70000);
 
-INSERT INTO usuarios (nombre, hash_contrasenia, rol, sexo, edad, precio_buscado) VALUES
-	('Marco12', '$2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'M', 19, 120000),
-	('Juanfran', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'M', 19, 300000),
-	('Ana', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 25, 150000),
-	('Luis', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 32, 500000),
-	('Sofía', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 28, 200000),
-	('Carlos', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 40, 1000000),
-	('Marta', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 35, 70000);
+INSERT INTO relojes_favoritos_usuarios (id_usuario, id_reloj) VALUES 
+	(1, 5), 
+	(1, 8), 
+	(1, 11);
 
-INSERT INTO relojes_usuarios (id_usuario, id_reloj) VALUES 
-	(1, 2), 
-	(2, 1),
-	(3, 3),
-	(4, 4),
-	(5, 5),
-	(6, 7),
-	(7, 9);
+INSERT INTO relojes_vistos_usuarios (id_usuario, id_reloj) VALUES 
+	(1, 5), 
+	(1, 8), 
+	(1, 11);
 
 INSERT INTO resenias (id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso) VALUES
 	(1, 2, 'Un tanque en miniatura, impresionante', 'Su diseño simple pero atractivo, sumado a su estilo lo hacen un reloj resistente y muy recomendable', 5, '2025-05-12', 8),
@@ -130,9 +109,15 @@ CREATE MATERIALIZED VIEW busqueda_relojes AS
 	SELECT
 		r.id_reloj,
 		marcas.nombre AS marca,
+		marcas.id_marca AS id_marca,
 		r.nombre,
+		r.mecanismo,
+		r.material,
 		r.imagen,
+		r.resistencia_agua,
+		r.diametro,
 		r.precio,
+		r.sexo,
 		LOWER(r.nombre || ' ' || marcas.nombre || ' ' || r.mecanismo || ' ' || r.material) AS propiedades
 	FROM relojes r
 	JOIN marcas ON r.id_marca = marcas.id_marca;

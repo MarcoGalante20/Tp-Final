@@ -2,28 +2,21 @@ const jwt = require("jsonwebtoken");
 const AUTENTICACION = "Tp-Final-IntroSoftware";
 
 const {
-	getReloj,
 	esRelojExistente,
 } = require("./db/relojes-db.js");
 
 const {
-	getMarca,
 	esMarcaExistente,
 } = require("./db/marcas-db.js");
 
 const {
-	getUsuario,
 	esUsuarioExistente,
 } = require("./db/usuarios-db.js");
 
 const {
-	getResenia,
 	esReseniaExistente,
 } = require("./db/resenias-db.js");
 
-const {
-	getRelojesUsuario,
-} = require("./db/relojesUsuarios-db.js");
 
 const {
 	EXITO,

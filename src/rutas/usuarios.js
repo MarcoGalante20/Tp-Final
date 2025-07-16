@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const AUTENTICACION = "Tp-Final-IntroSoftware";
 
 const {
@@ -16,10 +17,15 @@ const {
 } = require("../db/usuarios-db.js");
 
 const {
-	getRelojesUsuario,
-	agregarRelojUsuario,
-	quitarRelojUsuario,
-	} = require("../db/relojesUsuarios-db.js");
+	getRelojesFavoritosUsuario,
+	getRecomendadosFavoritos,
+	agregarRelojFavoritoUsuario,
+	quitarRelojFavoritoUsuario,
+} = require("../db/relojesFavoritosUsuarios-db.js");
+
+const {
+	getRecomendadosVistos,
+} = require("../db/relojesVistosUsuarios-db.js");
 
 const {
 	validarUsuario,
@@ -151,7 +157,7 @@ router.get("/misRelojes", validarToken(), async (req, res) => {
 		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
 	}
 	
-	const relojes_usuario = await getRelojesUsuario(id_usuario);
+	const relojes_usuario = await getRelojesFavoritosUsuario(id_usuario);
 	if(relojes_usuario === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo los relojes del usuario.\n");
 	}
@@ -161,7 +167,7 @@ router.get("/misRelojes", validarToken(), async (req, res) => {
 
 
 router.post("/misRelojes", validarToken(), validarRelojUsuario(false), async (req,res) => {
-	const reloj_agregado = await agregarRelojUsuario(req.usuario.id_usuario, req.body.id_reloj);
+	const reloj_agregado = await agregarRelojFavoritoUsuario(req.usuario.id_usuario, req.body.id_reloj);
 	if(reloj_agregado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando el reloj al usuario.\n");
 	}
@@ -171,16 +177,41 @@ router.post("/misRelojes", validarToken(), validarRelojUsuario(false), async (re
 
 
 router.delete("/misRelojes", validarToken(), validarRelojUsuario(false), async (req,res) => {
-	const resultado = await quitarRelojUsuario(req.usuario.id_usuario, req.body.id_reloj);
-	
+	const resultado = await quitarRelojFavoritoUsuario(req.usuario.id_usuario, req.body.id_reloj);
 	if(resultado === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno interno quitándole el reloj al usuario\n");
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno interno quitándole el reloj al usuario.\n");
 	}
 	else if(resultado === NO_ENCONTRADO) {
 		return res.status(NO_ENCONTRADO).send("El usuario no posee el reloj en la base de datos, por lo que no es posible quitárselo.\n");
 	}
 	
 	return res.status(EXITO).send("Se le quitó el reloj al usuario con éxito.\n");
+});
+
+
+router.get("/misRecomendados/favoritos", validarToken(), async (req, res) => {
+	const relojes = await getRecomendadosFavoritos(req.usuario.id_usuario, req.query.relojes);
+	if(relojes === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las recomendaciones del usuario según sus relojes favoritos.\n");
+	}
+	else if(relojes === REQUEST_INVALIDA) {
+		res.status(REQUEST_INVALIDA).send("El rango de relojes es inválido.\n");
+	}
+	
+	return res.status(EXITO).json(relojes);
+});
+
+
+router.get("/misRecomendados/vistos", validarToken(), async (req, res) => {
+	const relojes = await getRecomendadosVistos(req.usuario.id_usuario, req.query.relojes);
+	if(relojes === undefined) {
+		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las recomendaciones del usuario según los relojes vistos.\n");
+	}
+	else if(relojes === REQUEST_INVALIDA) {
+		res.status(REQUEST_INVALIDA).send("El rango de relojes es inválido.\n");
+	}
+	
+	return res.status(EXITO).json(relojes);
 });
 
 
@@ -206,7 +237,7 @@ router.get("/:id_usuario/relojes", validarToken(), necesitaAdmin(), async (req, 
 		return res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
 	}
 	
-	const relojes_usuario = await getRelojesUsuario(req.params.id_usuario);
+	const relojes_usuario = await getRelojesFavoritosUsuario(req.params.id_usuario);
 	if(relojes_usuario === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo los relojes del usuario.\n");
 	}
@@ -216,7 +247,7 @@ router.get("/:id_usuario/relojes", validarToken(), necesitaAdmin(), async (req, 
 
 
 router.delete("/:id_usuario/relojes", validarToken(), necesitaAdmin(), validarRelojUsuario(true), async (req,res) => {
-	const resultado = await quitarRelojUsuario(req.params.id_usuario, req.body.id_reloj);
+	const resultado = await quitarRelojFavoritoUsuario(req.params.id_usuario, req.body.id_reloj);
 	
 	if(resultado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno interno quitándole el reloj al usuario\n");
