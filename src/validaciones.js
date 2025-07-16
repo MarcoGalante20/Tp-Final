@@ -54,10 +54,7 @@ async function validarRelojyUsuario(id_reloj, id_usuario, res) {
 }
 
 
-// ---------------------------- Validaciones de los relojes ------------------------------
-
-
-function validarReloj(tieneQueExistir) {
+function validarReloj() {
 	return async function(req, res, next) {
 		if(req.body === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó un cuerpo para la request.\n");
@@ -76,15 +73,6 @@ function validarReloj(tieneQueExistir) {
 		if(nombre === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó el nombre del reloj.\n");
 		}
-		if(!tieneQueExistir) {
-			const existe_reloj = await esRelojExistente(undefined, nombre);
-			if(existe_reloj === undefined) {
-				return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo al reloj en la base de datos.\n");
-			}
-			else if(existe_reloj) {
-				return res.status(CONFLICTO).send("El reloj recibido ya existe en la base de datos.\n");
-			}
-		}
 		
 		if(mecanismo !== "Cuarzo" && mecanismo !== "Automático" && mecanismo !== "Mecánico" && mecanismo !== "Solar") {
 			return res.status(REQUEST_INVALIDA).send("El mecánismo brindado no es válido.\n");
@@ -92,7 +80,7 @@ function validarReloj(tieneQueExistir) {
 		if(material !== "Plástico" && material !== "Acero Inoxidable" && material !== "Aluminio" && material !== "Titanio" && material !== "Latón" && material !== "Oro") {
 			return res.status(REQUEST_INVALIDA).send("El material del reloj no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
-		if(resistencia_agua === undefined || resistencia_agua < 0 || resistencia_agua > 600) {
+		if(resistencia_agua === undefined || resistencia_agua < 0 || resistencia_agua > 2000) {
 			return res.status(REQUEST_INVALIDA).send("La resistencia al agua del reloj no es correcta.\nVerifique que la haya ingresado y sea válida.\n");
 		}
 		if(diametro === undefined || diametro < 0 || diametro > 55) {
@@ -108,9 +96,6 @@ function validarReloj(tieneQueExistir) {
 		next();
 	};
 }
-
-
-// ---------------------------- Validaciones de las marcas ------------------------------
 
 
 function validarMarca(tieneQueExistir) {
@@ -144,9 +129,6 @@ function validarMarca(tieneQueExistir) {
 }
 
 
-// ---------------------------- Validaciones de los usuarios ------------------------------
-
-
 function validarUsuario(tieneQueExistir) {
 	return async function(req, res, next) {
 		if(req.body === undefined) {
@@ -173,7 +155,7 @@ function validarUsuario(tieneQueExistir) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó la contrasenia del usuario.\n");
 		}
 		
-		if(sexo !== 'H' && sexo !== 'M' && sexo !== '-') {
+		if(sexo !== 'H' && sexo !== 'M') {
 			return res.status(REQUEST_INVALIDA).send("El sexoo del usuario no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
 		
@@ -214,6 +196,35 @@ function validarToken() {
 }
 
 
+function validarTokenGetRelojes() {
+	return async function(req, res, next) {
+		const autenticador = req.headers["authorization"];
+		
+		let token = null;
+		if(autenticador) {
+			const partes = autenticador.split(' ');
+			if(partes.length === 2 && partes[0] === 'Bearer') {
+				token = partes[1];
+			}
+		}
+		
+		if(!token || token === "null") {
+			req.usuario.id_usuario = undefined;
+			next();
+		}
+		
+		try {
+			const datos_usuario = jwt.verify(token, AUTENTICACION);
+			req.usuario = datos_usuario;
+			next();
+		} catch(error_recibido) {
+			console.error("Error verificando el token: ", error_recibido);
+			return res.status(PROHIBIDO).send("El token recibido no es válido.\nAcceso denegado.\n");
+		}
+	}
+}
+
+
 function necesitaAdmin() {
 	return async function(req, res, next) {
 		if(req.usuario.rol !== 'admin') {
@@ -222,9 +233,6 @@ function necesitaAdmin() {
 		next();
 	}
 }
-
-
-// ---------------------------- Validaciones de las resenias ------------------------------
 
 
 function validarResenia(tieneQueExistir) {
@@ -266,9 +274,6 @@ function validarResenia(tieneQueExistir) {
 		next();
 	};
 }
-
-
-// ---------------------------- Validaciones de los relojes de los usuarios ------------------------------
 
 
 function validarRelojUsuario(por_params) {

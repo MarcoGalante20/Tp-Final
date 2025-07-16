@@ -185,7 +185,7 @@ async function determinarCaracteristicas(usuario, req) {
 	
 	if(nombre !== undefined) usuario.nombre = nombre;
 	if(contrasenia !== undefined) usuario.hash_contrasenia = await bcrypt.hash(contrasenia, 10);
-	if(sexo === 'H' || sexo === 'M' || sexo === '-') usuario.sexo = sexo;
+	if(sexo === 'H' || sexo === 'M') usuario.sexo = sexo;
 	if(precio_buscado !== undefined && precio_buscado > 0) usuario.precio_buscado = precio_buscado;
 }
 

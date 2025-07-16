@@ -30,7 +30,7 @@ function filtroInvalido(min_precio, max_precio, min_diam, max_diam, min_res, max
 function obtenerFiltros(filtros) {
 	const [min_precio, max_precio] = filtros.precio ? filtros.precio.split(',').map(Number) : [0, 50000000];
 	const [min_diam, max_diam] = filtros.diametro ? filtros.diametro.split(',').map(Number) : [0, 55];
-	const [min_res, max_res] = filtros.resistencia_agua ? filtros.resistencia_agua.split(',').map(Number) : [0, 600];
+	const [min_res, max_res] = filtros.resistencia_agua ? filtros.resistencia_agua.split(',').map(Number) : [0, 2000];
 	const [min_reloj, max_reloj] = filtros.relojes ? filtros.relojes.split(',').map(Number) : [0, 19];
 	const marcas = filtros.marcas ? filtros.marcas.split(',').map(Number) : [];
 	const mecanismos = filtros.mecanismos ? filtros.mecanismos.split(',') : ["Cuarzo", "Mecánico", "Automático", "Solar"];
@@ -284,7 +284,7 @@ async function determinarCaracteristicas(reloj, req) {
 	if(nombre !== undefined) reloj.nombre = nombre;
 	if(mecanismo === 'Cuarzo' || mecanismo === 'Mecánico' || mecanismo === 'Automático' || mecanismo === 'Solar') reloj.mecanismo = mecanismo;
 	if(material === "Plástico" || material === "Acero Inoxidable" || material === "Aluminio" || material === "Titanio" || material === "Latón" || material === "Oro") reloj.material = material;
-	if(resistencia_agua !== undefined && resistencia_agua >= 0 && resistencia_agua <= 600) reloj.resistencia_agua = resistencia_agua;
+	if(resistencia_agua !== undefined && resistencia_agua >= 0 && resistencia_agua <= 2000) reloj.resistencia_agua = resistencia_agua;
 	if(diametro !== undefined && diametro >= 0 && diametro <= 55) reloj.diametro = diametro;
 	if(precio !== undefined && precio >= 0) reloj.precio = precio;
 	if(sexo === 'H' || sexo === 'M') reloj.sexo = sexo;
