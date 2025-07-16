@@ -209,17 +209,18 @@ function validarTokenGetRelojes() {
 		}
 		
 		if(!token || token === "null") {
-			req.usuario.id_usuario = undefined;
+			req.usuario = { id_usuario: undefined };
 			next();
 		}
-		
-		try {
-			const datos_usuario = jwt.verify(token, AUTENTICACION);
-			req.usuario = datos_usuario;
-			next();
-		} catch(error_recibido) {
-			console.error("Error verificando el token: ", error_recibido);
-			return res.status(PROHIBIDO).send("El token recibido no es válido.\nAcceso denegado.\n");
+		else {
+			try {
+				const datos_usuario = jwt.verify(token, AUTENTICACION);
+				req.usuario = datos_usuario;
+				next();
+			} catch(error_recibido) {
+				console.error("Error verificando el token: ", error_recibido);
+				return res.status(PROHIBIDO).send("El token recibido no es válido.\nAcceso denegado.\n");
+			}
 		}
 	}
 }
@@ -298,4 +299,5 @@ module.exports = {
 	validarRelojUsuario,
 	validarToken,
 	necesitaAdmin,
+	validarTokenGetRelojes,
 };

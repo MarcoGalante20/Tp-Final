@@ -16,6 +16,7 @@ const {
 	validarReloj,
 	validarToken,
 	necesitaAdmin,
+	validarTokenGetRelojes,
 } = require("../validaciones.js");
 
 const {
