@@ -196,6 +196,35 @@ function validarToken() {
 }
 
 
+function validarTokenGetRelojes() {
+	return async function(req, res, next) {
+		const autenticador = req.headers["authorization"];
+		
+		let token = null;
+		if(autenticador) {
+			const partes = autenticador.split(' ');
+			if(partes.length === 2 && partes[0] === 'Bearer') {
+				token = partes[1];
+			}
+		}
+		
+		if(!token || token === "null") {
+			req.usuario.id_usuario = undefined;
+			next();
+		}
+		
+		try {
+			const datos_usuario = jwt.verify(token, AUTENTICACION);
+			req.usuario = datos_usuario;
+			next();
+		} catch(error_recibido) {
+			console.error("Error verificando el token: ", error_recibido);
+			return res.status(PROHIBIDO).send("El token recibido no es válido.\nAcceso denegado.\n");
+		}
+	}
+}
+
+
 function necesitaAdmin() {
 	return async function(req, res, next) {
 		if(req.usuario.rol !== 'admin') {
