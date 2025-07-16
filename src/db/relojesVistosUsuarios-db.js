@@ -1,116 +1,21 @@
 const dbClient = require("./conexion.js");
 
 const {
+	obtenerPorcentajesMateriales,
+	obtenerPorcentajesMecanismos,
+	obtenerPorcentajesMarcas,
+	obtenerPorcentajesSexos,
 	obtenerRankingRelojes,
 	obtenerPorRanking,
 } = require("./relacionUsuariosRelojes-db.js");
 
 const {
+	getAllRelojes,
+} = require("./relojes-db.js");
+
+const {
 	getUsuario,
 } = require("./usuarios-db.js");
-
-async function obtenerPorcentajesMaterialesVistos(id_usuario, total_relojes) {
-	try {
-		const materiales_vistos = (await dbClient.query(`
-				SELECT r.material, COUNT(*) AS cantidad
-				FROM relojes r
-				JOIN relojes_vistos_usuarios rv ON r.id_reloj = rv.id_reloj
-				WHERE rv.id_usuario = $1
-				GROUP BY r.material
-				ORDER BY cantidad DESC`,
-				[id_usuario]
-			)).rows;
-		
-		const porcentajes = {};
-		
-		for(const fila of materiales_vistos) {
-			porcentajes[fila.material] = Number(fila.cantidad) / total_relojes;
-		}
-		
-		return porcentajes;
-	} catch(error_recibido) {
-		console.error("Ocurrió el siguiente error en la función obtenerPorcentajesMaterialesVistos: ", error_recibido);
-		return undefined;
-	}
-}
-
-
-async function obtenerPorcentajesMecanismosVistos(id_usuario, total_relojes) {
-	try {
-		const mecanismos_vistos = (await dbClient.query(`
-				SELECT r.mecanismo, COUNT(*) AS cantidad
-				FROM relojes r
-				JOIN relojes_vistos_usuarios rv ON r.id_reloj = rv.id_reloj
-				WHERE rv.id_usuario = $1
-				GROUP BY r.mecanismo
-				ORDER BY cantidad DESC`,
-				[id_usuario]
-			)).rows;
-		
-		const porcentajes = {};
-		
-		for(const fila of mecanismos_vistos) {
-			porcentajes[fila.mecanismo] = (Number(fila.cantidad) / total_relojes);
-		}
-		
-		return porcentajes;
-	} catch(error_recibido) {
-		console.error("Ocurrió el siguiente error en la función obtenerPorcentajesMecanismosVistos: ", error_recibido);
-		return undefined;
-	}
-}
-
-
-async function obtenerPorcentajesMarcasVistas(id_usuario, total_relojes) {
-	try {
-		const marcas_vistas = (await dbClient.query(`
-				SELECT r.id_marca, COUNT(*) AS cantidad
-				FROM relojes r
-				JOIN relojes_vistos_usuarios rv ON r.id_reloj = rv.id_reloj
-				WHERE rv.id_usuario = $1
-				GROUP BY r.id_marca
-				ORDER BY cantidad DESC`,
-				[id_usuario]
-			)).rows;
-		
-		const porcentajes = {};
-		
-		for(const fila of marcas_vistas) {
-			porcentajes[fila.id_marca] = Number(fila.cantidad) / total_relojes;
-		}
-		
-		return porcentajes;
-	} catch(error_recibido) {
-		console.error("Ocurrió el siguiente error en la función obtenerPorcentajesMarcasVistas: ", error_recibido);
-		return undefined;
-	}
-}
-
-
-async function obtenerPorcentajesSexosVistos(id_usuario, total_relojes) {
-	try {
-		const sexos_vistos = (await dbClient.query(`
-				SELECT r.sexo, COUNT(*) AS cantidad
-				FROM relojes r
-				JOIN relojes_vistos_usuarios rv ON r.id_reloj = rv.id_reloj
-				WHERE rv.id_usuario = $1
-				GROUP BY r.sexo
-				ORDER BY cantidad DESC`,
-				[id_usuario]
-			)).rows;
-		
-		const porcentajes = {};
-		
-		for(const fila of sexos_vistos) {
-			porcentajes[fila.sexo] = Number(fila.cantidad) / total_relojes;
-		}
-		
-		return porcentajes;
-	} catch(error_recibido) {
-		console.error("Ocurrió el siguiente error en la función obtenerPorcentajesSexosVistos: ", error_recibido);
-		return undefined;
-	}
-}
 
 
 async function obtenerPromediosVistos(id_usuario) {
@@ -152,22 +57,28 @@ async function obtenerTotalRelojesVistos(id_usuario) {
 }
 
 
-async function getRecomendadosVistos(id_usuario) {
+async function getRecomendadosVistos(id_usuario, relojes) {
 	try {
+		const [min_relojes, max_relojes] = filtros.relojes ? filtros.relojes.split(',').map(Number) : [0, 19];
+		
 		const total_relojes = await obtenerTotalRelojesVistos(id_usuario);
 		if(total_relojes === undefined) return undefined;
 		
-		const porcentajes_mecanismos = await obtenerPorcentajesMecanismosVistos(id_usuario, total_relojes);
+		if(max_relojes > total_relojes) max_relojes = total_relojes;
+		
+		const porcentajes_mecanismos = await obtenerPorcentajesMecanismos(id_usuario, total_relojes, "relojes vistos");
 		if(porcentajes_mecanismos === undefined) return undefined;
 		
-		const porcentajes_materiales = await obtenerPorcentajesMaterialesVistos(id_usuario, total_relojes);
+		const porcentajes_materiales = await obtenerPorcentajesMateriales(id_usuario, total_relojes, "relojes vistos");
 		if(porcentajes_materiales === undefined) return undefined;
 		
-		const porcentajes_marcas = await obtenerPorcentajesMarcasVistas(id_usuario, total_relojes);
+		const porcentajes_marcas = await obtenerPorcentajesMarcas(id_usuario, total_relojes, "relojes vistos");
 		if(porcentajes_marcas === undefined) return undefined;
 		
-		const porcentajes_sexos = await obtenerPorcentajesSexosVistos(id_usuario, total_relojes);
+		const porcentajes_sexos = await obtenerPorcentajesSexos(id_usuario, total_relojes, "relojes vistos");
 		if(porcentajes_sexos === undefined) return undefined;
+		
+		const porcentajes = { mecanismos: porcentajes_mecanismos, materiales: porcentajes_materiales, marcas: porcentajes_marcas, sexos: porcentajes_sexos };
 		
 		const promedios = await obtenerPromediosVistos(id_usuario); 
 		if(promedios === undefined) return undefined;
@@ -179,9 +90,9 @@ async function getRecomendadosVistos(id_usuario) {
 		if(usuario === undefined) return undefined;
 		const preferencias_usuario = { precio_buscado: usuario.precio_buscado, sexo: usuario.sexo };
 		
-		const { id_relojes, orden } = obtenerRankingRelojes(relojes, promedios, porcentajes_sexos, porcentajes_marcas, porcentajes_materiales, porcentajes_mecanismos, preferencias_usuario);
+		const { id_relojes, orden } = obtenerRankingRelojes(relojes, promedios, porcentajes, preferencias_usuario, max_relojes);
 		
-		const recomendados_rankeados = await obtenerPorRanking(id_relojes, orden, id_usuario, "relojes vistos");
+		const recomendados_rankeados = await obtenerPorRanking(id_relojes, orden, id_usuario, min_relojes, "relojes vistos");
 		if(recomendados_rankeados === undefined) return undefined;
 		
 		return recomendados_rankeados;

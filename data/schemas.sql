@@ -90,6 +90,11 @@ INSERT INTO relojes_favoritos_usuarios (id_usuario, id_reloj) VALUES
 	(1, 8), 
 	(1, 11);
 
+INSERT INTO relojes_vistos_usuarios (id_usuario, id_reloj) VALUES 
+	(1, 5), 
+	(1, 8), 
+	(1, 11);
+
 INSERT INTO resenias (id_reloj, id_usuario, titulo, resenia, calificacion, fecha, meses_de_uso) VALUES
 	(1, 2, 'Un tanque en miniatura, impresionante', 'Su diseño simple pero atractivo, sumado a su estilo lo hacen un reloj resistente y muy recomendable', 5, '2025-05-12', 8),
 	(2, 1, 'El mejor para el día a día', 'Elegante, resistente, simple y no es caro. Qué más querés pedir?', 5, '2024-11-09', 7),

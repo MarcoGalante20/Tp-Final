@@ -19,12 +19,6 @@ const {
 } = require("../validaciones.js");
 
 const {
-	getExtrasReloj,
-	agregarExtraReloj,
-	quitarExtraReloj,
-} = require("../db/extrasRelojes-db.js");
-
-const {
 	EXITO,
 	CREADO,
 	REQUEST_INVALIDA,

@@ -189,7 +189,7 @@ router.delete("/misRelojes", validarToken(), validarRelojUsuario(false), async (
 
 
 router.get("/misRecomendados/favoritos", validarToken(), async (req, res) => {
-	const relojes = await getRecomendadosFavoritos(req.usuario.id_usuario);
+	const relojes = await getRecomendadosFavoritos(req.usuario.id_usuario, req.query.relojes);
 	if(relojes === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las recomendaciones del usuario según sus relojes favoritos.\n");
 	}
@@ -202,7 +202,7 @@ router.get("/misRecomendados/favoritos", validarToken(), async (req, res) => {
 
 
 router.get("/misRecomendados/vistos", validarToken(), async (req, res) => {
-	const relojes = await getRecomendadosVistos(req.usuario.id_usuario);
+	const relojes = await getRecomendadosVistos(req.usuario.id_usuario, req.query.relojes);
 	if(relojes === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las recomendaciones del usuario según los relojes vistos.\n");
 	}
