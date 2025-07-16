@@ -1,3 +1,16 @@
+function inicializarEncabezado() {
+    const botonCerrarSesion = document.createElement("button");
+    botonCerrarSesion.classList.add("button", "is-danger", "is-small");
+    botonCerrarSesion.textContent = "Cerrar sesion"
+    botonCerrarSesion.addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = ("../usuarios.html");
+    })
+
+    document.getElementById("encabezado").appendChild(botonCerrarSesion);
+}
+
+
 function insertarDatosEnPagina(datos) {
     const nombreUsuario = document.getElementById("nombreUsuario");
     nombreUsuario.textContent += `${datos.nombre}`;
@@ -129,6 +142,7 @@ function asignarEscucharCambios() {
 
 function crearPagina() {
     insertarDatosUsuario();
+    inicializarEncabezado();
     asignarEscucharCambios();
 }
 
