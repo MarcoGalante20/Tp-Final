@@ -35,6 +35,11 @@ async function insertarDatosUsuario() {
             alert("Acceso denegado, solo podes ingresar a tu usuario");
             window.location.href = ("../usuarios.html");
         }
+        if (respuesta.status == 404) {
+            alert("Este usuario no existe");
+            localStorage.clear();
+            window.location.href = ("../usuarios.html");
+        }
         if (!respuesta.ok) {
             const mensajeError = await respuesta.text();
             throw new Error(`${respuesta.status}\n${mensajeError}`);
