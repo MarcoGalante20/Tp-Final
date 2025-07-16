@@ -623,7 +623,20 @@ async function cargarRelojesNuevos() {
         });
     }
     else {
-        console.log("Cositas");
+        const input = document.getElementById("inputBusqueda").value;
+        const params = `busqueda=${input}&relojes=${inicio},${final}`
+        return fetch(`http://localhost:3000/api/v1/relojes/busqueda?busqueda=${params}`)
+        .then((respuesta) => {
+            return respuesta.json();
+        })
+
+        .then((data) => {
+            insertarRelojes(data);
+        })
+
+        .catch((error) => {
+            console.error("Hubo un error al obtener los relojes:\n", error);
+        });
     }
 }
 
