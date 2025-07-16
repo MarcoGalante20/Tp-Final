@@ -54,9 +54,6 @@ async function validarRelojyUsuario(id_reloj, id_usuario, res) {
 }
 
 
-// ---------------------------- Validaciones de los relojes ------------------------------
-
-
 function validarReloj() {
 	return async function(req, res, next) {
 		if(req.body === undefined) {
@@ -83,7 +80,7 @@ function validarReloj() {
 		if(material !== "Plástico" && material !== "Acero Inoxidable" && material !== "Aluminio" && material !== "Titanio" && material !== "Latón" && material !== "Oro") {
 			return res.status(REQUEST_INVALIDA).send("El material del reloj no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
 		}
-		if(resistencia_agua === undefined || resistencia_agua < 0 || resistencia_agua > 600) {
+		if(resistencia_agua === undefined || resistencia_agua < 0 || resistencia_agua > 2000) {
 			return res.status(REQUEST_INVALIDA).send("La resistencia al agua del reloj no es correcta.\nVerifique que la haya ingresado y sea válida.\n");
 		}
 		if(diametro === undefined || diametro < 0 || diametro > 55) {
@@ -99,9 +96,6 @@ function validarReloj() {
 		next();
 	};
 }
-
-
-// ---------------------------- Validaciones de las marcas ------------------------------
 
 
 function validarMarca(tieneQueExistir) {
@@ -135,16 +129,13 @@ function validarMarca(tieneQueExistir) {
 }
 
 
-// ---------------------------- Validaciones de los usuarios ------------------------------
-
-
 function validarUsuario(tieneQueExistir) {
 	return async function(req, res, next) {
 		if(req.body === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó un cuerpo para la request.\n");
 		}
 		
-		const { nombre, contrasenia, sexo, edad, precio_buscado } = req.body;
+		const { nombre, contrasenia, sexo, precio_buscado } = req.body;
 		
 		if(nombre === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó el nombre del usuario.\n");
@@ -164,12 +155,8 @@ function validarUsuario(tieneQueExistir) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó la contrasenia del usuario.\n");
 		}
 		
-		if(sexo !== 'H' && sexo !== 'M' && sexo !== '-') {
+		if(sexo !== 'H' && sexo !== 'M') {
 			return res.status(REQUEST_INVALIDA).send("El sexoo del usuario no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
-		}
-		
-		if(edad === undefined || edad < 0 || edad > 122) {
-			return res.status(REQUEST_INVALIDA).send("No se brindó la edad del usuario.\n");
 		}
 		
 		if(precio_buscado === undefined || precio_buscado < 0) {
@@ -219,9 +206,6 @@ function necesitaAdmin() {
 }
 
 
-// ---------------------------- Validaciones de las resenias ------------------------------
-
-
 function validarResenia(tieneQueExistir) {
 	return async function(req, res, next) {
 		if(req.body === undefined) {
@@ -261,9 +245,6 @@ function validarResenia(tieneQueExistir) {
 		next();
 	};
 }
-
-
-// ---------------------------- Validaciones de los relojes de los usuarios ------------------------------
 
 
 function validarRelojUsuario(por_params) {

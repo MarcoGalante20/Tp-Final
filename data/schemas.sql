@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE TABLE marcas (
 	id_marca SERIAL PRIMARY KEY,
 	nombre VARCHAR(20) NOT NULL UNIQUE,
-	imagen VARCHAR(200)
+	imagen TEXT
 );
 
 CREATE TABLE relojes (
@@ -12,7 +12,7 @@ CREATE TABLE relojes (
 	nombre VARCHAR(50) NOT NULL,
 	mecanismo VARCHAR(50) NOT NULL,
 	material VARCHAR(50) NOT NULL,
-	imagen VARCHAR(200),
+	imagen TEXT,
 	resistencia_agua INT NOT NULL,
 	diametro INT NOT NULL,
 	precio INT NOT NULL,
@@ -77,13 +77,13 @@ INSERT INTO relojes (id_marca, nombre, mecanismo, material, resistencia_agua, di
 	(6, 'Seamaster', 'Automático', 'Acero Inoxidable', 300, 42, 700000, 'M');
 
 INSERT INTO usuarios (nombre, hash_contrasenia, rol, sexo, precio_buscado) VALUES
-	('Marco12', '$2b$10$a.ngcApdpiEi0d/iZn6beekAMGaQYwmgBiSSccp4ic5EDE8k969T6', 'admin', 'M', 120000),
-	('Juanfran', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'M', 300000),
-	('Ana', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 150000),
-	('Luis', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 500000),
-	('Sofía', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 200000),
-	('Carlos', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 1000000),
-	('Marta', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 70000);
+	('Marco12', '$2b$10$a.ngcApdpiEi0d/iZn6beekAMGaQYwmgBiSSccp4ic5EDE8k969T6', 'admin', 'H', 120000),
+	('Juanfran', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'H', 300000),
+	('Ana', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 150000),
+	('Luis', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'H', 500000),
+	('Sofía', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 200000),
+	('Carlos', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'H', 1000000),
+	('Marta', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 70000);
 
 INSERT INTO relojes_favoritos_usuarios (id_usuario, id_reloj) VALUES 
 	(1, 5), 

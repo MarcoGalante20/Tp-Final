@@ -19,6 +19,11 @@ const {
 } = require("../validaciones.js");
 
 const {
+	agregarRelojVistoUsuario,
+} = require("../db/relojesVistosUsuarios-db.js");
+
+
+const {
 	EXITO,
 	CREADO,
 	REQUEST_INVALIDA,
@@ -44,7 +49,7 @@ router.get("/", async (req, res) => {
 });
 
 
-router.post("/", validarToken(), necesitaAdmin(), validarReloj(false), async (req, res) => {
+router.post("/", validarToken(), necesitaAdmin(), validarReloj(), async (req, res) => {
 	const reloj = await crearReloj(req);
 	if(reloj === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando el reloj a la base de datos.\n");
@@ -76,7 +81,7 @@ router.get("/:id_reloj", validarToken(), async (req, res) => {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
 	}
 	
-	const resultado = await agegarRelojVistoUsuario(req.usuario.id_usuario, req.params.id_reloj);
+	const resultado = await agregarRelojVistoUsuario(req.usuario.id_usuario, req.params.id_reloj);
 	if(resultado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error agregando el reloj a los visitados por el usuario.\n");
 	}
@@ -98,7 +103,7 @@ router.delete("/:id_reloj", validarToken(), necesitaAdmin(), async (req, res) =>
 });
 
 
-router.put("/:id_reloj", validarToken(), necesitaAdmin(), validarReloj(true), async (req, res) => {
+router.put("/:id_reloj", validarToken(), necesitaAdmin(), validarReloj(), async (req, res) => {
 	const reloj_actualizado = await actualizarReloj(req);
 	if(reloj_actualizado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno actualizando el reloj en la base de datos.\n");
