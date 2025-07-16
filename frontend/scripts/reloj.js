@@ -378,7 +378,9 @@ async function publicarReview(idReloj) {
     const meses_de_uso = inputMeses_de_uso.value;
     inputMeses_de_uso.value = "";
 
-    if ((titulo != "") && (resenia != "") && (calificacion != "") && (meses_de_uso != "")) {
+    const id_usuario = localStorage.getItem("id_usuario");
+
+    if ((id_usuario != null) && (titulo != "") && (resenia != "") && (calificacion != "") && (meses_de_uso != "")) {
         fetch('http://localhost:3000/api/v1/resenias', {
             method: 'POST',
             headers: {
@@ -387,7 +389,6 @@ async function publicarReview(idReloj) {
             },
             body: JSON.stringify({
                 id_reloj: idReloj,
-                id_usuario: 2,
                 titulo,
                 resenia,
                 calificacion,
@@ -407,7 +408,12 @@ async function publicarReview(idReloj) {
         });
     }
     else {
-        alert("Todos los campos tienen que tener un valor");
+        if (id_usuario == null) {
+            alert("Inicie sesion para publicar una reseña");
+        }
+        else {
+            alert("Todos los campos tienen que tener un valor");
+        }
     }
 }
 

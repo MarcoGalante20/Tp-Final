@@ -533,11 +533,11 @@ function insertarRelojes(data) {
         const nuevoReloj = document.createElement("div");
         nuevoReloj.classList.add("nuevoReloj");
         nuevoReloj.addEventListener("click", () => {
-            window.location.href = ("http://localhost:8080/reloj.html?id=" + infoReloj.id_reloj);
+            window.location.href = ("./reloj.html?id=" + infoReloj.id_reloj);
         });
         nuevoReloj.addEventListener("mousedown", function(event) {
             if (event.button === 1) {
-                window.open("http://localhost:8080/reloj.html?id=" + infoReloj.id_reloj, "_blank");
+                window.open("./reloj.html?id=" + infoReloj.id_reloj, "_blank");
             }
         });
 

@@ -1,4 +1,4 @@
-function ingresarSesion() {
+function iniciarSesion() {
     const inputNombre = document.getElementById("inputNombre");
     const nombre = inputNombre.value;
     inputNombre.value = "";
@@ -41,11 +41,76 @@ function ingresarSesion() {
     }
 }
 
-function inicializarBotonIngresarSesion() {
-    const botonIngresarSesion = document.getElementById("botonIngresarSesion");
-    botonIngresarSesion.addEventListener("click", () => {
-        ingresarSesion();
+
+
+function inicializarCrearUsuario() {
+    const crearUsuario = document.getElementById("crearUsuario");
+    const modalCrearUsuario = document.getElementById("modalCrearUsuario");
+    crearUsuario.addEventListener("click", () => {
+        modalCrearUsuario.classList.add("is-active");
+        document.getElementById("inputNombreModalCrearUsuario").value="";
+        document.getElementById("inputContraseniaModalCrearUsuario").value="";
+    })
+    const modalCrearUsuarioBackground = document.getElementById("modalCrearUsuarioBackground");
+    modalCrearUsuarioBackground.addEventListener("click", () => {
+        modalCrearUsuario.classList.remove("is-active");
     })
 }
 
-inicializarBotonIngresarSesion();
+async function crearUsuario() {
+    const inputNombreModalCrearUsuario = document.getElementById("inputNombreModalCrearUsuario");
+    const nombre = inputNombreModalCrearUsuario.value;
+
+    const inputContraseniaModalCrearUsuario = document.getElementById("inputContraseniaModalCrearUsuario");
+    const contrasenia = inputContraseniaModalCrearUsuario.value;
+
+    const selectSexoModalCrearUsuario = document.getElementById("selectSexoModalCrearUsuario");
+    const sexo = selectSexoModalCrearUsuario.value;
+
+    if ((nombre != "") && (contrasenia != "")) {
+        fetch("http://localhost:3000/api/v1/usuarios", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                nombre,
+                contrasenia,
+                sexo,
+                edad: null,
+                precio_buscado: null
+            })
+        })
+        .then( async (respuesta) => {
+            if (!respuesta.ok) {
+                const mensajeError = await respuesta.text();
+                throw new Error(`${respuesta.status}\n${mensajeError}`);
+            } 
+            return respuesta.json();
+        })
+        .catch(error => {
+            alert(`${error}`);
+            console.error("Error al crear el usuario:", error);
+        });
+    }
+    else {
+        alert("Todos los campos necesitan tener un valor")
+    }
+}
+
+function inicializarBotonCrearUsuario() {
+    const botonCrearUsuario = document.getElementById("botonCrearUsuario");
+    botonCrearUsuario.addEventListener("click", () => {
+        crearUsuario();
+        document.getElementById("modalCrearUsuario").classList.remove("is-active");
+    })
+}
+
+function inicializarModalCrearUsuario() {
+    inicializarCrearUsuario();
+    inicializarBotonCrearUsuario();
+}
+
+
+inicializarModalCrearUsuario();
+
