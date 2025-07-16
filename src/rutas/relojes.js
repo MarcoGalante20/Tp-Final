@@ -19,6 +19,10 @@ const {
 } = require("../validaciones.js");
 
 const {
+	agregarRelojVistoUsuario,
+} = require("../db/relojesVistosUsuarios-db.js");
+
+const {
 	EXITO,
 	CREADO,
 	REQUEST_INVALIDA,
@@ -76,7 +80,7 @@ router.get("/:id_reloj", validarToken(), async (req, res) => {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
 	}
 	
-	const resultado = await agegarRelojVistoUsuario(req.usuario.id_usuario, req.params.id_reloj);
+	const resultado = await agregarRelojVistoUsuario(req.usuario.id_usuario, req.params.id_reloj);
 	if(resultado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error agregando el reloj a los visitados por el usuario.\n");
 	}

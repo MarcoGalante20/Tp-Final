@@ -153,7 +153,7 @@ function validarUsuario(tieneQueExistir) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó un cuerpo para la request.\n");
 		}
 		
-		const { nombre, contrasenia, sexo, edad, precio_buscado } = req.body;
+		const { nombre, contrasenia, sexo, precio_buscado } = req.body;
 		
 		if(nombre === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó el nombre del usuario.\n");
@@ -175,10 +175,6 @@ function validarUsuario(tieneQueExistir) {
 		
 		if(sexo !== 'H' && sexo !== 'M' && sexo !== '-') {
 			return res.status(REQUEST_INVALIDA).send("El sexoo del usuario no es correcto.\nVerifique que lo haya ingresado y sea válido.\n");
-		}
-		
-		if(edad === undefined || edad < 0 || edad > 122) {
-			return res.status(REQUEST_INVALIDA).send("No se brindó la edad del usuario.\n");
 		}
 		
 		if(precio_buscado === undefined || precio_buscado < 0) {

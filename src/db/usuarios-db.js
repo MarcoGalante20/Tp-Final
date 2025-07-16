@@ -57,19 +57,18 @@ async function getUsuario(id_usuario, nombre) {
 
 async function crearUsuario(req) {
 	try { 
-		const { nombre, contrasenia, sexo, edad, precio_buscado} = req.body;
+		const { nombre, contrasenia, sexo, precio_buscado} = req.body;
 		const hash_contrasenia = await bcrypt.hash(contrasenia, 10);
 		
 		const resultado = await dbClient.query(
-			"INSERT INTO usuarios (nombre, hash_contrasenia, sexo, edad, precio_buscado) VALUES ($1, $2, $3, $4, $5)",
-			[nombre, hash_contrasenia, sexo, edad, precio_buscado]
+			"INSERT INTO usuarios (nombre, hash_contrasenia, sexo, precio_buscado) VALUES ($1, $2, $3, $4)",
+			[nombre, hash_contrasenia, sexo, precio_buscado]
 		);
 		
 		return {
 			nombre,
 			contrasenia, 
 			sexo,
-			edad,
 			precio_buscado,
 		};
 	} catch(error_devuelto) {
@@ -154,13 +153,13 @@ async function eliminarUsuario(id_usuario) {
 
 // Devuelve el nuevo usuario si se pudo actualizar y undefined en caso contrario
 async function actualizarUsuario(id_usuario, req) {
-	const { nombre, contrasenia, sexo, edad, precio_buscado } = req.body;
+	const { nombre, contrasenia, sexo, precio_buscado } = req.body;
 	const hash_contrasenia = await bcrypt.hash(contrasenia, 10);
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE usuarios SET nombre = $2, hash_contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
-			[id_usuario, nombre, hash_contrasenia, sexo, edad, precio_buscado]
+			"UPDATE usuarios SET nombre = $2, hash_contrasenia = $3, sexo = $4, precio_buscado = $5 WHERE id_usuario = $1",
+			[id_usuario, nombre, hash_contrasenia, sexo, precio_buscado]
 		);
 		
 		if(resultado.rowCount === 0) {
@@ -172,7 +171,6 @@ async function actualizarUsuario(id_usuario, req) {
 			nombre,
 			contrasenia,
 			sexo,
-			edad,
 			precio_buscado,
 		};
 	} catch (error_devuelto) {
@@ -183,11 +181,10 @@ async function actualizarUsuario(id_usuario, req) {
 
 
 async function determinarCaracteristicas(usuario, req) {
-	const { nombre, contrasenia, sexo, edad, precio_buscado } = req.body;
+	const { nombre, contrasenia, sexo, precio_buscado } = req.body;
 	
 	if(nombre !== undefined) usuario.nombre = nombre;
 	if(contrasenia !== undefined) usuario.hash_contrasenia = await bcrypt.hash(contrasenia, 10);
-	if(edad !== undefined && edad > 0 && edad < 122) usuario.edad = edad;
 	if(sexo === 'H' || sexo === 'M' || sexo === '-') usuario.sexo = sexo;
 	if(precio_buscado !== undefined && precio_buscado > 0) usuario.precio_buscado = precio_buscado;
 }
@@ -202,8 +199,8 @@ async function patchearUsuario(id_usuario, req) {
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE usuarios SET nombre = $2, hash_contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
-			[usuario.id_usuario, usuario.nombre, usuario.hash_contrasenia, usuario.sexo, usuario.edad, usuario.precio_buscado]
+			"UPDATE usuarios SET nombre = $2, hash_contrasenia = $3, sexo = $4, precio_buscado = $5 WHERE id_usuario = $1",
+			[usuario.id_usuario, usuario.nombre, usuario.hash_contrasenia, usuario.sexo, usuario.precio_buscado]
 		);
 		
 		if(resultado.rowCount === 0) {
@@ -215,7 +212,6 @@ async function patchearUsuario(id_usuario, req) {
 			nombre: usuario.nombre,
 			contrasenia: usuario.contrasenia,
 			sexo: usuario.sexo,
-			edad: usuario.edad,
 			precio_buscado: usuario.precio_buscado,
 		};
 	} catch(error_devuelto) {

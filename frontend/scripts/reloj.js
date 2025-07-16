@@ -451,7 +451,13 @@ function inicializarBotonPublicarResenia() {
 
 async function crearPagina(idReloj) {
     inicializarEncabezado();
-    return fetch(`http://localhost:3000/api/v1/relojes/${idReloj}`)
+    return fetch(`http://localhost:3000/api/v1/relojes/${idReloj}`, {
+        method: "GET",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem("token")}`
+        }
+    })
     .then( async (respuesta) => {
         if (respuesta.status == 404) {
             alert("No se encontro la pagina del reloj, lo sentimos");
