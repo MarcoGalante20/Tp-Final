@@ -1,53 +1,56 @@
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
-create table marcas (
-	id_marca serial primary key,
-	nombre varchar(20),
-	imagen varchar(200)
+CREATE TABLE marcas (
+	id_marca serial PRIMARY KEY,
+	nombre VARCHAR(20) NOT NULL UNIQUE,
+	imagen VARCHAR(200)
 );
 
-create table relojes (
-	id_reloj serial primary key,
-	id_marca int REFERENCES marcas (id_marca) ON DELETE CASCADE,
-	nombre varchar(50) not null,
-	mecanismo varchar(50) not null default 'Cuarzo',
-	material varchar(50) not null default 'Acero-inox',
-	imagen varchar(200),
-	resistencia_agua int not null default 30,
-	diametro int not null,
-	precio int not null,
-	sexo char
+CREATE TABLE relojes (
+	id_reloj serial PRIMARY KEY,
+	id_marca INT REFERENCES marcas (id_marca) ON DELETE CASCADE,
+	nombre VARCHAR(50) NOT NULL UNIQUE,
+	mecanismo VARCHAR(50) NOT NULL,
+	material VARCHAR(50) NOT NULL,
+	imagen VARCHAR(200),
+	resistencia_agua INT NOT NULL,
+	diametro INT NOT NULL,
+	precio INT NOT NULL,
+	sexo CHAR NOT NULL
 );
 
-create table usuarios (
-	id_usuario serial primary key,
-	nombre varchar(50) not null,
-	contrasenia varchar(50) not null,
-	sexo char,
-	edad int,
-	precio_buscado int
+CREATE TABLE usuarios (
+	id_usuario serial PRIMARY KEY,
+	nombre VARCHAR(50) NOT NULL UNIQUE,
+	hash_contrasenia VARCHAR(255) NOT NULL,
+	rol VARCHAR(20) DEFAULT 'usuario',
+	sexo CHAR,
+	edad INT,
+	precio_buscado INT
 );
 
-create table resenias (
-	id_resenia serial primary key,
-	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE,
-	id_usuario int REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
-	titulo varchar(50),
-	resenia text not null,
-	calificacion int not null,
-	fecha date not null,
-	meses_de_uso int not null
+CREATE TABLE resenias (
+	id_resenia serial PRIMARY KEY,
+	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
+	id_usuario INT REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
+	titulo VARCHAR(50),
+	resenia TEXT NOT NULL,
+	calificacion INT NOT NULL,
+	fecha DATE NOT NULL,
+	meses_de_uso INT NOT NULL
 );
 
 
-create table relojes_usuarios (
-	id_usuario int REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
-	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE
+CREATE TABLE relojes_usuarios (
+	id_usuario INT REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
+	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
+	PRIMARY KEY (id_usuario, id_reloj)
 );
 
-create table extras_reloj (
-	id_reloj int REFERENCES relojes (id_reloj) ON DELETE CASCADE,
-	atributo varchar(50) not null
+CREATE TABLE extras_reloj (
+	id_reloj INT REFERENCES relojes (id_reloj) ON DELETE CASCADE,
+	atributo VARCHAR(50) NOT NULL,
+	PRIMARY KEY (id_reloj, atributo)
 );
 
 
@@ -95,14 +98,14 @@ INSERT INTO extras_reloj (id_reloj, atributo) VALUES
 	(10, 'Buceo'),
 	(10, 'Elegante');
 
-INSERT INTO usuarios (nombre, contrasenia, sexo, edad, precio_buscado) VALUES
-	('Marco12', 'Boquitael+grande', 'M', 19, 120000),
-	('Juanfran', 'Calamardexvida', 'M', 19, 300000),
-	('Ana', 'pass123', 'F', 25, 150000),
-	('Luis', 'contraseña', 'M', 32, 500000),
-	('Sofía', 'abcd1234', 'F', 28, 200000),
-	('Carlos', 'qwerty', 'M', 40, 1000000),
-	('Marta', 'zxcvbn', 'F', 35, 70000);
+INSERT INTO usuarios (nombre, hash_contrasenia, rol, sexo, edad, precio_buscado) VALUES
+	('Marco12', '$2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'M', 19, 120000),
+	('Juanfran', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'admin', 'M', 19, 300000),
+	('Ana', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 25, 150000),
+	('Luis', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 32, 500000),
+	('Sofía', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 28, 200000),
+	('Carlos', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'M', 40, 1000000),
+	('Marta', '2b$10$K4hkXMuG7rI28hGkybKkBuQ4VK1ELm6zNx7QkBOdfhdK3t4oP1pQi', 'usuario', 'F', 35, 70000);
 
 INSERT INTO relojes_usuarios (id_usuario, id_reloj) VALUES 
 	(1, 2), 

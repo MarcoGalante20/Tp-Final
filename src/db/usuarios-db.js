@@ -1,26 +1,47 @@
 const dbClient = require("./conexion.js");
+const bcrypt = require("bcrypt");
 
 const {
-	ELIMINADO,
+	EXITO,
+	REQUEST_INVALIDA,
 	NO_ENCONTRADO,
 	ERROR_INTERNO,
 } = require("../codigosStatusHttp.js");
 
 async function getAllUsuarios() {
 	try {
-		const usuarios = await dbClient.query("SELECT * FROM usuarios ORDER BY id_usuario ASC");
+		const usuarios = await dbClient.query(`
+			SELECT 
+				u.id_usuario,
+				u.nombre,
+				u.rol,
+				u.sexo
+			FROM usuarios u 
+			ORDER BY id_usuario ASC`
+		);
 		
 		return usuarios.rows;
 	} catch(error_recibido) {
-		console.error("Error en getAllUsuarios: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getAllUsuarios: ", error_recibido);
 		return undefined;
 	}
 }
 
 
-async function getUsuario(id_usuario) {
+async function getUsuario(id_usuario, nombre) {
 	try {
-		const usuario = await dbClient.query("SELECT * FROM usuarios WHERE id_usuario = $1", [id_usuario]);
+		let usuario;
+		
+		if(nombre === undefined) {
+			if(id_usuario === undefined) {
+				return undefined;
+			}
+			usuario = await dbClient.query("SELECT * FROM usuarios WHERE id_usuario = $1", [id_usuario]);
+		}
+		else {
+			usuario = await dbClient.query("SELECT * FROM usuarios WHERE nombre = $1", [nombre]);
+		}
+		
 		
 		if(usuario.rows.length === 0) {
 			return NO_ENCONTRADO;
@@ -28,19 +49,32 @@ async function getUsuario(id_usuario) {
 		
 		return usuario.rows[0];
 	} catch(error_recibido) {
-		console.error("Error en getUsuario: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getUsuario: ", error_recibido);
+		return undefined;
+	}
+}
+
+
+async function getHashUsuario(nombre) {
+	try {
+		const hash = await dbClient.query("SELECT hash_contrasenia FROM usuarios WHERE nombre = $1", [nombre]);
+		
+		return hash.rows[0].hash_contrasenia;
+	} catch(error_recibido) {
+		console.error("Ocurrió el siguiente error en la función getUsuarioId: ", error_recibido);
 		return undefined;
 	}
 }
 
 
 async function crearUsuario(req) {
-	const { nombre, contrasenia, sexo, edad, precio_buscado} = req.body;
-	
 	try { 
+		const { nombre, contrasenia, sexo, edad, precio_buscado} = req.body;
+		const hash_contrasenia = await bcrypt.hash(contrasenia, 10);
+		
 		const resultado = await dbClient.query(
-			"INSERT INTO usuarios (nombre, contrasenia, sexo, edad, precio_buscado) VALUES ($1, $2, $3, $4, $5)",
-			[nombre, contrasenia, sexo, edad, precio_buscado]
+			"INSERT INTO usuarios (nombre, hash_contrasenia, sexo, edad, precio_buscado) VALUES ($1, $2, $3, $4, $5)",
+			[nombre, hash_contrasenia, sexo, edad, precio_buscado]
 		);
 		
 		return {
@@ -51,22 +85,51 @@ async function crearUsuario(req) {
 			precio_buscado,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en crearUsuario: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función crearUsuario: ", error_devuelto);
 		return undefined;
 	}
 }
 
 
-async function esUsuarioExistente(nombre) {
+async function logearUsuario(nombre, contrasenia) {
 	try {
-		const respuesta = await dbClient.query("SELECT * FROM usuarios WHERE nombre = $1", [nombre]);
+		const hash = await getHashUsuario(nombre); 
+		if(hash === undefined) return undefined;
+		
+		const es_correcta = await bcrypt.compare(contrasenia, hash);
+		
+		if(!es_correcta) {
+			return REQUEST_INVALIDA;
+		}
+		
+		return EXITO;
+	} catch(error_recibido) {
+		console.error("Ocurrió el siguiente error en la función logearUsuario: ", error_recibido);
+		return undefined;
+	}
+}
+
+
+async function esUsuarioExistente(id_usuario, nombre) {
+	let respuesta;
+	
+	try {
+		if(nombre === undefined) {
+			if(id_usuario === undefined) {
+				return undefined;
+			}
+			respuesta = await dbClient.query("SELECT 1 FROM usuarios WHERE id_usuario = $1", [id_usuario]);
+		} else {
+			respuesta = await dbClient.query("SELECT 1 FROM usuarios WHERE nombre = $1", [nombre]);
+		};
 		
 		if(respuesta.rows.length !== 0) {
 			return true;
 		}
+		
 		return false;
 	} catch(error_recibido) {
-		console.error("Error en esUsuarioExistente: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función esUsuarioExistente: ", error_recibido);
 		return undefined;
 	}
 }
@@ -81,23 +144,23 @@ async function eliminarUsuario(id_usuario) {
 			return NO_ENCONTRADO;
 		}
 		
-		return ELIMINADO;
+		return EXITO;
 	} catch (error_devuelto) {
-		console.error("Error en eliminarUsuario: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función eliminarUsuario: ", error_devuelto);
 		return ERROR_INTERNO;
 	}
 }
 
 
 // Devuelve el nuevo usuario si se pudo actualizar y undefined en caso contrario
-async function actualizarUsuario(req) {
-	const id_usuario = req.params.id_usuario;
+async function actualizarUsuario(id_usuario, req) {
 	const { nombre, contrasenia, sexo, edad, precio_buscado } = req.body;
+	const hash_contrasenia = await bcrypt.hash(contrasenia, 10);
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE usuarios SET nombre = $2, contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
-			[id_usuario, nombre, contrasenia, sexo, edad, precio_buscado]
+			"UPDATE usuarios SET nombre = $2, hash_contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
+			[id_usuario, nombre, hash_contrasenia, sexo, edad, precio_buscado]
 		);
 		
 		if(resultado.rowCount === 0) {
@@ -113,38 +176,42 @@ async function actualizarUsuario(req) {
 			precio_buscado,
 		};
 	} catch (error_devuelto) {
-		console.error("Error en actualizarUsuario: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función actualizarUsuario: ", error_devuelto);
 		return undefined;
 	}
 }
 
 
-async function patchearUsuario(req) {
-	const usuario = await getUsuario(req.params.id_usuario);
-	if(usuario === undefined) {
-		return NO_ENCONTRADO;
-	}
-	
+async function determinarCaracteristicas(usuario, req) {
 	const { nombre, contrasenia, sexo, edad, precio_buscado } = req.body;
 	
 	if(nombre !== undefined) usuario.nombre = nombre;
-	if(contrasenia !== undefined) usuario.contrasenia = contrasenia;
+	if(contrasenia !== undefined) usuario.hash_contrasenia = await bcrypt.hash(contrasenia, 10);
 	if(edad !== undefined && edad > 0 && edad < 122) usuario.edad = edad;
 	if(sexo === 'H' || sexo === 'M' || sexo === '-') usuario.sexo = sexo;
 	if(precio_buscado !== undefined && precio_buscado > 0) usuario.precio_buscado = precio_buscado;
+}
+
+
+async function patchearUsuario(id_usuario, req) {
+	const usuario = await getUsuario(id_usuario, undefined);
+	if(usuario === undefined) return undefined;
+	else if(usuario === NO_ENCONTRADO) return NO_ENCONTRADO;
+	
+	await determinarCaracteristicas(usuario, req);
 	
 	try {
 		const resultado = await dbClient.query(
-			"UPDATE usuarios SET nombre = $2, contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
-			[req.params.id_usuario, usuario.nombre, usuario.contrasenia, usuario.sexo, usuario.edad, usuario.precio_buscado]
+			"UPDATE usuarios SET nombre = $2, hash_contrasenia = $3, sexo = $4, edad = $5, precio_buscado = $6 WHERE id_usuario = $1",
+			[usuario.id_usuario, usuario.nombre, usuario.hash_contrasenia, usuario.sexo, usuario.edad, usuario.precio_buscado]
 		);
 		
 		if(resultado.rowCount === 0) {
-			return undefined;
+			return NO_ENCONTRADO;
 		}
 		
 		return {
-			id_usuario: req.params.id_usuario,
+			id_usuario: usuario.id_usuario,
 			nombre: usuario.nombre,
 			contrasenia: usuario.contrasenia,
 			sexo: usuario.sexo,
@@ -152,7 +219,26 @@ async function patchearUsuario(req) {
 			precio_buscado: usuario.precio_buscado,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en patchUsuario: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función patchUsuario: ", error_devuelto);
+		return undefined;
+	}
+}
+
+
+async function hacerAdmin(id_usuario) {
+	try {
+		const resultado = await dbClient.query(
+			"UPDATE usuarios SET rol = $1 WHERE id_usuario = $2",
+			['admin', id_usuario]
+		);
+		
+		if(resultado.rowCount === 0) {
+			return NO_ENCONTRADO;
+		}
+		
+		return EXITO;
+	} catch(error_recibido) {
+		console.error("Ocurrió el siguiente error en la función hacerAdmin: ", error_recibido);
 		return undefined;
 	}
 }
@@ -166,4 +252,6 @@ module.exports = {
     eliminarUsuario,
     actualizarUsuario,
     patchearUsuario,
+    logearUsuario,
+    hacerAdmin,
 };

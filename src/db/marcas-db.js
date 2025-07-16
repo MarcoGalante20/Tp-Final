@@ -1,7 +1,7 @@
 const dbClient = require("./conexion.js");
 
 const {
-	ELIMINADO,
+	EXITO,
 	NO_ENCONTRADO,
 	ERROR_INTERNO,
 } = require("../codigosStatusHttp.js");
@@ -12,7 +12,7 @@ async function getAllMarcas() {
 		
 		return marcas.rows;
 	} catch(error_recibido) {
-		console.error("Error en getAllMarcas: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getAllMarcas: ", error_recibido);
 		return undefined;
 	}
 }
@@ -27,7 +27,7 @@ async function getMarca(id_marca) {
 		
 		return marca.rows[0];
 	} catch(error_recibido) {
-		console.error("Error en getMarca: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getMarca: ", error_recibido);
 		return undefined;
 	}
 }
@@ -37,19 +37,20 @@ async function crearMarca(req) {
 	const { nombre, imagen } = req.body;
 	
 	try { 
-		const resultado = await dbClient.query(
-			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2)",
+		const resultado_id = await dbClient.query(
+			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2) RETURNING id_marca",
 			[nombre, imagen]
 		);
 		
 		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
 		
 		return {
+			id_marca: resultado_id.rows[0].id_marca,
 			nombre,
 			imagen,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en crearReloj: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función crearReloj: ", error_devuelto);
 		return undefined;
 	}
 }
@@ -63,9 +64,9 @@ async function esMarcaExistente(id_marca, nombre) {
 			if(id_marca === undefined) {
 				return undefined;
 			}
-			respuesta = await dbClient.query("SELECT * FROM marcas WHERE id_marca = $1", [id_marca]);
+			respuesta = await dbClient.query("SELECT 1 FROM marcas WHERE id_marca = $1", [id_marca]);
 		} else {
-			respuesta = await dbClient.query("SELECT * FROM marcas WHERE nombre = $1", [nombre]);
+			respuesta = await dbClient.query("SELECT 1 FROM marcas WHERE nombre = $1", [nombre]);
 		}
 		
 		if(respuesta.rows.length === 0) {
@@ -73,7 +74,7 @@ async function esMarcaExistente(id_marca, nombre) {
 		}
 		return true;
 	} catch(error_recibido) {
-		console.error("Error en esMarcaExistente: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función esMarcaExistente: ", error_recibido);
 		return undefined;
 	}
 }
@@ -90,9 +91,9 @@ async function eliminarMarca(id_marca) {
 		
 		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
 		
-		return ELIMINADO;
+		return EXITO;
 	} catch (error_devuelto) {
-		console.error("Error en eliminarMarca: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función eliminarMarca: ", error_devuelto);
 		return ERROR_INTERNO;
 	}
 }
@@ -121,7 +122,7 @@ async function actualizarMarca(req) {
 			imagen,
 		};
 	} catch (error_devuelto) {
-		console.error("Error en actualizarMarca: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función actualizarMarca: ", error_devuelto);
 		return undefined;
 	}
 }
@@ -129,9 +130,8 @@ async function actualizarMarca(req) {
 
 async function patchearMarca(req) {
 	const marca = await getMarca(req.params.id_marca);
-	if(marca === undefined) {
-		return NO_ENCONTRADO;
-	}
+	if(marca === undefined) return undefined;
+	else if(marca === NO_ENCONTRADO) return NO_ENCONTRADO;
 	
 	const { nombre, imagen } = req.body;
 	
@@ -141,22 +141,22 @@ async function patchearMarca(req) {
 	try {
 		const resultado = await dbClient.query(
 			"UPDATE marcas SET nombre = $2, imagen = $3 WHERE id_marca = $1",
-			[req.params.id_marca, marca.nombre, marca.imagen]
+			[marca.id_marca, marca.nombre, marca.imagen]
 		);
 		
 		if(resultado.rowCount === 0) {
-			return undefined;
+			return NO_ENCONTRADO;
 		}
 		
 		await dbClient.query("REFRESH MATERIALIZED VIEW busqueda_relojes");
 		
 		return {
-			id_marca: req.params.id_marca,
+			id_marca: marca.id_marca,
 			nombre: marca.nombre,
 			imagen: marca.imagen,
 		};
 	} catch(error_devuelto) {
-		console.error("Error en patchMarca: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función patchMarca: ", error_devuelto);
 		return undefined;
 		
 	}

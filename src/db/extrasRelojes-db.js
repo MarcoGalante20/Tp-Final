@@ -1,8 +1,10 @@
 const dbClient = require("./conexion.js");
 
 const {
+	EXITO,
 	NO_ENCONTRADO,
 } = require("../codigosStatusHttp.js");
+
 
 async function getExtrasReloj(id_reloj) {
 	try {
@@ -13,7 +15,7 @@ async function getExtrasReloj(id_reloj) {
 		
 		return atributos.rows;
 	} catch(error_recibido) {
-		console.error("Error en getExtrasReloj: ", error_recibido);
+		console.error("Ocurrió el siguiente error en la función getExtrasReloj: ", error_recibido);
 		return undefined;
 	}
 }
@@ -28,7 +30,7 @@ async function agregarExtraReloj(id_reloj, atributo) {
 		
 		return resultado.rowCount;
 	} catch(error_devuelto) {
-		console.error("Error en agregarExtraReloj: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función agregarExtraReloj: ", error_devuelto);
 		return undefined;
 	}
 }
@@ -43,9 +45,9 @@ async function quitarExtraReloj(id_reloj, atributo) {
 			return NO_ENCONTRADO;
 		}
 		
-		return ELIMINADO;
+		return EXITO;
 	} catch (error_devuelto) {
-		console.error("Error en quitarExtraReloj: ", error_devuelto);
+		console.error("Ocurrió el siguiente error en la función quitarExtraReloj: ", error_devuelto);
 		return undefined;
 	}
 }
