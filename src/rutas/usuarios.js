@@ -193,8 +193,8 @@ router.get("/misRecomendados/favoritos", validarToken(), async (req, res) => {
 	if(relojes === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las recomendaciones del usuario según sus relojes favoritos.\n");
 	}
-	else if(relojes === NO_ENCONTRADO) {
-		res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
+	else if(relojes === REQUEST_INVALIDA) {
+		res.status(REQUEST_INVALIDA).send("El rango de relojes es inválido.\n");
 	}
 	
 	return res.status(EXITO).json(relojes);
@@ -206,8 +206,8 @@ router.get("/misRecomendados/vistos", validarToken(), async (req, res) => {
 	if(relojes === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las recomendaciones del usuario según los relojes vistos.\n");
 	}
-	else if(relojes === NO_ENCONTRADO) {
-		res.status(NO_ENCONTRADO).send("No existe un usuario con el id brindado en la base de datos.\n");
+	else if(relojes === REQUEST_INVALIDA) {
+		res.status(REQUEST_INVALIDA).send("El rango de relojes es inválido.\n");
 	}
 	
 	return res.status(EXITO).json(relojes);

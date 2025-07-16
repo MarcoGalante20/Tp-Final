@@ -162,11 +162,11 @@ async function obtenerPorcentajesSexos(id_usuario, total_relojes, uso) {
 }
 
 
-async function obtenerPorRanking(id_relojes, orden, id_usuario, min_relojes, uso) {
+async function obtenerPorRanking(id_relojes, orden, id_usuario, min_relojes, max_relojes, uso) {
 	try {
-		let relojes;
+		let relojes_brutos;
 		if(uso === "relojes vistos") {
-			relojes = await dbClient.query(`
+			relojes_brutos = await dbClient.query(`
 				WITH ranking AS (
 					SELECT 
 						unnest($1::int[]) AS id_reloj, 
@@ -183,14 +183,12 @@ async function obtenerPorRanking(id_relojes, orden, id_usuario, min_relojes, uso
 				JOIN marcas m ON m.id_marca = r.id_marca
 				LEFT JOIN relojes_vistos_usuarios rv ON (rv.id_usuario = $3 AND rv.id_reloj = rk.id_reloj)
 				WHERE rv.id_reloj IS NULL
-				ORDER BY rk.orden
-				OFFSET $4`,
-				[id_relojes, orden, id_usuario, min_relojes]
+				ORDER BY rk.orden`,
+				[id_relojes, orden, id_usuario]
 			);
 		}
 		else if(uso === "relojes fav") {
-			
-			relojes = await dbClient.query(`
+			relojes_brutos = await dbClient.query(`
 				WITH ranking AS (
 					SELECT 
 						unnest($1::int[]) AS id_reloj, 
@@ -207,12 +205,14 @@ async function obtenerPorRanking(id_relojes, orden, id_usuario, min_relojes, uso
 				JOIN marcas m ON m.id_marca = r.id_marca
 				LEFT JOIN relojes_favoritos_usuarios rf ON (rf.id_usuario = $3 AND rf.id_reloj = rk.id_reloj)
 				WHERE rf.id_reloj IS NULL
-				ORDER BY rk.orden
-				OFFSET $4`,
-				[id_relojes, orden, id_usuario, min_relojes]
+				ORDER BY rk.orden`,
+				[id_relojes, orden, id_usuario]
 			);
 		}
-		return relojes.rows;
+		
+		const relojes = relojes_brutos.rows.slice(min_relojes, (max_relojes + 1));
+		
+		return relojes;
 	} catch(error_recibido) {
 		console.error("Ocurrió el siguiente error en la función obtenerPorRanking: ", error_recibido);
 		return undefined;
@@ -220,52 +220,65 @@ async function obtenerPorRanking(id_relojes, orden, id_usuario, min_relojes, uso
 }
 
 
-function obtenerRankingRelojes(relojes, promedios, porcentajes, preferencias_usuario, max_relojes) {
+function obtenerRelojesOrdenados(similitud_relojes) {
+	const id_relojes = [];
+	const orden = [];
+	
+	const total_relojes = similitud_relojes.length;
+	
+	for(let i = 0; i < total_relojes; i++) {
+		let menor_diferencia = 0;
+		
+		for(let j = 1; j < similitud_relojes.length; j++) { 
+			if(similitud_relojes[j].diferencia < similitud_relojes[menor_diferencia].diferencia) {
+				menor_diferencia = j;
+			}
+		}
+		
+		id_relojes.push(similitud_relojes[menor_diferencia].id_reloj);
+		orden.push(i + 1);
+		similitud_relojes.splice(menor_diferencia, 1);
+	}
+	
+	return { id_relojes, orden };
+}
+
+
+function determinarDiferencia(reloj, promedios, porcentajes, preferencias_usuario) {
+	let diferencia = 0;
+	
+	if(preferencias_usuario !== undefined) {
+		diferencia += (Math.abs(reloj.precio - preferencias_usuario.precio_buscado) * 0.9);
+		if(reloj.sexo !== preferencias_usuario.sexo) diferencia += 200;
+	}
+	diferencia += (Math.abs(reloj.resistencia_agua - promedios.resistencia_agua) * 2);
+	diferencia += (Math.abs(reloj.diametro - promedios.diametro) * 50);
+	diferencia += (Math.abs(reloj.precio - promedios.precio) * 0.8);
+	const mecan_porc = porcentajes.mecanismos[reloj.mecanismo] ?? 0;
+	const mater_porc = porcentajes.materiales[reloj.material] ?? 0;
+	const marca_porc = porcentajes.marcas[reloj.marca] ?? 0;
+	const sexo_porc = porcentajes.sexos[reloj.sexo] ?? 0;
+	diferencia += ((1 - mecan_porc) * 600);
+	diferencia += ((1 - mater_porc) * 600);
+	diferencia += ((1 - marca_porc) * 600);
+	diferencia += ((1 - sexo_porc) * 600);
+	
+	return diferencia;
+}
+
+
+function obtenerRankingRelojes(relojes, promedios, porcentajes, preferencias_usuario) {
 	const similitud_relojes = [];
-		let total_relojes = 0;
+	let total_relojes = 0;
+	
+	for(const reloj of relojes) {
+		let diferencia = determinarDiferencia(reloj, promedios, porcentajes, preferencias_usuario);
 		
-		for(const reloj of relojes) {
-			let penalizacion = 0;
-			
-			if(preferencias_usuario !== undefined) {
-				penalizacion += (Math.abs(reloj.precio - preferencias_usuario.precio_buscado) * 0.9);
-				if(reloj.sexo !== preferencias_usuario.sexo) penalizacion += 200;
-			}
-			penalizacion += (Math.abs(reloj.resistencia_agua - promedios.resistencia_agua) * 2);
-			penalizacion += (Math.abs(reloj.diametro - promedios.diametro) * 50);
-			penalizacion += (Math.abs(reloj.precio - promedios.precio) * 0.8);
-			const mecan = porcentajes.mecanismos[reloj.mecanismo] ?? 0;
-			const mater = porcentajes.materiales[reloj.material] ?? 0;
-			const marca = porcentajes.marcas[reloj.marca] ?? 0;
-			const sexo = porcentajes.sexos[reloj.sexo] ?? 0;
-			penalizacion += ((1 - mecan) * 600);
-			penalizacion += ((1 - mater) * 600);
-			penalizacion += ((1 - marca) * 600);
-			penalizacion += ((1 - sexo) * 600);
-			
-			similitud_relojes.push({ id_reloj: reloj.id_reloj, penalizacion });
-			total_relojes += 1;
-		}
-		
-		const id_relojes = [];
-		const orden = [];
-		
-		
-		for(let i = 0; i < (max_relojes + 1); i++) {
-			let menor_penalizacion = 0;
-			
-			for(let j = 1; j < similitud_relojes.length; j++) { 
-				if(similitud_relojes[j].penalizacion < similitud_relojes[menor_penalizacion].penalizacion) {
-					menor_penalizacion = j;
-				}
-			}
-			
-			id_relojes.push(similitud_relojes[menor_penalizacion].id_reloj);
-			orden.push(i + 1);
-			similitud_relojes.splice(menor_penalizacion, 1);
-		}
-		
-		return { id_relojes, orden };
+		similitud_relojes.push({ id_reloj: reloj.id_reloj, diferencia });
+		total_relojes += 1;
+	}
+	
+	return obtenerRelojesOrdenados(similitud_relojes);
 }
 
 

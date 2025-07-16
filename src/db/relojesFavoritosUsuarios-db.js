@@ -86,14 +86,13 @@ async function obtenerTotalRelojesFav(id_usuario) {
 }
 
 
-async function getRecomendadosFavoritos(id_usuario, relojes) {
+async function getRecomendadosFavoritos(id_usuario, relojes_rango) {
 	try {
-		const [min_relojes, max_relojes] = filtros.relojes ? filtros.relojes.split(',').map(Number) : [0, 19];
+		let [min_relojes, max_relojes] = relojes_rango ? relojes_rango.split(',').map(Number) : [0, 19];
+		if(min_relojes > max_relojes) return REQUEST_INVALIDA;
 		
 		const total_relojes = await obtenerTotalRelojesFav(id_usuario);
 		if(total_relojes === undefined) return undefined;
-		
-		if(max_relojes > total_relojes) max_relojes = total_relojes;
 		
 		const porcentajes_mecanismos = await obtenerPorcentajesMecanismos(id_usuario, total_relojes, "relojes fav");
 		if(porcentajes_mecanismos === undefined) return undefined;
@@ -115,9 +114,9 @@ async function getRecomendadosFavoritos(id_usuario, relojes) {
 		const relojes = await getAllRelojes();
 		if(relojes === undefined) return undefined;
 		
-		const { id_relojes, orden } = obtenerRankingRelojes(relojes, promedios, porcentajes, undefined, max_relojes);
+		const { id_relojes, orden } = obtenerRankingRelojes(relojes, promedios, porcentajes, undefined);
 		
-		const recomendados_rankeados = await obtenerPorRanking(id_relojes, orden, id_usuario, min_relojes, "relojes fav");
+		const recomendados_rankeados = await obtenerPorRanking(id_relojes, orden, id_usuario, min_relojes, max_relojes, "relojes fav");
 		if(recomendados_rankeados === undefined) return undefined;
 		
 		return recomendados_rankeados;
