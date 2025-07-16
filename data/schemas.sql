@@ -9,7 +9,7 @@ CREATE TABLE marcas (
 CREATE TABLE relojes (
 	id_reloj SERIAL PRIMARY KEY,
 	id_marca INT REFERENCES marcas (id_marca) ON DELETE CASCADE,
-	nombre VARCHAR(50) NOT NULL UNIQUE,
+	nombre VARCHAR(50) NOT NULL,
 	mecanismo VARCHAR(50) NOT NULL,
 	material VARCHAR(50) NOT NULL,
 	imagen VARCHAR(200),

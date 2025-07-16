@@ -57,7 +57,7 @@ async function validarRelojyUsuario(id_reloj, id_usuario, res) {
 // ---------------------------- Validaciones de los relojes ------------------------------
 
 
-function validarReloj(tieneQueExistir) {
+function validarReloj() {
 	return async function(req, res, next) {
 		if(req.body === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó un cuerpo para la request.\n");
@@ -75,15 +75,6 @@ function validarReloj(tieneQueExistir) {
 		
 		if(nombre === undefined) {
 			return res.status(REQUEST_INVALIDA).send("No se brindó el nombre del reloj.\n");
-		}
-		if(!tieneQueExistir) {
-			const existe_reloj = await esRelojExistente(undefined, nombre);
-			if(existe_reloj === undefined) {
-				return res.status(ERROR_INTERNO).send("Ocurrió un error interno accediendo al reloj en la base de datos.\n");
-			}
-			else if(existe_reloj) {
-				return res.status(CONFLICTO).send("El reloj recibido ya existe en la base de datos.\n");
-			}
 		}
 		
 		if(mecanismo !== "Cuarzo" && mecanismo !== "Automático" && mecanismo !== "Mecánico" && mecanismo !== "Solar") {
