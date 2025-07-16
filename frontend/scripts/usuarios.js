@@ -79,7 +79,6 @@ async function crearUsuario() {
                 nombre,
                 contrasenia,
                 sexo,
-                edad: null,
                 precio_buscado: null
             })
         })

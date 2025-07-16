@@ -453,7 +453,32 @@ function escucharFiltrado() {
     return data;
 }
 
+function vaciarFiltrado() {
+    const selectMarcas = document.getElementById("selectMarcas");
+    const selectMateriales = document.getElementById("selectMateriales");
+    const selectMecanismos = document.getElementById("selectMecanismos");
+
+    [selectMarcas, selectMateriales, selectMecanismos].forEach((select) => {
+        for (let opcion of select.options) {
+            opcion.selected = false;
+        }
+    })
+
+    document.getElementById("minPrecio").value = "";
+    document.getElementById("maxPrecio").value = "";
+
+    document.getElementById("minDiametro").value = "";
+    document.getElementById("maxDiametro").value = "";
+
+    document.getElementById("minResistencia").value = "";
+    document.getElementById("maxResistencia").value = "";
+
+    document.getElementById("selectSexo").value = "H,M"
+}
+
 function atribuirEscucharFiltrado() {
+    const inputBusqueda = document.getElementById("inputBusqueda");
+
     const selectMarcas = document.getElementById("selectMarcas");
 
     const minPrecio = document.getElementById("minPrecio");
@@ -471,12 +496,23 @@ function atribuirEscucharFiltrado() {
     const minResistencia = document.getElementById("minResistencia");
     const maxResistencia = document.getElementById("maxResistencia");
 
+
+
+    inputBusqueda.addEventListener("change", () => {
+        inicio = 0;
+        final = 15;
+        vaciarContenedorRelojes();
+        vaciarFiltrado();
+        cargarRelojesNuevos();
+    })
+
     const elementos = [selectMarcas, minPrecio, maxPrecio, selectSexo, minDiametro, maxDiametro, selectMateriales, selectMecanismos, minResistencia, maxResistencia];
     elementos.forEach((elemento) => {
         elemento.addEventListener("change", () => {
             inicio = 0;
             final = 15;
             vaciarContenedorRelojes();
+            inputBusqueda.value = "";
             cargarRelojesNuevos();
         })
     })
@@ -493,7 +529,6 @@ function diccionarioAQueryString(diccionario) {
         if (Array.isArray(valor)) {
             const filtrado = valor.filter(v => v !== undefined && v !== null && v !== "");
             if (filtrado.length > 0) {
-                // Las comas no se codifican
                 partes.push(`${encodeURIComponent(clave)}=${filtrado.join(",")}`);
             }
         } else if (valor !== undefined && valor !== null && valor !== "") {
@@ -572,19 +607,24 @@ function insertarRelojes(data) {
 }
 
 async function cargarRelojesNuevos() {
-    const params = diccionarioAQueryString(escucharFiltrado())
-    return fetch(`http://localhost:3000/api/v1/relojes?${params}`)
-    .then((respuesta) => {
-        return respuesta.json();
-    })
+    if (document.getElementById("inputBusqueda").value == "") {
+        const params = diccionarioAQueryString(escucharFiltrado())
+        return fetch(`http://localhost:3000/api/v1/relojes?${params}`)
+        .then((respuesta) => {
+            return respuesta.json();
+        })
 
-    .then((data) => {
-        insertarRelojes(data);
-    })
+        .then((data) => {
+            insertarRelojes(data);
+        })
 
-    .catch((error) => {
-        console.error("Hubo un error al obtener los relojes:\n", error);
-    });
+        .catch((error) => {
+            console.error("Hubo un error al obtener los relojes:\n", error);
+        });
+    }
+    else {
+        console.log("Cositas");
+    }
 }
 
 async function cargarMarcas() {
