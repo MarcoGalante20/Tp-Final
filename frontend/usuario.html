@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+    <head>
+        <title>ChronoVault: Usuario</title>
+        <link rel="icon" href="https://acdn-us.mitiendanube.com/stores/668/981/products/reloj-casio1-da1f90837056e6c99b16534214944587-1024-1024.png" type="image/jpeg">
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+
+        <div class = "container is-flex is-align-items-center is-justify-content-space-between pb-4 mt-4">
+            <a href="http://localhost:8080">
+                <h1 class = "title is-1">ChronoVault</h1>
+            </a>
+        </div>
+        <div class="columns">
+            <div class="column is-two-fifths is-offset-1">
+                <br />
+                <h1 class="title is-4">Usuario: </h1>
+                <div class="box">
+                    <h1 id="nombreUsuario" class="title is-5">Nombre de usuario: </h1>
+                    <h1 class="title is-5">Contraseña: ******</h1>
+                    <h1 class="title is-5" style="display: inline-block;">Sexo: </h1>
+                    <div class="select"><select id="selectSexo">
+                        <option value="H">Hombre</option>
+                        <option value="M">Mujer</option>
+                    </select></div>
+                    <h1 class="title is-5">Presupuesto: </h1>
+                    <input id="inputPresupuesto" class="input" style="width: 200px;" placeholder="Presupuesto" type="number">
+                </div>
+            </div>
+            <div class="column is-one-third">
+                <br />
+                <h1 class="title is-4">Cambiar contraseña: </h1>
+                <div class="box">
+                    <h1 class="title is-5">Nueva contraseña: </h1>
+                    <input id="inputCambiarContrasenia" class="input block" type="password" placeholder="Nueva contraseña">
+                    <br />
+                    <button id="botonCambiarContrasenia" class="button is-link">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="./scripts/usuario.js"></script>
+    </body>
+</html>

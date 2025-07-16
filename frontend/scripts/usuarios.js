@@ -23,9 +23,11 @@ function iniciarSesion() {
             const id_usuario = data.id_usuario;
             const rol = data.rol;
             const token = data.token;
+            localStorage.setItem("nombre_usuario", nombre);
             localStorage.setItem("id_usuario", id_usuario);
             localStorage.setItem("rol", rol);
             localStorage.setItem("token", token);
+            window.location.href = ("../usuario.html?id=" + id_usuario);
         })
         .catch((e) => {
             if (e.status == 404) {

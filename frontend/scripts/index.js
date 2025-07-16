@@ -1,3 +1,25 @@
+function inicializarEncabezado() {
+    const encabezado = document.getElementById("encabezado");
+    const link = document.createElement("a");
+    if (localStorage.getItem("nombre_usuario") != null) {
+        link.href = `./usuario.html?id=${localStorage.getItem("id_usuario")}`;
+        const nombre = document.createElement("h1");
+        nombre.classList.add("title", "is-7", "has-text-primary");
+        nombre.textContent=`${localStorage.getItem("nombre_usuario")}`;
+        link.appendChild(nombre);
+    }
+    else {
+        link.href = `./usuarios.html`;
+        const boton = document.createElement("button");
+        boton.classList.add("button", "is-primary", "is-outlined", "is-small");
+        boton.textContent = "Iniciar sesion";
+        link.appendChild(boton)
+    }
+    encabezado.appendChild(link);
+}
+
+
+
 function inicializarBotonCargarRelojes() {
     const boton = document.getElementById("cargarRelojes");
     boton.addEventListener("click", () => {
@@ -589,6 +611,7 @@ let inicio = 0;
 let final = 15;
 
 async function main() {
+    inicializarEncabezado();
     await cargarMarcas();
     inicializarBotonCargarRelojes();
     inicializarDivBotonesMarcas();
