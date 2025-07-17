@@ -209,10 +209,9 @@ function validarTokenGetRelojes() {
 		}
 		
 		if(!token || token === "null") {
-			req.usuario = {id_usuario: undefined};
+			req.usuario = { id_usuario: undefined };
 			next();
 		}
-		
 		else {
 			try {
 				const datos_usuario = jwt.verify(token, AUTENTICACION);

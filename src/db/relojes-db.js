@@ -11,6 +11,7 @@ const {
 	esMarcaExistente,
 } = require("./marcas-db.js");
 
+let semilla = null;
 
 function filtroInvalido(min_precio, max_precio, min_diam, max_diam, min_res, max_res, min_reloj, max_reloj) {
 	let es_invalido = false;
@@ -48,6 +49,16 @@ async function getRelojesFiltro(filtros) {
 		return REQUEST_INVALIDA;
 	}
 	
+	if(min_reloj === 0) {
+		semilla = Math.random().toString(36).substring(2,10);
+	}
+	
+	if(!semilla) {
+		semilla = Math.random().toString(36).substring(2,10);
+	}
+	
+	const semilla_string = String(semilla);
+	
 	try {
 		const relojes = await dbClient.query(`
 			SELECT 
@@ -65,11 +76,11 @@ async function getRelojesFiltro(filtros) {
 				(r.precio BETWEEN $5 AND $6) AND
 				(r.diametro BETWEEN $7 AND $8) AND
 				(r.resistencia_agua BETWEEN $9 AND $10) 
-			ORDER BY id_reloj ASC
+			ORDER BY md5(concat(r.id_reloj::text, $13::text)) ASC
 			OFFSET $11
 			LIMIT $12`,
 			[marcas, sexo, materiales, mecanismos, min_precio, max_precio, min_diam, max_diam, min_res, max_res, 
-			min_reloj, (max_reloj - min_reloj + 1)]
+			min_reloj, (max_reloj - min_reloj + 1), semilla_string]
 		); 
 		
 		return relojes.rows;
