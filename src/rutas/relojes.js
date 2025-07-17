@@ -13,22 +13,16 @@ const {
 } = require("../db/relojes-db.js");
 
 const {
-	getRelojesUsuario,
-	agregarRelojUsuario,
-	quitarRelojUsuario,
-	} = require("../db/relojesUsuarios-db.js");
-
-const {
 	validarReloj,
 	validarToken,
 	necesitaAdmin,
+	validarTokenGetRelojes,
 } = require("../validaciones.js");
 
 const {
-	getExtrasReloj,
-	agregarExtraReloj,
-	quitarExtraReloj,
-} = require("../db/extrasRelojes-db.js");
+	agregarRelojVistoUsuario,
+} = require("../db/relojesVistosUsuarios-db.js");
+
 
 const {
 	EXITO,
@@ -56,7 +50,7 @@ router.get("/", async (req, res) => {
 });
 
 
-router.post("/", validarToken(), necesitaAdmin(), validarReloj(false), async (req, res) => {
+router.post("/", validarToken(), necesitaAdmin(), validarReloj(), async (req, res) => {
 	const reloj = await crearReloj(req);
 	if(reloj === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando el reloj a la base de datos.\n");
@@ -67,72 +61,19 @@ router.post("/", validarToken(), necesitaAdmin(), validarReloj(false), async (re
 
 
 router.get("/busqueda", async (req, res) => {
-	const relojes = await getRelojesBusqueda(req.query.busqueda, req.query.relojes);
+	const relojes = await getRelojesBusqueda(req.query);
 	if(relojes === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno buscando los relojes en la base de datos.\n");
+	}
+	else if(relojes === REQUEST_INVALIDA) {
+		return res.status(REQUEST_INVALIDA).send("Se recibió uno o más parámetros incorrectos en la request.\nVerifique que todos existan y sean válidos.\n");
 	}
 	
 	return res.status(EXITO).json(relojes);
 });
 
-router.get("/:id_reloj/extras", validarToken(), necesitaAdmin(), async (req, res) => {
-	const existe = await esRelojExistente(req.params.id_reloj, undefined);
-	if(existe === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el reloj de la base de datos.\n");
-	}
-	else if(!existe) {
-		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
-	}
-	
-	const extras_reloj = await getExtrasReloj(req.params.id_reloj);
-	if(extras_reloj === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo las características extras del reloj.\n");
-	}
-	
-	return res.status(EXITO).json(extras_reloj);
-});
 
-
-router.post("/:id_reloj/extras", validarToken(), necesitaAdmin(), async (req,res) => {
-	const existe = await esRelojExistente(req.params.id_reloj, undefined);
-	if(existe === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el reloj de la base de datos.\n");
-	}
-	else if(!existe) {
-		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
-	}
-	
-	const extra_agregado = await agregarExtraReloj(req.params.id_reloj, req.body.atributo);
-	if(extra_agregado === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno agregando la característica extra al reloj.\n");
-	}
-	
-	return res.status(CREADO).send("Característica agregada al reloj con éxito.\n");
-});
-
-
-router.delete("/:id_reloj/extras", validarToken(), necesitaAdmin(), async (req,res) => {
-	const existe = await esRelojExistente(req.params.id_reloj, undefined);
-	if(existe === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno obteniendo el reloj de la base de datos.\n");
-	}
-	else if(!existe) {
-		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
-	}
-	
-	const resultado = await quitarExtraReloj(req.params.id_reloj, req.body.atributo);
-	if(resultado === undefined) {
-		return res.status(ERROR_INTERNO).send("Ocurrió un error interno interno quitándole la característica extra al reloj.\n");
-	}
-	else if(resultado === NO_ENCONTRADO) {
-		return res.status(NO_ENCONTRADO).send("El reloj no posee la característica en la base de datos, por lo que no es posible quitársela.\n");
-	}
-	
-	return res.status(EXITO).send("Se le quitó la característica al reloj con éxito.\n");
-});
-
-
-router.get("/:id_reloj", async (req, res) => {
+router.get("/:id_reloj", validarTokenGetRelojes(), async (req, res) => {
 	const reloj = await getReloj(req.params.id_reloj);
 	if(reloj === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error buscando el reloj en la base de datos.\n");
@@ -141,6 +82,12 @@ router.get("/:id_reloj", async (req, res) => {
 		return res.status(NO_ENCONTRADO).send("No existe un reloj con el id brindado en la base de datos.\n");
 	}
 	
+	if(req.usuario.id_usuario !== undefined) {
+		const resultado = await agregarRelojVistoUsuario(req.usuario.id_usuario, req.params.id_reloj);
+		if(resultado === undefined) {
+			return res.status(ERROR_INTERNO).send("Ocurrió un error agregando el reloj a los visitados por el usuario.\n");
+		}
+	}
 	return res.status(EXITO).json(reloj);
 });
 
@@ -158,7 +105,7 @@ router.delete("/:id_reloj", validarToken(), necesitaAdmin(), async (req, res) =>
 });
 
 
-router.put("/:id_reloj", validarToken(), necesitaAdmin(), validarReloj(true), async (req, res) => {
+router.put("/:id_reloj", validarToken(), necesitaAdmin(), validarReloj(), async (req, res) => {
 	const reloj_actualizado = await actualizarReloj(req);
 	if(reloj_actualizado === undefined) {
 		return res.status(ERROR_INTERNO).send("Ocurrió un error interno actualizando el reloj en la base de datos.\n");
