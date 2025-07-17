@@ -4,7 +4,9 @@
   "description": "TP final IDS, FIUBA",
   "main": "src/api.js",
   "scripts": {
-    "dev": "nodemon src/api.js"
+    "dev": "nodemon src/api.js",
+    "frontend": "http-server frontend --cors -c-1",
+    "start": "nodemon src/api.js"
   },
   "repository": {
     "type": "git",
@@ -17,8 +19,12 @@
   },
   "homepage": "https://github.com/MarcoGalante20/Tp-Final#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
+    "db": "^6.0.3",
     "express": "^5.1.0",
+    "http-server": "^14.1.1",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3"
   },
   "devDependencies": {

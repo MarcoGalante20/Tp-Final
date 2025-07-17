@@ -1,17 +1,22 @@
 const express = require("express");
-var cors = require('cors');
-const {  } = require("./db/ChronoVault-db.js")
-//     ^   aca van las funciones que hay que importar desde ChronoVault-db.js
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
 const app = express();
 const port = 3000;
 
-app.use(express.json()); //linea magica para que ande post, interpreta los bodies de los requests como jsons
-app.use(cors()); //importante para que el http-server me deje hacer requests a la api
+app.use(express.json());
+app.use(cors());
 
+app.use("/api/v1/relojes", require("./rutas/relojes.js"));
+app.use("/api/v1/marcas", require("./rutas/marcas.js"));
+app.use("/api/v1/usuarios", require("./rutas/usuarios.js"));
+app.use("/api/v1/resenias", require("./rutas/resenias.js"));
 
-
-
+app.get('/api/health', (req, res) => {
+	res.json({ status: 'OK' });
+});
 
 app.listen(port, () => {
-    console.log(`Server initialized at port ${port}\n`);
+    console.log(`Server inicializado en el puerto ${port}\n`);
 });
+
