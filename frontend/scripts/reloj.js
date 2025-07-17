@@ -48,6 +48,97 @@ function insertarCaracteristicasReloj(datos) {
 }
 
 
+function agregarMeGusta() {
+    return fetch(`http://localhost:3000/api/v1/usuarios/misRelojes`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ id_reloj: idReloj})
+    })
+    .then(async (respuesta) => {
+        if (!respuesta.ok) {
+            const mensajeError = await respuesta.text();
+            throw new Error(`${respuesta.status}\n${mensajeError}`);
+        }
+        return respuesta.text();
+    })
+    .catch(error => {
+        alert(`${error}`);
+        throw error;
+    });
+}
+
+async function eliminarMeGusta() {
+    return fetch(`http://localhost:3000/api/v1/usuarios/misRelojes`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ id_reloj: idReloj})
+    })
+    .then(async (respuesta) => {
+        if (!respuesta.ok) {
+            const mensajeError = await respuesta.text();
+            throw new Error(`${respuesta.status}\n${mensajeError}`);
+        }
+        return respuesta.text();
+    })
+    .catch(error => {
+        alert(`${error}`);
+        throw error;
+    });
+}
+
+async function inicializarMeGusta() {
+    if (localStorage.getItem("token") != null) {
+        const corazon = document.getElementById("corazon");
+        corazon.addEventListener("click", () => {
+            if (corazon.classList.contains("far")) {
+                agregarMeGusta();
+                corazon.classList.remove("far");
+                corazon.classList.add("fas");
+            }
+            else {
+                eliminarMeGusta();
+                corazon.classList.remove("fas");
+                corazon.classList.add("far");
+            }
+        })
+
+
+        return fetch(`http://localhost:3000/api/v1/usuarios/misRelojes`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("token")}`
+            }
+        })
+        .then(async (respuesta) => {
+            if (!respuesta.ok) {
+                const mensajeError = await respuesta.text();
+                throw new Error(`${respuesta.status}\n${mensajeError}`);
+            }
+            return respuesta.json();
+        })
+        .then((data) => {
+            data.forEach((reloj) => {
+                if (reloj.id_reloj == idReloj) {
+                    corazon.classList.remove("far");
+                    corazon.classList.add("fas");
+                }
+            })
+        })
+        .catch(error => {
+            alert(`${error}`);
+            throw error;
+        });
+    }
+}
+
+
 function insertarImagenes(datos) {
     const imagenReloj = document.getElementById("imagenReloj");
     imagenReloj.src = datos.imagen;
@@ -463,6 +554,10 @@ async function crearPagina(idReloj) {
             alert("No se encontro la pagina del reloj, lo sentimos");
             window.location.href = ("..");
         }
+        if (respuesta.status == 403) {
+            alert("Usuario prohibido, ingrese sesion correctamente para continuar");
+            window.location.href = ("../usuarios.html");
+        }
         if (!respuesta.ok) {
             const mensajeError = await respuesta.text();
             throw new Error(`${respuesta.status}\n${mensajeError}`);
@@ -472,6 +567,7 @@ async function crearPagina(idReloj) {
 
     .then((datos) => {
         insertarCaracteristicasReloj(datos);
+        inicializarMeGusta();
         insertarImagenes(datos);
         insertarBotones();
         inicializarModalEdicionReloj();

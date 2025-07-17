@@ -5,3 +5,36 @@
     width: fit-content;
     padding: 0.75rem;
 }
+
+
+
+#wrapper{
+    background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlQD0IJX7OjiVPLauGBMeZtQlTMwNNQ-Db1A&s");
+    background-size: cover;  
+    background-position: center; 
+    background-repeat: no-repeat;
+    height: 150px;
+}
+
+
+.carousel-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem 0;
+}
+
+.reloj {
+    min-width: 150px;
+    height: 150px;
+    flex: 0 0 auto;
+    border-radius: 8px;
+}
