@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon src/api.js",
     "frontend": "http-server frontend --cors -c-1",
-    "start": "nodemon src/api.js"
+    "start": "node src/api.js"
   },
   "repository": {
     "type": "git",
