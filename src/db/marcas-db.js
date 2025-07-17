@@ -36,7 +36,7 @@ async function getMarca(id_marca) {
 async function crearMarca(req) {
 	const { nombre, imagen } = req.body;
 	
-	try { 
+	try {
 		const resultado_id = await dbClient.query(
 			"INSERT INTO marcas (nombre, imagen) VALUES ($1, $2) RETURNING id_marca",
 			[nombre, imagen]
@@ -49,6 +49,7 @@ async function crearMarca(req) {
 			nombre,
 			imagen,
 		};
+		
 	} catch(error_devuelto) {
 		console.error("Ocurrió el siguiente error en la función crearReloj: ", error_devuelto);
 		return undefined;

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+    <head>
+        <title>ChronoVault: Usuarios</title>
+        <link rel="icon" href="https://acdn-us.mitiendanube.com/stores/668/981/products/reloj-casio1-da1f90837056e6c99b16534214944587-1024-1024.png" type="image/jpeg">
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+
+        <div class = "container is-flex is-align-items-center is-justify-content-space-between pb-4 mt-4">
+            <a href="./principal.html">
+                <h1 class = "title is-1">ChronoVault</h1>
+            </a>
+        </div>
+
+        <div class = "container is-max-tablet box">
+            <h1 class="title is-4">Iniciar Sesion: </h1>
+            <h1 class="title is-6">Nombre de usuario: </h1>
+            <input id="inputNombre" class="input block" placeholder="Nombre de usuario">
+            <h1 class="title is-6">Contraseña: </h1>
+            <input id="inputContrasenia" class="input block" placeholder="Contraseña" type="password">
+            <button id="botonIniciarSesion" class="button is-info" onclick=iniciarSesion()>Ingresar</button>
+
+            <p id="crearUsuario" class="has-text-info">
+                No tenes usuario? Registrate ahora !
+            </p>
+
+        </div>
+
+        <div id="modalCrearUsuario" class="modal">
+            <div id="modalCrearUsuarioBackground" class="modal-background"></div>
+            
+            <div class="modal-content">
+                <div class="box">
+                    <div class="media-content">
+                        <div class="field">
+                            <h1 class="title is-4">Crear usuario: </h1>
+                            <input id="inputNombreModalCrearUsuario" class="input block" placeholder="Usuario">
+                            <input id="inputContraseniaModalCrearUsuario" class="input block" placeholder="Contraseña" type="password"> 
+                            <div class="select">
+                                <select id="selectSexoModalCrearUsuario">
+                                    <option value="H">Hombre</option>
+                                    <option value="M">Mujer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <nav class="level">
+                        <div class="level-left">
+                            <div class="level-item">
+                                <a id="botonCrearUsuario" class="button is-link">Crear usuario</a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <script src="./scripts/usuarios.js"></script>
+    </body>
+</html>

@@ -23,7 +23,6 @@ const {
 	agregarRelojVistoUsuario,
 } = require("../db/relojesVistosUsuarios-db.js");
 
-
 const {
 	EXITO,
 	CREADO,
