@@ -1029,7 +1029,7 @@ CREATE MATERIALIZED VIEW busqueda_relojes AS
 		r.diametro,
 		r.precio,
 		r.sexo,
-		LOWER(r.nombre || ' ' || marcas.nombre || ' ' || r.mecanismo || ' ' || r.material) AS propiedades
+		LOWER(marcas.nombre || ' ' || r.nombre || ' ' || r.mecanismo || ' ' || r.material || ' ' r.diametro || ' ' || r.resistencia_agua) AS propiedades
 	FROM relojes r
 	JOIN marcas ON r.id_marca = marcas.id_marca;
 
