@@ -45,26 +45,29 @@ a todas las herramientas y funcionalidades más avanzadas del sistema. De todos 
 Una vez presinado el botón para iniciar sesion, podrá ingresar su usuario y contraseña para logearse al sistema si es que ya tenía creada
 una cuenta con anterioridad, o bien crear un nuevo usuario si es su primera vez en ChronoVault:
 ![Iniciar sesion](./imagenesREADME/image2.png)
-![Pagina de usuario](./imagenesREADME/image3.png)
 
 
 Para crear un usuario, tan solo debe ingresar el nombre por el que desea que lo conozcan en la comunidad ChronoVault y la contraseña con la que podrá luego ingresar a su cuenta:
+![Crear usuario](./imagenesREADME/image4.png)
 
 
 Una vez realizado esto, tendrá la opción de personalizar su perfil con el precio que busca en su reloj ideal o su sexo, para que podamos 
-brindarle las mejores recomendaciones en relojes en un futuro. Una vez realizado esto, presione en el logo de ChronoVault para acceder a la 
-página con todos los relojes disponibles:
-
+brindarle las mejores recomendaciones en relojes en un futuro. Una vez realizado esto, presione en el logo de ChronoVault para acceder a la página con todos los relojes disponibles:
+![Pagina de usuario](./imagenesREADME/image3.png)
 
 Desde esta sección podrá buscar todos los relojes que desee, utilizando nuestro sistema de filtros y/o de búsqueda por texto:
+![Pagina de relojes](./imagenesREADME/image5.png)
 
 
 También podrá seleccionar el reloj que desea ver, agregarlo a sus favoritos, ver las reseñas de otros usuarios o incluso agregar la suya:
+![Pagina de reloj particular](./imagenesREADME/image6.png)
 
 
-Una vez que haya estado navegando por la página el tiempo suficiente como para recolectar una buena cantidad de relojes favoritos y haberle
-hechado un vistazo a aquellos que más le interesan, podrá ir devuelta a la página principal en la que se encontrará con una sección personalizada
-con relojes que nosotros le recomendamos ver en base a sus gustos y preferencias.
+
+Una vez que haya estado navegando por la página el tiempo suficiente como para recolectar una buena cantidad de relojes favoritos y haberle hechado un vistazo a aquellos que más le interesan, podrá ir devuelta a la página principal en la que se encontrará con una sección personalizada con relojes que nosotros le recomendamos ver en base a sus gustos y preferencias.
+![Pagina inicial actualizada](./imagenesREADME/image7.png)
+![Recomendaciones personalizadas](./imagenesREADME/image8.png)
+
 
 
 

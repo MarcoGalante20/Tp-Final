@@ -11,15 +11,15 @@ iniciarBackend:
 	npm start
 
 iniciarBdd:
-	@eco "Iniciando la base de datos..."
+	@echo "Iniciando la base de datos..."
 	docker compose up -d
 
 detenerBdd:
-	@eco "Deteneniendo la ejecución de la base de datos..."
+	@echo "Deteneniendo la ejecución de la base de datos..."
 	docker compose stop
 
 eliminarBdd:
-	@eco "Eliminando la base de datos..."
+	@echo "Eliminando la base de datos..."
 	docker compose down
 
 
