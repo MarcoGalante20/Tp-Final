@@ -27,7 +27,7 @@ function iniciarSesion() {
             localStorage.setItem("id_usuario", id_usuario);
             localStorage.setItem("rol", rol);
             localStorage.setItem("token", token);
-            window.location.href = ("../usuario.html?id=" + id_usuario);
+            window.location.href = ("./usuario.html?id=" + id_usuario);
         })
         .catch((e) => {
             if (e.status == 404) {

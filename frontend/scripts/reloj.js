@@ -161,7 +161,7 @@ function eliminarReloj() {
             const mensaje = await respuesta.text();
             throw new Error(`Error ${respuesta.status}: ${mensaje}`);
         }
-        window.location.href = ("http://localhost:8080");
+        window.location.href = ("./principal.html");
     })
     .catch(error => {
         alert(error);
@@ -556,7 +556,7 @@ async function crearPagina(idReloj) {
         }
         if (respuesta.status == 403) {
             alert("Usuario prohibido, ingrese sesion correctamente para continuar");
-            window.location.href = ("../usuarios.html");
+            window.location.href = ("./usuarios.html");
         }
         if (!respuesta.ok) {
             const mensajeError = await respuesta.text();

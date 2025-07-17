@@ -7,241 +7,32 @@
         <link rel="stylesheet" href="./css/index.css">
     </head>
     <body>
-
+    
         <div id = "wrapper" class = "is-flex is-align-items-center">
             <div id="encabezado" class = "container is-flex is-align-items-center is-justify-content-space-between pb-4 mt-4">
                 <h1 class = "title is-1">ChronoVault</h1>
-
+            
             </div>
         </div><br />
 
-        <div class="container is-fluid">
-            <div class="columns">
-                <div class="column is-one-fifth">
-                    <div class="box mt-4">
-                        <h1 class = "title is-5">Filtros: </h1>
+        <div id ="contenido" class="container content">
+            <h1>Bienvenido a ChronoVault !!!</h1>
+            <p>
+                Cansado de buscar tu reloj ideal? Frustrado de no tener todo junto?
+                Angustiado de perder el tiempo en foros que no llevan a ninguna parte? <br />
+                <strong>ChronoVault</strong> llega al rescate de los entusiastas de la relojería !!! <br />
+                Una aplicación para buscar con precisión y sin rodeos.  
+            </p>
+            <h2>Qué ofrecemos ?</h2>
+            <p>
+                En ChronoVault, además de buscar el reloj de tus sueños, vas a poder conectar con una comunidad que comparte tu pasión. <br />
+                Además, si te volves parte de la comunidad <strong>ChronoVault</strong>, podemos ofrecerte un seguimiento personal para realizarte las mejores recomendaciones.
+                No nos crees? Inicia sesión ahora y fijate vos mismo.
+            </p>
 
-                        <div id="divBotonesMarcas">
-                            <h1 class = "title is-6" style="display:inline-block;">Marca: </h1> 
-                        </div>
-                        <div class="select is-multiple block">
-                            <select id="selectMarcas" multiple size = 5></select>
-                        </div>
-
-                        <h1 class="title is-6">Precio: </h1>
-                        <div class="container is-flex block">
-                            <input id="minPrecio" class="input" type="number" placeholder="min">
-                            <input id="maxPrecio" class="input" type="number" placeholder="max">
-                        </div>
-
-                        <h1 class = "title is-6">Sexo: </h1>
-                        <div class="select block">
-                            <select id="selectSexo">
-                                <option value="H,M">-</option>
-                                <option value="H">Hombre</option>
-                                <option value="M">Mujer</option>
-                            </select>
-                        </div>
-
-                        <h1 class = "title is-6">Diametro: </h1>
-                        <div class="container is-flex block">
-                            <input id="minDiametro" class="input" type="number" placeholder="min">
-                            <input id="maxDiametro" class="input" type="number" placeholder="max">
-                        </div>
-
-                        <h1 class = "title is-6">Material: </h1>
-                        <div class="select is-multiple block">
-                            <select id="selectMateriales" multiple size="4">
-                                <option value="Plástico">Plástico</option>
-                                <option value="Acero Inoxidable">Acero Inoxidable</option>
-                                <option value="Aluminio">Aluminio</option>
-                                <option value="Titanio">Titanio</option>
-                                <option value="Latón">Latón</option>
-                                <option value="Oro">Oro</option>
-                            </select>
-                        </div>
-
-                        <h1 class = "title is-6">Mecanismo: </h1>
-                        <div class="select is-multiple block">
-                            <select id="selectMecanismos" multiple size="3">
-                                <option value="Mecánico">Mecánico</option>
-                                <option value="Automático">Automático</option>
-                                <option value="Cuarzo">Cuarzo</option>
-                                <option value="Solar">Solar</option>
-                            </select>
-                        </div>
-
-                        <h1 class = "title is-6">Resistencia al agua: </h1>
-                        <div class="container is-flex block">
-                            <input id="minResistencia" class="input" type="number" placeholder="min">
-                            <input id="maxResistencia" class="input" type="number" placeholder="max">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column is-three-fifths">
-                    <input id="inputBusqueda" class="input" type="text" placeholder="Busca tu reloj: " />
-                    <div class="box mt-4">
-                        <h1 class = "title is-4">Relojes: </h1>
-                        <div id="contenedorRelojes" class="container is-flex is-flex-wrap-wrap is-fluid is-4">
-
-                        </div>
-                    </div>
-                    <button id="cargarRelojes" class="button is-info">Cargar más relojes</button>
-                </div>
-
-
-            </div>
-        </div>
-        
-
-        
-        <div id="modalAgregarReloj" class="modal">
-            <div id="modalAgregarRelojBackground" class="modal-background"></div>
-            
-            <div class="modal-content">
-                <div class="box">
-                    <div class="media-content">
-                        <div class="field">
-                            <h1 class="title is-4">Nuevo reloj: </h1>
-                            <input id="inputNombreRelojModal" class="input block" placeholder="Nombre del reloj">
-                            <div class="columns">
-                                <div class="column">
-                                    
-                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Marca: </h1>
-                                    <div class="select block">
-                                        <select id="selectMarcaModal">
-                                        </select>
-                                    </div>
-                                    <br />
-
-                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Sexo: </h1>
-                                    <div class="select block">
-                                        <select id="selectSexoModal">
-                                            <option value="H">Hombre</option>
-                                            <option value="M">Mujer</option>
-                                        </select>
-                                    </div>
-                                    <br />
-
-                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Material: </h1>
-                                    <div class="select block">
-                                        <select id="selectMaterialModal">
-                                            <option value="Plástico">Plástico</option>
-                                            <option value="Acero Inoxidable">Acero Inoxidable</option>
-                                            <option value="Aluminio">Aluminio</option>
-                                            <option value="Titanio">Titanio</option>
-                                            <option value="Latón">Latón</option>
-                                            <option value="Oro">Oro</option>
-                                        </select>
-                                    </div>
-                                    <br />
-                                    
-                                    <h1 class = "title is-6" style="display:inline-block; margin:0.5rem;">Mecanismo: </h1>
-                                    <div class="select block">
-                                        <select id="selectMecanismoModal">
-                                            <option value="Mecánico">Mecánico</option>
-                                            <option value="Automático">Automático</option>
-                                            <option value="Cuarzo">Cuarzo</option>
-                                            <option value="Solar">Solar</option>
-                                        </select>
-                                    </div>
-                                    <br />
-                                    
-                                </div>
-                                <div class="column">
-                                    <input id="inputImagenRelojModal" class="input block" placeholder="Link de la imagen">
-                                    <input id="inputPrecioModal" class="input block" type="number" placeholder="Precio">
-                                    <input id="inputDiametroModal" class="input block" type="number" placeholder="Diametro">
-                                    <input id="inputResistenciaModal" class="input block" type="number" placeholder="Resistencia al agua">
-
-                                </div>
-                            </div>   
-
-                        </div>
-                        <nav class="level">
-                            <div class="level-left">
-                                <div class="level-item">
-                                    <a id="botonGuardarReloj" class="button is-info">Guardar</a>
-                                </div>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-        
         </div>
 
-        <div id="modalAgregarMarca" class="modal">
-            <div id="modalAgregarMarcaBackground" class="modal-background"></div>
-            
-            <div class="modal-content">
-                <div class="box">
-                    <div class="media-content">
-                        <div class="field">
-                            <h1 class="title is-4">Nueva marca: </h1>
-                            <input id="inputNombreMarcaModal" class="input block" placeholder="Nombre de la marca">
-                            <input id="inputImagenMarcaModal" class="input block" placeholder="Imagen de la marca">
-                        </div>
-                        <nav class="level">
-                            <div class="level-left">
-                                <div class="level-item">
-                                    <a id="botonGuardarMarca" class="button is-info">Guardar</a>
-                                </div>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-        
-        </div>
-
-        <div id="modalEditarMarca" class="modal">
-            <div id="modalEditarMarcaBackground" class="modal-background"></div>
-
-            <div class="modal-content">
-                <div class="box">
-                    <div class="media-content">
-                        <div class="field">
-                            <h1 class="title is-4">Marca a editar: </h1>
-                            <select id="selectMarcaModalEditar" class="input block"></select>
-                            <input id="inputNombreMarcaModalEditar" class="input block" placeholder="Nuevo nombre de la marca">
-                            <input id="inputImagenMarcaModalEditar" class="input block" placeholder="Nueva imagen de la marca">
-                        </div>
-                        <nav class="level">
-                            <div class="level-left">
-                                <div class="level-item">
-                                    <a id="botonEditarMarca" class="button is-warning">Editar</a>
-                                </div>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="modalEliminarMarca" class="modal">
-            <div id="modalEliminarMarcaBackground" class="modal-background"></div>
-
-            <div class="modal-content">
-                <div class="box">
-                    <div class="media-content">
-                        <div class="field">
-                            <h1 class="title is-4">Marca a eliminar: </h1>
-                            <select id="selectMarcaModalEliminar" class="input block"></select>
-                        </div>
-                        <nav class="level">
-                            <div class="level-left">
-                                <div class="level-item">
-                                    <a id="botonEliminarMarca" class="button is-danger">Eliminar</a>
-                                </div>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
+    
         <script src="./scripts/index.js"></script>
     </body>
 </html>

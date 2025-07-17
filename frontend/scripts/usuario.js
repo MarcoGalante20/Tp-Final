@@ -4,7 +4,7 @@ function inicializarEncabezado() {
     botonCerrarSesion.textContent = "Cerrar sesion"
     botonCerrarSesion.addEventListener("click", () => {
         localStorage.clear();
-        window.location.href = ("../usuarios.html");
+        window.location.href = ("./usuarios.html");
     })
 
     document.getElementById("encabezado").appendChild(botonCerrarSesion);
@@ -33,12 +33,12 @@ async function insertarDatosUsuario() {
     .then(async (respuesta) => {
         if (respuesta.status == 403) {
             alert("Acceso denegado, solo podes ingresar a tu usuario");
-            window.location.href = ("../usuarios.html");
+            window.location.href = ("./usuarios.html");
         }
         if (respuesta.status == 404) {
             alert("Este usuario no existe");
             localStorage.clear();
-            window.location.href = ("../usuarios.html");
+            window.location.href = ("./usuarios.html");
         }
         if (!respuesta.ok) {
             const mensajeError = await respuesta.text();
@@ -130,6 +130,27 @@ async function cambiarContrasenia() {
     });
 }
 
+async function eliminarUsuario() {
+    return fetch("http://localhost:3000/api/v1/usuarios/miUsuario", {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem("token")}`
+        },
+    })
+    .then(async (respuesta) => {
+        if (!respuesta.ok) {
+            const mensajeError = await respuesta.text();
+            throw new Error(`${respuesta.status}\n${mensajeError}`);
+        }
+        return respuesta.text();
+    })
+    .catch((error) => {
+        alert(`${error}`);
+        throw error;
+    });
+}
+
 
 function asignarEscucharCambios() {
     const selectSexo = document.getElementById("selectSexo");
@@ -145,6 +166,13 @@ function asignarEscucharCambios() {
     const botonCambiarContrasenia = document.getElementById("botonCambiarContrasenia");
     botonCambiarContrasenia.addEventListener("click", () => {
         cambiarContrasenia();
+    })
+
+    const botonEliminarUsuario = document.getElementById("botonEliminarUsuario");
+    botonEliminarUsuario.addEventListener("click", () => {
+        eliminarUsuario();
+        localStorage.clear();
+        window.location.href = "./usuarios.html"
     })
 }
 
