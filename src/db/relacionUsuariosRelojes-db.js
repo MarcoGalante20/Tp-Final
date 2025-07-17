@@ -247,7 +247,7 @@ function obtenerRelojesOrdenados(similitud_relojes) {
 function determinarDiferencia(reloj, promedios, porcentajes, preferencias_usuario) {
 	let diferencia = 0;
 	
-	if(preferencias_usuario !== undefined) {
+	if(preferencias_usuario !== undefined && preferencias_usuario.precio_buscado !== 1) {
 		diferencia += (Math.abs(reloj.precio - preferencias_usuario.precio_buscado) * 0.9);
 		if(reloj.sexo !== preferencias_usuario.sexo) diferencia += 200;
 	}
