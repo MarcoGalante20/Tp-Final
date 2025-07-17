@@ -79,7 +79,7 @@ async function crearUsuario() {
                 nombre,
                 contrasenia,
                 sexo,
-                precio_buscado: null
+                precio_buscado: 1
             })
         })
         .then( async (respuesta) => {

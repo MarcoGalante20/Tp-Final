@@ -81,7 +81,11 @@ async function cambiarSexo() {
 }
 
 async function cambiarPresupuesto() {
-    const precio_buscado = document.getElementById("inputPresupuesto").value;
+    let precio_buscado = document.getElementById("inputPresupuesto").value;
+    if (precio_buscado < 1) {
+        precio_buscado = 1;
+    }
+
     return fetch("http://localhost:3000/api/v1/usuarios/miUsuario", {
         method: 'PATCH',
         headers: {
